@@ -1,0 +1,7 @@
+- name: Micado Master in Ansible pull mode
+  hosts: localhost
+  user: root
+  connection: local # or ssh or paramiko
+
+  roles:
+    - micado-master

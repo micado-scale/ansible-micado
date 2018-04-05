@@ -1,0 +1,117 @@
+version: '3.3'
+
+services:
+   submitter:
+     image: micado/micado-submitter:1.1
+     container_name: micado-submitter
+     volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/lib/micado/occopus/data/:/etc/micado/occopus/"
+      - "/var/lib/micado/submitter/data/:/var/lib/micado/occopus/"
+     environment:
+       # Input template files
+       TEMP_AUTH_DATA_FILE: /var/lib/micado/occopus/temp_auth_data.yaml
+       TEMP_NODE_DEF_FILE: /var/lib/micado/occopus/temp_node_definitions.yaml
+       TEMP_INFRA_DEF_FILE: /var/lib/micado/occopus/temp_infrastructure_descriptor.yaml
+       # Input user data files
+       USER_DATA_FILE: /var/lib/micado/occopus/temp_user_data.yaml
+       # Output occopus descriptors
+       AUTH_DATA_FILE: /etc/micado/occopus/auth_data.yaml
+       NODE_DEF_FILE: /etc/micado/occopus/nodes/node_definitions.yaml
+       INFRA_DEF_FILE: /etc/micado/occopus/infrastructure_descriptor.yaml
+       MASTER_IP: $IP
+       WORKER_INFRA_NAME: micado_worker_infra
+     command: python /app/submitter/submitter.py
+
+   redis:
+    image: redis
+    container_name: occopus_redis
+    restart: always
+    volumes:
+      - "/var/lib/micado/redis/data/:/data/"
+    command: redis-server --appendonly yes
+
+   occopus:
+    image: micado/occopus:1.5
+    container_name: occopus
+    depends_on:
+      - redis
+      - submitter
+    ports:
+      - 5000:5000
+    volumes:
+      - "/var/lib/micado/occopus/data/:/etc/micado/occopus/"
+    environment:
+      - REDIS_NAME=redis
+    command: occopus-rest-service --auth_data_path /etc/micado/occopus/auth_data.yaml --host 0.0.0.0
+
+   consul:
+    image: consul:1.0.0
+    container_name: consul
+    restart: always
+    ports:
+      - 8300:8300
+      - 8301:8301
+      - 8301:8301/udp
+      - 8302:8302
+      - 8302:8302/udp
+      - 8500:8500
+      - 8600:8600
+      - 8600:8600/udp
+    volumes:
+      - "/var/lib/micado/consul/config/:/consul/config/"
+      - "/var/lib/micado/consul/data/:/consul/data/"
+    command: agent -server -client=0.0.0.0 -advertise=$IP -bootstrap=true -ui
+
+   prometheus:
+    image: prom/prometheus:v1.8.2
+    container_name: prometheus
+    restart: always
+    depends_on:
+      - consul
+    ports:
+      - 9090:9090
+    volumes:
+      - "/var/lib/micado/prometheus/config/:/etc/prometheus/"
+      - "/var/lib/micado/prometheus/data/:/prometheus/"
+
+   alertmanager:
+    image: prom/alertmanager:v0.12.0
+    container_name: alertmanager
+    depends_on:
+      - prometheus
+    ports:
+      - 9093:9093
+    volumes:
+      - "/var/lib/micado/alertmanager/config/:/etc/alertmanager/"
+      - "/var/lib/micado/alertmanager/data/:/alertmanager/"
+
+   prometheus_executor:
+    image: micado/prometheus_executor:3.0
+    container_name: prometheus_executor
+    restart: always
+    depends_on:
+      - alertmanager
+    ports:
+      - 9095:9095
+    volumes:
+      - "/var/lib/micado/prometheus_executor/config/:/etc/prometheus_executor/"
+
+   alert-generator:
+    image: micado/alert-generator:1.2
+    container_name: alert-generator
+    restart: always
+    depends_on:
+      - prometheus
+      - alertmanager
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/lib/micado/prometheus/config/:/etc/prometheus/"
+      - "/var/lib/micado/alert-generator/config/:/var/lib/micado/alert-generator/"
+    environment:
+      CONTAINER_SCALING_FILE: /var/lib/micado/alert-generator/scaling_policy.yaml
+      ALERTS_FILE_PATH: /etc/prometheus/
+      AUTO_GENERATE_ALERT: "False"
+      DEFAULT_SCALEUP: 90
+      DEFAULT_SCALEDOWN: 10
+      PROMETHEUS: prometheus

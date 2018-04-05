@@ -1,0 +1,18 @@
+user_data:
+  auth_data:
+    type: cloudbroker
+    email: YOUR_CLOUDBROKER_EMAIL
+    password: YOUR_CLOUDBROKER_PASSWORD
+
+  resource:
+    type: cloudbroker
+    endpoint: YOUR_ENDPOINT
+    description: 
+      deployment_id: YOUR_DEPLOYMENT_ID
+      instance_type_id: YOUR_INSTANCE_TYPE_ID
+      key_pair_id: YOUR_KEY_PAIR_ID
+      opened_port: PORTS_TO_BE_OPENED # 80, 443, 22, 53, 2375, 2377, 7946, 8080, 8300, 8301, 8302, 8400, 8500, 8600, 9090, 9093, 9095, 9100, 9200
+
+  scaling:
+    min: 1
+    max: 10

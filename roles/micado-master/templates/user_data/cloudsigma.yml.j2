@@ -1,0 +1,25 @@
+user_data:
+  auth_data:
+    type: cloudsigma
+    email: YOUR_EMAIL
+    password: YOUR_PASSWORD
+
+  resource:
+    type: cloudsigma
+    endpoint: YOUR_ENDPOINT
+    libdrive_id: UBUNTU_16.04_IMAGE_ID
+    description:
+        cpu: 1000
+        mem: 1073741824
+        vnc_password: secret
+        pubkeys:
+            -
+                KEY_UUID
+        nics:
+            -
+                 ip_v4_conf:
+                    conf: dhcp
+
+  scaling:
+    min: 1
+    max: 10

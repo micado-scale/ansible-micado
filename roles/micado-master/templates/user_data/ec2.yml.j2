@@ -1,0 +1,21 @@
+user_data:
+  auth_data:
+    type: ec2
+    accesskey: {{ user_data.auth_data.user }}
+    secretkey: {{ user_data.auth_data.password }}
+
+  resource:
+    type: ec2
+    endpoint: {{ user_data.resource.ec2.endpoint }}
+    regionname: {{ user_data.resource.ec2.regionname }} 
+    image_id: {{ user_data.resource.ec2.image_id }}
+    instance_type: {{ user_data.resource.ec2.instance_type }}
+    key_name: {{ user_data.resource.ec2.key_name or '' }}
+    security_group_ids:
+        {% for id in user_data.resource.ec2.security_group_ids %}
+        - {{ id }}
+        {% endfor %}
+        
+  scaling:
+    min: {{ user_data.scaling.min }}
+    max: {{ user_data.scaling.max }}
