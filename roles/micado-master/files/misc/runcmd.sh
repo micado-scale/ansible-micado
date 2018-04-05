@@ -3,9 +3,8 @@
 #
 # disable apt-daily.service as it locks apt db after the VM becomes available
 #
+systemctl stop apt-daily.timer
 systemctl stop apt-daily.service
-#systemctl stop apt-daily.timer 
-#systemctl disable apt-daily.timer
 systemctl kill --kill-who=all apt-daily.service
 
 # wait until `apt-get updated` has been killed
