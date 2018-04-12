@@ -1,4 +1,4 @@
-- name: Micado Master in Ansible pull mode
+- name: Deploy MiCADO master
   hosts: localhost
   user: root
   connection: local # or ssh or paramiko

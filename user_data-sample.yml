@@ -1,0 +1,24 @@
+# Rename to user_data.yml and fill credentials
+user_data:
+  type: ec2 # or: nova, cloudbroker, cloudsigma
+  auth_data:
+    user: <USER>  # contains accesskey for ec2, email for cloudbroker, etc.
+    password: <PASSWORD> # contains secretkey for ec2, password for else
+  resource:
+    ec2:
+      regionname: ROOT
+      endpoint: https://opennebula.lpds.sztaki.hu:4567 
+      image_id: ami-00000450
+      instance_type: m1.small
+      key_name:  
+      security_group_ids: 
+        - 
+    nova: # TODO
+      foo: bar 
+    cloudbroker: # TODO
+      foo: bar 
+    cloudsigma: # TODO
+      foo: bar
+  scaling:
+    min: 1
+    max: 10

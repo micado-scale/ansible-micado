@@ -6,19 +6,19 @@ services:
      container_name: micado-submitter
      volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "/var/lib/micado/occopus/data/:/etc/micado/occopus/"
-      - "/var/lib/micado/submitter/data/:/var/lib/micado/occopus/"
+      - "/var/lib/micado/occopus/data/:/var/lib/micado/occopus/data/"
+      - "/var/lib/micado/submitter/data/:/var/lib/micado/submitter/data/"
      environment:
        # Input template files
-       TEMP_AUTH_DATA_FILE: /var/lib/micado/occopus/temp_auth_data.yaml
-       TEMP_NODE_DEF_FILE: /var/lib/micado/occopus/temp_node_definitions.yaml
-       TEMP_INFRA_DEF_FILE: /var/lib/micado/occopus/temp_infrastructure_descriptor.yaml
+       TEMP_AUTH_DATA_FILE: /var/lib/micado/occopus/data/auth_data.yaml
+       TEMP_NODE_DEF_FILE: /var/lib/micado/submitter/data/temp_node_definitions.yaml
+       TEMP_INFRA_DEF_FILE: /var/lib/micado/submitter/data/temp_infrastructure_descriptor.yaml
        # Input user data files
-       USER_DATA_FILE: /var/lib/micado/occopus/temp_user_data.yaml
+       USER_DATA_FILE: /var/lib/micado/submitter/data/temp_user_data.yaml
        # Output occopus descriptors
-       AUTH_DATA_FILE: /etc/micado/occopus/auth_data.yaml
-       NODE_DEF_FILE: /etc/micado/occopus/nodes/node_definitions.yaml
-       INFRA_DEF_FILE: /etc/micado/occopus/infrastructure_descriptor.yaml
+       AUTH_DATA_FILE: /var/lib/micado/occopus/data/auth_data.yaml
+       NODE_DEF_FILE: /var/lib/micado/occopus/data/nodes/node_definitions.yaml
+       INFRA_DEF_FILE: /var/lib/micado/occopus/data/infrastructure_descriptor.yaml
        MASTER_IP: $IP
        WORKER_INFRA_NAME: micado_worker_infra
      command: python /app/submitter/submitter.py
@@ -40,10 +40,10 @@ services:
     ports:
       - 5000:5000
     volumes:
-      - "/var/lib/micado/occopus/data/:/etc/micado/occopus/"
+      - "/var/lib/micado/occopus/data/:/var/lib/micado/occopus/data/"
     environment:
       - REDIS_NAME=redis
-    command: occopus-rest-service --auth_data_path /etc/micado/occopus/auth_data.yaml --host 0.0.0.0
+    command: occopus-rest-service --auth_data_path /var/lib/micado/occopus/data/auth_data.yaml --host 0.0.0.0
 
    consul:
     image: consul:1.0.0
@@ -107,9 +107,9 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "/var/lib/micado/prometheus/config/:/etc/prometheus/"
-      - "/var/lib/micado/alert-generator/config/:/var/lib/micado/alert-generator/"
+      - "/var/lib/micado/alert-generator/config/:/var/lib/micado/alert-generator/config/"
     environment:
-      CONTAINER_SCALING_FILE: /var/lib/micado/alert-generator/scaling_policy.yaml
+      CONTAINER_SCALING_FILE: /var/lib/micado/alert-generator/config/scaling_policy.yaml
       ALERTS_FILE_PATH: /etc/prometheus/
       AUTO_GENERATE_ALERT: "False"
       DEFAULT_SCALEUP: 90

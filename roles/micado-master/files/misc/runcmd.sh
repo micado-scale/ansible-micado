@@ -63,7 +63,7 @@ docker node update --availability drain $(hostname)
 export IP=$(hostname -I | cut -d\  -f1)
 sed -i -e 's/hostIP/'$IP'/g' /var/lib/micado/prometheus_executor/config/conf.sh
 # Start infra. services
-curl -L $GITHUB_URL/worker_node/templates/temp_auth_data.yaml --create-dirs -o /var/lib/micado/submitter/data/temp_auth_data.yaml
+curl -L $GITHUB_URL/worker_node/templates/temp_auth_data.yaml --create-dirs -o /var/lib/micado/occopus/data/auth_data.yaml
 curl -L $GITHUB_URL/worker_node/templates/temp_node_definitions.yaml --create-dirs -o /var/lib/micado/submitter/data/temp_node_definitions.yaml
 curl -L $GITHUB_URL/worker_node/templates/temp_infrastructure_descriptor.yaml  --create-dirs -o /var/lib/micado/submitter/data/temp_infrastructure_descriptor.yaml
 curl -L $GITHUB_URL/worker_node/cloud_init_worker.yaml --create-dirs -o /var/lib/micado/occopus/data/nodes/cloud_init_worker.yaml
