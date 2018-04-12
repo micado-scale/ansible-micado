@@ -1,11 +1,11 @@
 galaxy_info:
   author: Attila Csaba Marosi
-  description: Create, delete users
-  company: SU
+  description: Install MiCADO
+  company: MTA SZTAKI
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
-  issue_tracker_url: https://bitbucket.org/atisu-ansible/users/issues 
+  issue_tracker_url: https://github.com/micado-scale/ansible-micado/issues 
 
   # Some suggested licenses:
   # - BSD (default)
@@ -14,7 +14,7 @@ galaxy_info:
   # - GPLv3
   # - Apache
   # - CC-BY
-  license: BSD
+  license: Apache
 
   min_ansible_version: 1.2
 
