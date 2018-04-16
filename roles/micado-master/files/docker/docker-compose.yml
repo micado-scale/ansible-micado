@@ -32,7 +32,7 @@ services:
     command: redis-server --appendonly yes
 
    occopus:
-    image: micado/occopus:1.5
+    image: micado/occopus:1.5-dev
     container_name: occopus
     depends_on:
       - redis
@@ -41,8 +41,10 @@ services:
       - 5000:5000
     volumes:
       - "/var/lib/micado/occopus/data/:/var/lib/micado/occopus/data/"
+      - "/var/lib/micado/occopus/log/:/var/log/occopus"
     environment:
       - REDIS_NAME=redis
+      - LOG_DIR=/var/log/occopus
     command: occopus-rest-service --auth_data_path /var/lib/micado/occopus/data/auth_data.yaml --host 0.0.0.0
 
    consul:
