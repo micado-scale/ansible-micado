@@ -19,7 +19,7 @@ services:
        AUTH_DATA_FILE: /var/lib/micado/occopus/data/auth_data.yaml
        NODE_DEF_FILE: /var/lib/micado/occopus/data/nodes/node_definitions.yaml
        INFRA_DEF_FILE: /var/lib/micado/occopus/data/infrastructure_descriptor.yaml
-       MASTER_IP: $IP
+       MASTER_IP: {{ ansible_default_ipv4.address }}
        WORKER_INFRA_NAME: micado_worker_infra
      command: python /app/submitter/submitter.py
 
@@ -63,7 +63,7 @@ services:
     volumes:
       - "/var/lib/micado/consul/config/:/consul/config/"
       - "/var/lib/micado/consul/data/:/consul/data/"
-    command: agent -server -client=0.0.0.0 -advertise=$IP -bootstrap=true -ui
+    command: agent -server -client=0.0.0.0 -advertise={{ ansible_default_ipv4.address }} -bootstrap=true -ui
 
    prometheus:
     image: prom/prometheus:v1.8.2

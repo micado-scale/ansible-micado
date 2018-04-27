@@ -1,0 +1,7 @@
+'node_def:worker':
+  -
+    resource:
+    contextualisation:
+      type: cloudinit
+      context_template: !yaml_import
+        url: file://cloud_init_worker.yaml

@@ -1,0 +1,11 @@
+---
+- name: 'Ansible: Add Ansible PPA'
+  apt_repository: repo="ppa:ansible/ansible" update_cache=no
+
+- name: 'Ansible: Update APT cache'
+  apt: update_cache=yes
+
+- name: 'Ansible: Install system packages'
+  apt: pkg={{ item }} state=latest install_recommends=no
+  with_items:
+    - ansible

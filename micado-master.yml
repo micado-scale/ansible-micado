@@ -1,7 +1,19 @@
-- name: Deploy MiCADO master
+- name: Deploy MiCADO master (and spawn a worker...)
   hosts: localhost
   user: root
   connection: local # or ssh or paramiko
 
+  pre_tasks:
+    - name: Verify Ansible meets the version requirements (>=2.2).
+      assert:
+        that: "ansible_version.full is version_compare('2.2', '>=')"
+        msg: >
+          "You must update Ansible to at least 2.2. Use update-ansible.yml."
+
   roles:
     - micado-master
+
+  vars:
+    - docker_package: docker-engine=17.05.0~ce-0~ubuntu-xenial
+    - docker_compose_version: 1.16.1
+    - docker_compose_pip_version: pip

@@ -1,0 +1,56 @@
+---
+
+- name: 'Docker: Installing dependencies'
+  apt:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+
+- name: 'Docker: Adding APT key'
+  apt_key:
+    id: "58118E89F3A912897C070ADBF76221572C52609D"
+    keyserver: "hkp://p80.pool.sks-keyservers.net:80"
+
+- name: 'Docker: Adding APT repository'
+  apt_repository:
+    repo: "deb https://apt.dockerproject.org/repo {{ ansible_distribution | lower }}-{{ ansible_distribution_release }} main"
+    update_cache: yes
+
+- name: 'Docker: Installing APT packages'
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python-setuptools
+    - "{{ docker_package }}"
+
+- name: 'Docker: Replace ExecStart for systemd'
+  lineinfile:
+    dest: /lib/systemd/system/docker.service 
+    regexp: '^ExecStart=/usr/bin/dockerd[.]?'
+    line: "ExecStart=/usr/bin/dockerd -H fd:// -H tcp://{{ ansible_default_ipv4.address }}:2375"
+
+- name: 'Docker: Restart service'
+  systemd:
+    daemon_reload: yes
+    name: docker
+    state: restarted
+    enabled: yes
+    masked: no
+
+- name: 'Docker-compose: Installing packages'
+  action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=present"
+  with_items:
+    - python-setuptools
+
+- name: 'Docker-compose: Install dependencies'
+  easy_install:
+    name: "{{ docker_compose_pip_version }}"
+
+- name: 'Docker-compose: Install'
+  pip:
+    name: docker-compose
+    version: "{{ docker_compose_version if docker_compose_version else omit }}"
+    state: present

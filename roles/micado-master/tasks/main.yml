@@ -1,76 +1,35 @@
 ---
-- name: Load the user_data variable file from the playbook or from a default location (used for ansible-pull)
-  include_vars: "{{ item }}"
-  with_first_found:
-    - "user_data.yml"
-    - "/etc/ansible/user_data.yml"
+- name: "Disable updates"
+  script: files/misc/disable-updates.sh
 
-- name: Create directory /var/lib/micado/submitter/data/
-  file:
-    path: /var/lib/micado/submitter/data/
-    state: directory
-    mode: 0775
-    recurse: yes
-- name: Create temp_user_data.yaml for Micado submitter (EC2)
-  template:
-      src: user_data/ec2.yml.j2
-      dest: "/var/lib/micado/submitter/data/temp_user_data.yaml"
-  when: user_data.type == "ec2"
-# TODO: cloudsigma, cloudbroker, nova
+# TODO: Configure hostname here
 
-- name: "Consul config: Create directory"
-  file:
-    path: /var/lib/micado/consul/config/
-    state: directory
-    mode: 0775
-    recurse: yes
-- name: "Consul config: copy file"
-  copy:
-    src: consul/config.json
-    dest: /var/lib/micado/consul/config/config.json
-    mode: 0644
+- name: 'Installing packages'
+  apt:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - apt-transport-https # TODO: Docker part will install this
+    - ca-certificates # TODO: Docker part will install this
+    - curl 
+    - software-properties-common 
+    - wget 
+    - unzip 
+    - jq 
+    - dnsmasq
 
-- name: "Prometheus config: Create directory"
-  file:
-    path: /var/lib/micado/prometheus/config/
-    state: directory
-    mode: 0775
-    recurse: yes
-- name: "Prometheus config: copy file"
-  copy:
-    src: prometheus/prometheus.yml
-    dest: /var/lib/micado/prometheus/config/prometheus.yml
-    mode: 0644
+# FIXME: Why do we need this?
+- name: 'Create Prometheus user'
+  user:
+    name: prometheus
+    createhome: no
+    state: present
 
-- name: "Prometheus rules: copy file"
-  copy:
-    src: prometheus/prometheus.rules
-    dest: /var/lib/micado/prometheus/config/prometheus.rules
-    mode: 0644
+- include: docker-install.yml
 
-- name: "Alertmanager config: Create directory"
-  file:
-    path: /var/lib/micado/alertmanager/config/
-    state: directory
-    mode: 0775
-    recurse: yes
-- name: "Alertmanager config: copy file"
-  copy:
-    src: alertmanager/config.yml
-    dest: /var/lib/micado/alertmanager/config/config.yml
-    mode: 0644
+- include: files.yml
 
-- name: "consul-set-network.sh: copy file"
-  copy:
-    src: misc/consul-set-network.sh
-    dest: /bin/consul-set-network.sh
-    mode: 0755
-
-- name: "Docker-compose: copy file"
-  copy:
-    src: docker/docker-compose.yml
-    dest: /var/lib/micado/docker-compose.yml
-    mode: 0644
+- include: worker_node.yml
 
 - name: "Run runcmd.sh script #FIXME"
   script: files/misc/runcmd.sh

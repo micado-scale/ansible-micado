@@ -1,0 +1,8 @@
+---
+
+# version
+docker_compose_version:
+# set pip version here
+docker_compose_pip_version: pip
+# apt package
+docker_package: docker-engine

@@ -1,0 +1,7 @@
+- name: Update Ansible
+  hosts: localhost
+  user: root
+  connection: local # or ssh or paramiko
+
+  roles:
+    - update-ansible

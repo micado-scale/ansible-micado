@@ -1,0 +1,13 @@
+user_id: userid
+infra_name: MICADO-worker
+
+nodes:
+- &Worker_cluster 
+  name: worker
+  type: worker
+  scaling:
+    min: 1
+    max: 10
+
+variables:
+  master_host_ip: "ip_address_of_the_master_node"
