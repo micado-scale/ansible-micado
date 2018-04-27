@@ -1,9 +1,4 @@
 ---
-- name: Load the user_data variable file from the playbook or from a default location (used for ansible-pull)
-  include_vars: "{{ item }}"
-  with_first_found:
-    - "user_data.yml"
-    - "/etc/ansible/user_data.yml"
 
 - name: Create directory /var/lib/micado/submitter/data/
   file:
