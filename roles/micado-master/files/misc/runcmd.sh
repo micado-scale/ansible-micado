@@ -67,6 +67,7 @@ docker node update --availability drain $(hostname)
 #curl -L $GITHUB_URL/worker_node/templates/temp_node_definitions.yaml --create-dirs -o /var/lib/micado/submitter/data/temp_node_definitions.yaml
 #curl -L $GITHUB_URL/worker_node/templates/temp_infrastructure_descriptor.yaml  --create-dirs -o /var/lib/micado/submitter/data/temp_infrastructure_descriptor.yaml
 #curl -L $GITHUB_URL/worker_node/cloud_init_worker.yaml --create-dirs -o /var/lib/micado/occopus/data/nodes/cloud_init_worker.yaml
+docker login -u smith -p lpds123 cola-registry.lpds.sztaki.hu
 docker-compose -f /var/lib/micado/docker-compose.yml up -d
 #chmod 777 /var/lib/micado/prometheus_executor/config/conf.sh
 ##  - docker network create -d bridge my-net --subnet 172.31.0.0/24

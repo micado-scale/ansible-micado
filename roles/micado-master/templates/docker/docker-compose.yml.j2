@@ -32,7 +32,7 @@ services:
     command: redis-server --appendonly yes
 
    occopus:
-    image: micado/occopus:1.5-dev
+    image: cola-registry.lpds.sztaki.hu/smith/occopus:latest
     container_name: occopus
     depends_on:
       - redis
