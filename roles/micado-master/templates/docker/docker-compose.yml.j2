@@ -88,17 +88,6 @@ services:
       - "/var/lib/micado/alertmanager/config/:/etc/alertmanager/"
       - "/var/lib/micado/alertmanager/data/:/alertmanager/"
 
-   prometheus_executor:
-    image: micado/prometheus_executor:3.0
-    container_name: prometheus_executor
-    restart: always
-    depends_on:
-      - alertmanager
-    ports:
-      - 9095:9095
-    volumes:
-      - "/var/lib/micado/prometheus_executor/config/:/etc/prometheus_executor/"
-
    alert-generator:
     image: micado/alert-generator:1.2
     container_name: alert-generator

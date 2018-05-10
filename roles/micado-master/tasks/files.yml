@@ -48,19 +48,6 @@
     dest: /var/lib/micado/prometheus/config/prometheus.rules
     mode: 0644
 
-
-- name: "Prometheus executor: Create directory"
-  file:
-    path: /var/lib/micado/prometheus_executor/config/
-    state: directory
-    mode: 0775
-    recurse: yes
-- name: "Prometheus executor: Create conf.sh"
-  template:
-    src: prometheus_executor/conf.sh.j2
-    dest: /var/lib/micado/prometheus_executor/config/conf.sh
-    mode: 0755
-
 - name: "Alertmanager config: Create directory"
   file:
     path: /var/lib/micado/alertmanager/config/

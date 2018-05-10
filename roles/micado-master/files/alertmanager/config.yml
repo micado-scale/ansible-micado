@@ -19,7 +19,3 @@ route:
     repeat_interval: 1m
     group_by: [alertname]
 
-receivers:
-- name: 'default'
-  webhook_configs: 
-   - url: http://prometheus_executor:9095
