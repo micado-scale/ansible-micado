@@ -50,7 +50,7 @@ add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(
 apt-get update
 apt-get install -y docker-ce=17.09.1~ce-0~ubuntu
 export IP=$(hostname -I | cut -d\  -f1)
-sed -i -e "s/-H fd:\/\//-H fd:\/\/ -H tcp:\/\/$IP:2375/g" /lib/systemd/system/docker.service
+sed -i -e "s/-H fd:\/\/.*$/-H fd:\/\/ -H tcp:\/\/$IP:2375/g" /lib/systemd/system/docker.service
 systemctl daemon-reload
 service docker restart
 # Install Docker Compose
