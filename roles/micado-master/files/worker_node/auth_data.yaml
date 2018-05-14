@@ -1,0 +1,25 @@
+resource:
+    -
+        type: ec2
+        auth_data:
+            accesskey: var_ec2_accesskey
+            secretkey: var_ec2_secretkey
+    -
+        type: nova
+        auth_data:
+            username: var_nova_username
+            password: var_nova_password
+    -   
+        type: occi
+        auth_data: 
+            proxy: var_occi_proxy
+    -
+        type: cloudbroker
+        auth_data:
+            email: var_cloudbroker_email
+            password: var_cloudbroker_password
+    -
+        type: cloudsigma
+        auth_data:
+            email: var_cloudsigma_email
+            password: var_cloudsigma_password

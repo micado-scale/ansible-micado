@@ -7,16 +7,16 @@ user_data:
   resource:
     ec2:
       regionname: ROOT
-      endpoint: https://opennebula.lpds.sztaki.hu:4567 
+      endpoint: https://opennebula.lpds.sztaki.hu:4567
       image_id: ami-00000450
       instance_type: m1.small
-      key_name:  
-      security_group_ids: 
-        - 
+      key_name:
+      security_group_ids:
+        -
     nova: # TODO
-      foo: bar 
+      foo: bar
     cloudbroker: # TODO
-      foo: bar 
+      foo: bar
     cloudsigma: # TODO
       foo: bar
   scaling:

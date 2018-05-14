@@ -1,6 +1,6 @@
 galaxy_info:
   author: Attila Csaba Marosi
-  description: Deploy MiCADO master (and spawn a worker)
+  description: Update Ansible
   company: MTA SZTAKI
 
   # If the issue tracker for your role is not on github, uncomment the
@@ -16,7 +16,7 @@ galaxy_info:
   # - CC-BY
   license: Apache
 
-  min_ansible_version: 2.2
+  min_ansible_version: 1.2
 
   # Optionally specify the branch Galaxy will use when accessing the GitHub
   # repo for this role. During role install, if no tags are available,
@@ -35,6 +35,7 @@ galaxy_info:
     - name: Ubuntu
       versions: 
         - xenial
+  #platforms:
   #- name: OpenBSD
   #  versions:
   #  - all

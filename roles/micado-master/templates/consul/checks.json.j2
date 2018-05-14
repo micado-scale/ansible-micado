@@ -1,0 +1,28 @@
+{
+  "checks": [
+    {
+      "id": "prometheus",
+      "name": "prometheus service check",
+      "http": "http://{{ ansible_default_ipv4.address }}:9090",
+      "service_id": "prometheus",
+      "interval": "60s",
+      "timeout": "10s"
+    },
+    {
+      "id": "alertmanager",
+      "name": "alertmanager service check",
+      "http": "http://{{ ansible_default_ipv4.address }}:9093",
+      "service_id": "alertmanager",
+      "interval": "60s",
+      "timeout": "10s"
+    },
+    {
+      "id": "consul",
+      "name": "consul service check",
+      "http": "http://{{ ansible_default_ipv4.address }}:8500",
+      "service_id": "consul",
+      "interval": "60s",
+      "timeout": "10s"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+---
+- name: "Disable updates"
+  script: files/misc/disable-updates.sh
+
+- include: ansible.yml
