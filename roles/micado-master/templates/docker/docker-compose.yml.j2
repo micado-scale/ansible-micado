@@ -32,7 +32,7 @@ services:
     command: redis-server --appendonly yes
 
    occopus:
-    image: cola-registry.lpds.sztaki.hu/smith/occopus:latest
+    image: micado/occopus:1.6-rc1
     container_name: occopus
     depends_on:
       - redis
@@ -66,7 +66,7 @@ services:
     command: agent -server -client=0.0.0.0 -advertise={{ ansible_default_ipv4.address }} -bootstrap=true -ui
 
    prometheus:
-    image: prom/prometheus:v1.8.2
+    image: prom/prometheus:v2.1.0
     container_name: prometheus
     restart: always
     depends_on:
@@ -75,7 +75,8 @@ services:
       - 9090:9090
     volumes:
       - "/var/lib/micado/prometheus/config/:/etc/prometheus/"
-      - "/var/lib/micado/prometheus/data/:/prometheus/"
+      #- "/var/lib/micado/prometheus/data/:/prometheus/"
+    command: '--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles --web.enable-lifecycle'
 
    alertmanager:
     image: prom/alertmanager:v0.12.0
@@ -87,4 +88,18 @@ services:
     volumes:
       - "/var/lib/micado/alertmanager/config/:/etc/alertmanager/"
       - "/var/lib/micado/alertmanager/data/:/alertmanager/"
+
+   policykeeper:
+    image: micado/policykeeper:0.1-dev-frame
+    container_name: policykeeper
+    depends_on:
+      - occopus
+      - prometheus
+    ports:
+      - 12345:12345
+    volumes:
+      - "/var/lib/micado/policykeeper/src/:/policykeeper/"
+      - "/var/lib/micado/policykeeper/config/:/config/policykeeper"
+      - "/var/lib/micado/prometheus/config/:/config/prometheus"
+    command: /policykeeper/policy_keeper.py --srv --cfg /config/policykeeper/policykeeper_config.yaml
 

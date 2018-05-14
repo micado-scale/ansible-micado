@@ -42,12 +42,6 @@
     dest: /var/lib/micado/prometheus/config/prometheus.yml
     mode: 0644
 
-- name: "Prometheus rules: Copy file"
-  copy:
-    src: prometheus/prometheus.rules
-    dest: /var/lib/micado/prometheus/config/prometheus.rules
-    mode: 0644
-
 - name: "Alertmanager config: Create directory"
   file:
     path: /var/lib/micado/alertmanager/config/
@@ -60,9 +54,27 @@
     dest: /var/lib/micado/alertmanager/config/config.yml
     mode: 0644
 
+- name: "Policy-keeper config: Create directory"
+  file:
+    path: /var/lib/micado/policykeeper/config/
+    state: directory
+    mode: 0775
+    recurse: yes
+- name: "Policy-keeper: Copy config file"
+  template:
+    src: policykeeper/policykeeper_config.yaml.j2
+    dest: /var/lib/micado/policykeeper/config/policykeeper_config.yaml
+- name: "Policy-keeper: Copy prometheus file"
+  copy:
+    src: policykeeper/prometheus_config_template.yaml
+    dest: /var/lib/micado/policykeeper/config/prometheus_config_template.yaml
+    mode: 0644
+
+
 - name: "Docker-compose: Copy file"
   template:
     src: docker/docker-compose.yml.j2
     dest: /var/lib/micado/docker-compose.yml
     mode: 0644
+
 

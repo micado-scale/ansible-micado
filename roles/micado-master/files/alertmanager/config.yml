@@ -1,21 +1,17 @@
 global:
-    
+  resolve_timeout: 30s 
 # The root route on which each incoming alert enters.
 # The root route with all parameters, which are inherited by the child
 # routes if they are not overwritten.
 route:
   receiver: 'default'
-  group_wait: 10s
-  group_interval: 20s
-  repeat_interval: 5m
+  group_wait: 0s
+  group_interval: 0s
+  repeat_interval: 1m
   group_by: [alertname]
 
-  routes:
-  - receiver: 'default'
-    match:
-      type: docker
-    group_wait: 10s
-    group_interval: 20s
-    repeat_interval: 1m
-    group_by: [alertname]
+receivers:
+- name: 'default'
+  webhook_configs:
+     - url: http://policykeeper:12345/alerts/fire
 

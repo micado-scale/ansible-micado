@@ -41,6 +41,8 @@ echo nameserver 8.8.8.8 >> /etc/resolv.conf
 docker swarm init --advertise-addr=$IP
 docker node update --availability drain $(hostname)
 
-docker login -u smith -p lpds123 cola-registry.lpds.sztaki.hu
+## Insert policykeeper source code as volume in its container (temporary solution)
+git clone https://github.com/micado-scale/component-policy-keeper.git /var/lib/micado/policykeeper/src
+
 export IP=$(hostname -I | cut -d\  -f1)
 docker-compose -f /var/lib/micado/docker-compose.yml up -d
