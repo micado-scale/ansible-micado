@@ -1,0 +1,34 @@
+---
+
+- name: 'Downloading docker image: Redis'
+  docker_image:
+      name: "{{docker_images.redis}}"
+
+- name: 'Downloading docker image: Consul'
+  docker_image:
+      name: "{{docker_images.consul}}"
+
+- name: 'Downloading docker image: Prometheus'
+  docker_image:
+      name: "{{docker_images.prometheus}}"
+
+- name: 'Downloading docker image: Alertmanager'
+  docker_image:
+      name: "{{docker_images.alertmanager}}"
+
+- name: 'Downloading docker image: Docker Visualizer'
+  docker_image:
+      name: "{{docker_images.dockervisualizer}}"
+
+- name: 'Downloading docker image: Submitter'
+  docker_image:
+      name: "{{docker_images.submitter}}"
+
+- name: 'Downloading docker image: Policykeeper'
+  docker_image:
+      name: "{{docker_images.policykeeper}}"
+
+- name: 'Downloading docker image: Occopus'
+  docker_image:
+      name: "{{docker_images.occopus}}"
+

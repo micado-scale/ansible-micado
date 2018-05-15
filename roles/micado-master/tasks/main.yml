@@ -37,5 +37,7 @@
 
 - include: worker_node.yml
 
+- include: docker-pull-images.yml
+
 - name: "Run runcmd.sh script #FIXME"
   script: files/misc/runcmd.sh

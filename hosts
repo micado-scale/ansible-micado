@@ -1,1 +1,1 @@
-micado-master ansible_host=IP ansible_connection=ssh
+micado-master ansible_host=localhost ansible_connection=local ansible_user=ubuntu ansible_become=True ansible_become_method=sudo

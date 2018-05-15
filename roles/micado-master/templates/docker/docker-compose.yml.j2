@@ -2,7 +2,7 @@ version: '3.3'
 
 services:
    submitter:
-     image: micado/micado-submitter:1.1
+     image: {{docker_images.submitter}}
      container_name: micado-submitter
      volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
@@ -24,7 +24,7 @@ services:
      command: python /app/submitter/submitter.py
 
    redis:
-    image: redis
+    image: {{docker_images.redis}}
     container_name: occopus_redis
     restart: always
     volumes:
@@ -32,7 +32,7 @@ services:
     command: redis-server --appendonly yes
 
    occopus:
-    image: micado/occopus:1.6-rc1
+    image: {{docker_images.occopus}}
     container_name: occopus
     depends_on:
       - redis
@@ -48,7 +48,7 @@ services:
     command: occopus-rest-service --auth_data_path /var/lib/micado/occopus/data/auth_data.yaml --host 0.0.0.0
 
    consul:
-    image: consul:1.0.0
+    image: {{docker_images.consul}}
     container_name: consul
     restart: always
     ports:
@@ -66,7 +66,7 @@ services:
     command: agent -server -client=0.0.0.0 -advertise={{ ansible_default_ipv4.address }} -bootstrap=true -ui
 
    prometheus:
-    image: prom/prometheus:v2.1.0
+    image: {{docker_images.prometheus}}
     container_name: prometheus
     restart: always
     depends_on:
@@ -79,7 +79,7 @@ services:
     command: '--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles --web.enable-lifecycle'
 
    alertmanager:
-    image: prom/alertmanager:v0.12.0
+    image: {{docker_images.alertmanager}}
     container_name: alertmanager
     depends_on:
       - prometheus
@@ -90,7 +90,7 @@ services:
       - "/var/lib/micado/alertmanager/data/:/alertmanager/"
 
    policykeeper:
-    image: micado/policykeeper:0.1-dev-frame
+    image: {{docker_images.policykeeper}}
     container_name: policykeeper
     depends_on:
       - occopus
@@ -102,4 +102,13 @@ services:
       - "/var/lib/micado/policykeeper/config/:/config/policykeeper"
       - "/var/lib/micado/prometheus/config/:/config/prometheus"
     command: /policykeeper/policy_keeper.py --srv --cfg /config/policykeeper/policykeeper_config.yaml
+
+   dockervisualizer:
+    image: {{docker_images.dockervisualizer}}
+    container_name: dockervisualizer
+    ports:
+      - 8080:8080
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    command: npm start
 
