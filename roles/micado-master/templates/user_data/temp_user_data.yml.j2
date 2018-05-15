@@ -1,0 +1,10 @@
+user_data:
+  auth_data:
+{{ user_data.auth_data| to_nice_yaml | indent(4, true) }}
+
+  resource:
+{{ user_data.resource| to_nice_yaml | indent(4, true) }}
+
+  scaling:
+    min: {{ user_data.scaling.min }}
+    max: {{ user_data.scaling.max }}

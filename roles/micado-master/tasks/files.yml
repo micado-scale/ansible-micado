@@ -6,12 +6,10 @@
     state: directory
     mode: 0775
     recurse: yes
-- name: Create temp_user_data.yaml for Micado submitter (EC2)
+- name: Create temp_user_data.yaml for Micado submitter
   template:
-      src: user_data/ec2.yml.j2
+      src: user_data/temp_user_data.yml.j2
       dest: "/var/lib/micado/submitter/data/temp_user_data.yaml"
-  when: user_data.type == "ec2"
-# TODO: cloudsigma, cloudbroker, nova
 
 - name: "Consul config: Create directory"
   file:
@@ -69,7 +67,6 @@
     src: policykeeper/prometheus_config_template.yaml
     dest: /var/lib/micado/policykeeper/config/prometheus_config_template.yaml
     mode: 0644
-
 
 - name: "Docker-compose: Copy file"
   template:
