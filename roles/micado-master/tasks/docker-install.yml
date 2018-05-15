@@ -10,18 +10,19 @@
 
 - name: 'Docker: Adding APT key'
   apt_key:
-    id: "58118E89F3A912897C070ADBF76221572C52609D"
-    keyserver: "hkp://p80.pool.sks-keyservers.net:80"
+    url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
+    state: present
 
 - name: 'Docker: Adding APT repository'
   apt_repository:
-    repo: "deb https://apt.dockerproject.org/repo {{ ansible_distribution | lower }}-{{ ansible_distribution_release }} main"
-    update_cache: yes
+    repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+    state: present
 
 - name: 'Docker: Installing APT packages'
   apt:
     name: "{{ item }}"
     state: present
+    update_cache: yes
   with_items:
     - python-setuptools
     - "{{ docker_package }}"

@@ -32,7 +32,7 @@ services:
     command: redis-server --appendonly yes
 
    occopus:
-    image: micado/occopus:1.5-dev
+    image: micado/occopus:1.6-rc1
     container_name: occopus
     depends_on:
       - redis
@@ -66,7 +66,7 @@ services:
     command: agent -server -client=0.0.0.0 -advertise={{ ansible_default_ipv4.address }} -bootstrap=true -ui
 
    prometheus:
-    image: prom/prometheus:v1.8.2
+    image: prom/prometheus:v2.1.0
     container_name: prometheus
     restart: always
     depends_on:
@@ -75,7 +75,8 @@ services:
       - 9090:9090
     volumes:
       - "/var/lib/micado/prometheus/config/:/etc/prometheus/"
-      - "/var/lib/micado/prometheus/data/:/prometheus/"
+      #- "/var/lib/micado/prometheus/data/:/prometheus/"
+    command: '--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles --web.enable-lifecycle'
 
    alertmanager:
     image: prom/alertmanager:v0.12.0
@@ -88,32 +89,17 @@ services:
       - "/var/lib/micado/alertmanager/config/:/etc/alertmanager/"
       - "/var/lib/micado/alertmanager/data/:/alertmanager/"
 
-   prometheus_executor:
-    image: micado/prometheus_executor:3.0
-    container_name: prometheus_executor
-    restart: always
+   policykeeper:
+    image: micado/policykeeper:0.1-dev-frame
+    container_name: policykeeper
     depends_on:
-      - alertmanager
-    ports:
-      - 9095:9095
-    volumes:
-      - "/var/lib/micado/prometheus_executor/config/:/etc/prometheus_executor/"
-
-   alert-generator:
-    image: micado/alert-generator:1.2
-    container_name: alert-generator
-    restart: always
-    depends_on:
+      - occopus
       - prometheus
-      - alertmanager
+    ports:
+      - 12345:12345
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "/var/lib/micado/prometheus/config/:/etc/prometheus/"
-      - "/var/lib/micado/alert-generator/config/:/var/lib/micado/alert-generator/config/"
-    environment:
-      CONTAINER_SCALING_FILE: /var/lib/micado/alert-generator/config/scaling_policy.yaml
-      ALERTS_FILE_PATH: /etc/prometheus/
-      AUTO_GENERATE_ALERT: "False"
-      DEFAULT_SCALEUP: 90
-      DEFAULT_SCALEDOWN: 10
-      PROMETHEUS: prometheus
+      - "/var/lib/micado/policykeeper/src/:/policykeeper/"
+      - "/var/lib/micado/policykeeper/config/:/config/policykeeper"
+      - "/var/lib/micado/prometheus/config/:/config/prometheus"
+    command: /policykeeper/policy_keeper.py --srv --cfg /config/policykeeper/policykeeper_config.yaml
+
