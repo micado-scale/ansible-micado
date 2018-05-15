@@ -1,8 +1,5 @@
 - name: Update Ansible
   hosts: micado-master
-  user: ubuntu
-  connection: ssh # or ssh or paramiko
-  become: true
 
   roles:
     - update-ansible

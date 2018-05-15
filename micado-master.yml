@@ -1,8 +1,6 @@
+---
 - name: Deploy MiCADO master (and spawn a worker...)
   hosts: micado-master
-  user: ubuntu
-  connection: ssh # or ssh or paramiko
-  become: true
 
   pre_tasks:
     - name: Verify Ansible meets the version requirements (>=2.2).
@@ -18,3 +16,12 @@
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
     - docker_compose_version: 1.16.1
     - docker_compose_pip_version: pip
+    - docker_images:
+        submitter: micado/micado-submitter:1.1
+        redis: redis
+        occopus: micado/occopus:1.6-rc1
+        consul: consul:1.0.0
+        prometheus: prom/prometheus:v2.1.0
+        alertmanager: prom/alertmanager:v0.12.0
+        policykeeper: micado/policykeeper:0.1-dev-frame
+        dockervisualizer: jaydes/dockerviz:min-refresh
