@@ -68,6 +68,40 @@
     dest: /var/lib/micado/policykeeper/config/prometheus_config_template.yaml
     mode: 0644
 
+- name: "Grafana config: Create dashboard directory"
+  file:
+    path: /var/lib/micado/grafana/data/dashboards
+    state: directory
+    mode: 0775
+    recurse: yes
+- name: "Grafana config: Copy dashboard file"
+  copy:
+    src: grafana/data-dashboards-micado.json
+    dest: /var/lib/micado/grafana/data/dashboards/micado.json
+    mode: 0644
+- name: "Grafana config: Create dashboard providers directory"
+  file:
+    path: /var/lib/micado/grafana/provisioning/dashboards
+    state: directory
+    mode: 0775
+    recurse: yes
+- name: "Grafana config: Copy dashboard provider file"
+  copy:
+    src: grafana/provisioning-dashboards-provider.yaml
+    dest: /var/lib/micado/grafana/provisioning/dashboards/provider.yaml
+    mode: 0644
+- name: "Grafana config: Create datasource directory"
+  file:
+    path: /var/lib/micado/grafana/provisioning/datasources
+    state: directory
+    mode: 0775
+    recurse: yes
+- name: "Grafana config: Copy datasource file"
+  copy:
+    src: grafana/provisioning-datasources-prometheus.yaml
+    dest: /var/lib/micado/grafana/provisioning/datasources/prometheus.yaml
+    mode: 0644
+
 - name: "Docker-compose: Copy file"
   template:
     src: docker/docker-compose.yml.j2

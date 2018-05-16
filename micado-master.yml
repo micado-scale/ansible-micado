@@ -13,6 +13,7 @@
     - micado-master
 
   vars:
+    - grafana_admin_pwd: secret
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
     - docker_compose_version: 1.16.1
     - docker_compose_pip_version: pip
@@ -25,3 +26,4 @@
         alertmanager: prom/alertmanager:v0.12.0
         policykeeper: micado/policykeeper:0.1-dev-frame
         dockervisualizer: jaydes/dockerviz:min-refresh
+        grafana: grafana/grafana:5.1.0

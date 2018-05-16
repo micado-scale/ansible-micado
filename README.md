@@ -36,7 +36,7 @@ Use any of aws, ec2, nova command-line tools or web interface of the target clou
 ### Step 4: Make sure python 2.7 is installed on the MiCADO master machine
 
 ```
-ssh <IP> sudo apt-get --yes --force-yes install python
+ssh <IP> sudo apt-get --yes install python
 ```
 
 ### Step 5: Set target machine in the 'hosts' file
@@ -71,5 +71,7 @@ MiCADO exposes the following webpages:
 ```http://IP:9090```
 - Docker visualizer:
 ```http://IP:8080```
+- Grafana:
+```http://IP:3000/d/micado```
 
 
