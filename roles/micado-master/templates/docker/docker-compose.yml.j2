@@ -112,3 +112,15 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
     command: npm start
 
+   grafana:
+    image: {{docker_images.grafana}}
+    container_name: grafana
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD={{grafana_admin_pwd}}
+    volumes:
+      - "/var/lib/micado/grafana/data:/var/lib/grafana"
+      - "/var/lib/micado/grafana/provisioning:/etc/grafana/provisioning"
+    user: "root"
+

@@ -20,6 +20,10 @@
   docker_image:
       name: "{{docker_images.dockervisualizer}}"
 
+- name: 'Downloading docker image: Grafana'
+  docker_image:
+      name: "{{docker_images.grafana}}"
+
 - name: 'Downloading docker image: Submitter'
   docker_image:
       name: "{{docker_images.submitter}}"
