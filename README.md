@@ -55,7 +55,7 @@ ansible-playbook -v -i hosts update-ansible.yml
 ansible-playbook -i hosts micado-master.yml
 ```
 
-## Testing
+## Health checking
 
 At the end of the deployment, core MiCADO services will be running on the MiCADO master machine. Here are the commands to test the operation of some of the core MiCADO services:
 
@@ -66,6 +66,8 @@ At the end of the deployment, core MiCADO services will be running on the MiCADO
 - Prometheus
 ```curl -s http://IP:9090/api/v1/status/config | jq '.status'```
 
+## Monitoring
+
 MiCADO exposes the following webpages:
 - Prometheus: 
 ```http://IP:9090```
@@ -73,5 +75,22 @@ MiCADO exposes the following webpages:
 ```http://IP:8080```
 - Grafana:
 ```http://IP:3000/d/micado```
+
+## Testing
+
+You can find test application(s) under the subdirectories of the 'testing' directory.
+
+- stressng
+ 
+  This application contains a single service, performing constant load. Policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Both compose and policy files are ready to be submitted with the helper scripts:
+  - Step1: set the MICADO_MASTER variable to contain the IP of the MiCADO master
+  - Step2: run ```1-deploy-stressng.sh``` to deploy the stressng service
+  - Step3: run ```2-start-scaling-policy-stressng.sh``` to activate the monitoring/scaling components
+  - Step4: inspect the system during its operation by visiting the pages defined above in the Monitoring section. MiCADO will scale its workers up to their maximum count which is 3. Note, that it may take about 5-10 minutes to play this scenario.
+  - Step5: run ```3-undeploy-stressng.sh``` and inspect how the worker nodes scale down.
+  - Step6: run ```4-stop-scaling-policy-stressng.sh``` to deactivate the monitoring/scaling components
+  - Step7: optionally, run ```curl -s -X POST http://$MICADO_MASTER:5000/infrastructures/micado_worker_infra/scaleto/worker/1``` to scale MiCADO workers back to their minimal count
+
+
 
 
