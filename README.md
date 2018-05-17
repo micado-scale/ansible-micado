@@ -52,7 +52,7 @@ ansible-playbook -v -i hosts update-ansible.yml
 ### Step 7: Launch the installation of core MiCADO services
 
 ```
-ansible-playbook -v -i hosts micado-master.yml
+ansible-playbook -i hosts micado-master.yml
 ```
 
 ## Testing
