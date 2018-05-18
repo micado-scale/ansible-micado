@@ -1,2 +1,3 @@
 ansible_user_data.yml
+hosts
 *.retry
