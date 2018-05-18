@@ -6,7 +6,7 @@
     state: present
   with_items:
     - python3
-    - pip3
+    - python3-pip
 
 - name: 'Installing submitter requirements'
   pip:
@@ -20,5 +20,5 @@
 - name: 'Cloning Git: Submitter'
   git:
       repo: 'https://github.com/micado-scale/component_submitter.git'
-      dest: /etc/micado/submitter
+      dest: /var/lib/micado/tosca-submitter
       version: master

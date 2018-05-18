@@ -32,7 +32,7 @@ hostname -F /etc/hostname
 line=127.0.1.1'\t'$new_host_name
 sed -i "s/$oldhostname/$new_host_name/g" /etc/hosts
 echo $line >> /etc/hosts
-export DEBIAN_FRONTEND=noninteractive 
+export DEBIAN_FRONTEND=noninteractive
 dpkg-reconfigure openssh-server
 resolvconf -u
 echo nameserver 8.8.8.8 >> /etc/resolv.conf
@@ -46,3 +46,4 @@ git clone https://github.com/micado-scale/component-policy-keeper.git /var/lib/m
 
 export IP=$(hostname -I | cut -d\  -f1)
 docker-compose -f /var/lib/micado/docker-compose.yml up -d
+python3 /var/lib/micado/tosca-submitter/api.py
