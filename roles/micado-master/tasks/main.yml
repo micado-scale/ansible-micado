@@ -17,11 +17,11 @@
   with_items:
     - apt-transport-https # TODO: Docker part will install this
     - ca-certificates # TODO: Docker part will install this
-    - curl 
-    - software-properties-common 
-    - wget 
-    - unzip 
-    - jq 
+    - curl
+    - software-properties-common
+    - wget
+    - unzip
+    - jq
     - dnsmasq
 
 # FIXME: Why do we need this?
@@ -38,6 +38,8 @@
 - include: worker_node.yml
 
 - include: docker-pull-images.yml
+
+- include: submitter-setup.yml
 
 - name: "Run runcmd.sh script #FIXME"
   script: files/misc/runcmd.sh

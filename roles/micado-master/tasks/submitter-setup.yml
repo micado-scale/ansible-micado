@@ -1,0 +1,24 @@
+---
+
+- name: 'Installing Python3 & pip3'
+  apt:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - python3
+    - pip3
+
+- name: 'Installing submitter requirements'
+  pip:
+    name: "{{ item }}"
+    executable: pip3
+  with_items:
+    - flask
+    - tosca-parser
+    - ruamel.yaml
+
+- name: 'Cloning Git: Submitter'
+  git:
+      repo: 'https://github.com/micado-scale/component_submitter.git'
+      dest: /etc/micado/submitter
+      version: master
