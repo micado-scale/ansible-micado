@@ -16,7 +16,7 @@ write_files:
     "encrypt": "uohStneoKEoVYZIASGp6Nw==",
     "log_level": "INFO",
     "enable_syslog": false,
-    "retry_join": ["{{variables.master_host_ip}}"], 
+    "retry_join": ["{{variables.master_host_ip}}"],
     "rejoin_after_leave": true,
     "services": [{"name":"worker_cluster","port":9100}, {"name":"app_docker_cluster","port":9200}]
     }
@@ -36,7 +36,7 @@ write_files:
 
     rm -rf /etc/resolvconf/*
     echo "Setup NETWORK finished."
-  
+
 
 - path: /etc/resolvconf/resolv.conf.d/base
   content: |
@@ -93,9 +93,10 @@ runcmd:
   - line=127.0.1.1'\t'$new_host_name
   - sed -i "s/$oldhostname/$new_host_name/g" /etc/hosts
   - echo $line >> /etc/hosts
-  - export DEBIAN_FRONTEND=noninteractive 
+  - export DEBIAN_FRONTEND=noninteractive
   - dpkg-reconfigure openssh-server
   - resolvconf -u
+  - echo nameserver 8.8.8.8 >> /etc/resolv.conf
 # Docker
   - apt-get update
   - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common wget unzip
@@ -116,6 +117,5 @@ runcmd:
   - export IP=$(hostname -I | cut -d\  -f1)
   - docker-compose -f /etc/micado/docker-compose.yml up -d
 #  - sudo docker run -d -p 9100:9100 prom/node-exporter:v0.15.2
-#  - sudo docker run -d --net=host -e 'CONSUL_LOCAL_CONFIG={"leave_on_terminate":true}' -p 8301:8301 -p 8301:8301/udp -p 8300:8300 -p 8302:8302 -p 8302:8302/udp -p 8400:8400 -p 8500:8500 -p 8600:8600/udp -v /etc/consul/:/etc/consul consul:1.0.0 agent -advertise=$IP -retry-join={{variables.master_host_ip}} -config-file=/etc/consul/config.json 
+#  - sudo docker run -d --net=host -e 'CONSUL_LOCAL_CONFIG={"leave_on_terminate":true}' -p 8301:8301 -p 8301:8301/udp -p 8300:8300 -p 8302:8302 -p 8302:8302/udp -p 8400:8400 -p 8500:8500 -p 8600:8600/udp -v /etc/consul/:/etc/consul consul:1.0.0 agent -advertise=$IP -retry-join={{variables.master_host_ip}} -config-file=/etc/consul/config.json
 #  - sudo docker run  --volume=/:/rootfs:ro  --volume=/var/run:/var/run:rw  --volume=/sys:/sys:ro  --volume=/var/lib/docker/:/var/lib/docker:ro  --publish=9200:8080  --detach=true  --name=cadvisor google/cadvisor:v0.28.3
-
