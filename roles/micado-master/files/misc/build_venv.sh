@@ -9,3 +9,4 @@ cd tosca-submitter
 git clone https://github.com/micado-scale/component_submitter.git
 cd component_submitter
 screen -dm gunicorn -b 0.0.0.0:5050 api:app
+sleep 5

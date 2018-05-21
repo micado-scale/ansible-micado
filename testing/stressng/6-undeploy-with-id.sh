@@ -11,4 +11,4 @@ if [ -z "$MICADO_MASTER" ]; then
 fi
 ID_APP=$1
 
-curl -d id_app=$ID_APP -X POST http://$MICADO_MASTER:5050/engine/
+curl -d id_app=$ID_APP -X POST http://$MICADO_MASTER:5050/undeploy/
