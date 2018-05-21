@@ -13,12 +13,7 @@
     name: "{{ item }}"
     executable: pip3
   with_items:
-    - flask
-    - tosca-parser
-    - ruamel.yaml
+    - virtualenv
 
-- name: 'Cloning Git: Submitter'
-  git:
-      repo: 'https://github.com/micado-scale/component_submitter.git'
-      dest: /var/lib/micado/tosca-submitter
-      version: master
+- name: 'Setup Virtual Environment'
+  script: files/misc/build_venv.sh

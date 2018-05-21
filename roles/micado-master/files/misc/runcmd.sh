@@ -46,5 +46,3 @@ git clone https://github.com/micado-scale/component-policy-keeper.git /var/lib/m
 
 export IP=$(hostname -I | cut -d\  -f1)
 docker-compose -f /var/lib/micado/docker-compose.yml up -d
-cd /var/lib/micado/tosca-submitter/
-python3 api.py
