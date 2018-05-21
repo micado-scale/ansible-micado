@@ -72,7 +72,7 @@ At the end of the deployment, core MiCADO services will be running on the MiCADO
 ## Monitoring
 
 MiCADO exposes the following webpages:
-- Prometheus: 
+- Prometheus:
 ```http://IP:9090```
 - Docker visualizer:
 ```http://IP:8080```
@@ -84,7 +84,7 @@ MiCADO exposes the following webpages:
 You can find test application(s) under the subdirectories of the 'testing' directory.
 
 - stressng
- 
+
   This application contains a single service, performing constant load. Policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Both compose and policy files are ready to be submitted with the helper scripts:
   - Step1: set the MICADO_MASTER variable to contain the IP of the MiCADO master
   - Step2: run ```1-deploy-stressng.sh``` to deploy the stressng service
@@ -94,6 +94,10 @@ You can find test application(s) under the subdirectories of the 'testing' direc
   - Step6: run ```4-stop-scaling-policy-stressng.sh``` to deactivate the monitoring/scaling components
   - Step7: optionally, run ```curl -s -X POST http://$MICADO_MASTER:5000/infrastructures/micado_worker_infra/scaleto/worker/1``` to scale MiCADO workers back to their minimal count
 
-
-
-
+  Optional steps for testing TOSCA submission of stressng:
+  - Step1: set the MICADO_MASTER variable to contain the IP of the MiCADO master
+  - Step2: run ```5-tosca-submit-stressng.sh``` to deploy the stressng service based on https://raw.githubusercontent.com/jaydesl/COLARepo/master/examples/stressng.yaml
+  - Step3: Edit ```policy-stressng.yaml``` and change the constant service name to include the id of the deployment (ie. SERVICE_FULL_NAME: '<app_id>_stressng')
+  - Step4: run ```2-start-scaling-policy-stressng.sh``` to activate the monitoring/scaling components
+  - Step5: run ```6-undeploy-with-id.sh <app_id>``` to remove the stressng service
+  - Step6: run ```4-stop-scaling-policy-stressng.sh``` to deactivate the monitoring/scaling components
