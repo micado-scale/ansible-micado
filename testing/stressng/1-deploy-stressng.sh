@@ -1,4 +1,3 @@
-
 if [ -z "$MICADO_MASTER" ]; then
     if [[ $# -eq 0 ]] ; then
        echo 'Please, specify the ip address or set MICADO_MASTER!'

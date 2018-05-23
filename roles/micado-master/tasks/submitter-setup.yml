@@ -1,0 +1,4 @@
+---
+
+- name: 'Launch submitter container'
+  command: docker run -d -p 5050:5050 -v /var/run/docker.sock:/var/run/docker.sock jaydes/toscasubmitter:ansible -h 0.0.0.0 -p 5050
