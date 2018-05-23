@@ -129,6 +129,7 @@ services:
     container_name: toscasubmitter
     ports:
       - 5050:5050
-    command: ["-h 0.0.0.0", "-p 5050"]
+    command: "-h 0.0.0.0 -p 5050"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+    user: "root"
