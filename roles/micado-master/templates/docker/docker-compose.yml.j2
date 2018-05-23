@@ -124,3 +124,11 @@ services:
       - "/var/lib/micado/grafana/provisioning:/etc/grafana/provisioning"
     user: "root"
 
+   toscasubmitter:
+    image: {{docker_images.toscasubmitter}}
+    container_name: toscasubmitter
+    ports:
+      - 5050:5050
+    command: ["-h 0.0.0.0", "-p 5050"]
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"

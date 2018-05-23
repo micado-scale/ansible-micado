@@ -27,3 +27,4 @@
         policykeeper: micado/policykeeper:0.1-dev-frame
         dockervisualizer: jaydes/dockerviz:min-refresh
         grafana: grafana/grafana:5.1.0
+        toscasubmitter: jaydes/toscasubmitter:ansible
