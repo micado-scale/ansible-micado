@@ -1,19 +1,4 @@
 ---
 
-- name: 'Installing Python3 & pip3'
-  apt:
-    pkg: "{{ item }}"
-    state: present
-  with_items:
-    - python3
-    - python3-pip
-
-- name: 'Installing submitter requirements'
-  pip:
-    name: "{{ item }}"
-    executable: pip3
-  with_items:
-    - virtualenv
-
-- name: 'Setup Virtual Environment'
-  script: files/misc/build_venv.sh
+- name: 'Launch submitter container'
+  command: docker run -d -p 5050:5050 -v /var/run/docker.sock:/var/run/docker.sock jaydes/toscasubmitter:ansible -h 0.0.0.0 -p 5050
