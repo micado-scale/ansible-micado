@@ -16,6 +16,11 @@
     path: /etc/hosts
     line: "127.0.0.1\tlocalhost\t{{ micado_master_name }}"
 
+- name: Load the credentials and security settings from the playbook
+  include_vars:
+    file: "credentials.yml"
+    name: config
+
 - include: docker-install.yml
 
 - include: files.yml

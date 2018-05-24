@@ -1,1 +1,1 @@
-micado-master ansible_host=localhost ansible_connection=local ansible_user=ubuntu ansible_become=True ansible_become_method=sudo cred_path=./credentials.yml
+micado-master ansible_host=localhost ansible_connection=local ansible_user=ubuntu ansible_become=True ansible_become_method=sudo
