@@ -36,3 +36,6 @@
   docker_image:
       name: "{{docker_images.occopus}}"
 
+- name: 'Downloading docker image: Dashboard'
+  docker_image:
+      name: "{{docker_images.dashboard}}"
