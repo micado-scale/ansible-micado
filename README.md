@@ -72,7 +72,9 @@ At the end of the deployment, core MiCADO services will be running on the MiCADO
 ## Monitoring
 
 MiCADO exposes the following webpages:
-- Prometheus: 
+- Dashboard:
+```http://IP:4000```
+- Prometheus:
 ```http://IP:9090```
 - Docker visualizer:
 ```http://IP:8080```
@@ -84,7 +86,7 @@ MiCADO exposes the following webpages:
 You can find test application(s) under the subdirectories of the 'testing' directory.
 
 - stressng
- 
+
   This application contains a single service, performing constant load. Policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Both compose and policy files are ready to be submitted with the helper scripts:
   - Step1: set the MICADO_MASTER variable to contain the IP of the MiCADO master
   - Step2: run ```1-deploy-stressng.sh``` to deploy the stressng service
