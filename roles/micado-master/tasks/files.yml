@@ -71,6 +71,17 @@
     dest: /var/lib/micado/policykeeper/config/prometheus_config_template.yaml
     mode: 0644
 
+- name: "Grafana config: Create config directory"
+  file:
+    path: /var/lib/micado/grafana/config/
+    state: directory
+    mode: 0775
+    recurse: yes
+- name: "Grafana config: Copy server config file"
+  copy:
+    src: grafana/grafana.ini
+    dest: /var/lib/micado/grafana/config/grafana.ini
+    mode: 0644
 - name: "Grafana config: Create dashboard directory"
   file:
     path: /var/lib/micado/grafana/data/dashboards
@@ -194,6 +205,33 @@
     content: "Check the logs by the following command:\ndocker logs dockervisualizer\n"
     dest: /var/log/micado/visualizer/README
     mode: 0644
+
+- name: "Zorp config: Create directory"
+  file:
+    path: /var/lib/micado/zorp/config/
+    state: directory
+    mode: 0775
+    recurse: yes
+- name: "Zorp config: Copy file"
+  copy:
+    src: zorp/policy.py
+    dest: /var/lib/micado/zorp/config/policy.py
+    mode: 0644
+- name: "Zorp entrypoint: Create directory"
+  file:
+    path: /var/lib/micado/zorp/scripts/
+    state: directory
+    mode: 0775
+    recurse: yes
+- name: "Zorp entrypoint: Copy file"
+  copy:
+    src: zorp/zorp-entrypoint.sh
+    dest: /var/lib/micado/zorp/scripts/docker-entrypoint.sh
+    mode: 0755
+- name: Create user_data_zorp.env for Zorp
+  template:
+      src: user_data/user_data_zorp.env.j2
+      dest: "/var/lib/micado/zorp/config/user_data_zorp.env"
 
 - name: "Docker-compose: Copy file"
   template:

@@ -1,13 +1,12 @@
 version: '3.3'
 
 services:
+
    dashboard:
      image: {{docker_images.dashboard}}
      container_name: micado-dashboard
      environment:
       MICADO_FRONTEND_IP: {{ ansible_default_ipv4.address }}
-     ports:
-      - 4000:4000
 
    redis:
     image: {{docker_images.redis}}
@@ -23,8 +22,6 @@ services:
     container_name: occopus
     depends_on:
       - redis
-    ports:
-      - 5000:5000
     volumes:
       - "/var/lib/micado/occopus/data/:/var/lib/micado/occopus/data/"
       - "/var/lib/micado/toscasubmitter/src/files/output_configs/:/var/lib/micado/occopus/submitter/"
@@ -44,7 +41,6 @@ services:
       - 8301:8301/udp
       - 8302:8302
       - 8302:8302/udp
-      - 8500:8500
       - 8600:8600
       - 8600:8600/udp
     volumes:
@@ -58,20 +54,16 @@ services:
     restart: always
     depends_on:
       - consul
-    ports:
-      - 9090:9090
     volumes:
       - "/var/lib/micado/prometheus/config/:/etc/prometheus/"
       - "/var/lib/micado/prometheus/data/:/prometheus/"
-    command: '--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles --web.enable-lifecycle'
+    command: '--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles --web.enable-lifecycle --web.external-url="http://prometheus/prometheus/" --web.route-prefix="/prometheus"'
 
    alertmanager:
     image: {{docker_images.alertmanager}}
     container_name: alertmanager
     depends_on:
       - prometheus
-    ports:
-      - 9093:9093
     volumes:
       - "/var/lib/micado/alertmanager/config/:/etc/alertmanager/"
       - "/var/lib/micado/alertmanager/data/:/alertmanager/"
@@ -82,8 +74,6 @@ services:
     depends_on:
       - occopus
       - prometheus
-    ports:
-      - 12345:12345
     volumes:
       - "/var/lib/micado/policykeeper/src/:/policykeeper/"
       - "/var/lib/micado/policykeeper/config/:/config/policykeeper"
@@ -94,21 +84,20 @@ services:
    dockervisualizer:
     image: {{docker_images.dockervisualizer}}
     container_name: dockervisualizer
-    ports:
-      - 8080:8080
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - CTX_ROOT=/docker-visualizer
     command: npm start
 
    grafana:
     image: {{docker_images.grafana}}
     container_name: grafana
-    ports:
-      - 3000:3000
     environment:
       GF_SECURITY_ADMIN_PASSWORD: {{grafana_admin_pwd}}
       GF_LOG_MODE: "console file"
     volumes:
+      - "/var/lib/micado/grafana/config/grafana.ini:/etc/grafana/grafana.ini"
       - "/var/lib/micado/grafana/data:/var/lib/grafana"
       - "/var/lib/micado/grafana/provisioning:/etc/grafana/provisioning"
       - "/var/log/micado/grafana/:/var/log/grafana"
@@ -127,3 +116,20 @@ services:
       - "/var/lib/micado/toscasubmitter/system/:/var/lib/submitter/system"
       - "/var/log/micado/toscasubmitter/:/var/log/submitter/"
     user: "root"
+
+   zorp:
+    image: balasys/zorpgpl:latest
+    container_name: zorp
+    restart: always
+    depends_on:
+      - alertmanager
+      - prometheus
+      - grafana
+      - dockervisualizer
+      - consul
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - "/var/lib/micado/zorp/config/:/etc/zorp/"
+      - "/var/lib/micado/zorp/scripts/:/app/"

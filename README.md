@@ -53,6 +53,14 @@ vi credentials.yml
 ```
 Edit credentials.yml to add cloud credentials. You will find predefined sections in the template for each cloud interface type MiCADO supports. Fill only the section belonging to your target cloud.
 
+Specify the provisioning method for the x509 keypair used for TLS encryption of the management interface.
+ - The 'self-signed' option generates a new keypair with the specified hostname as subject (or 'micado-master' if omitted). 
+ - The 'user-supplied' option lets the user add the keypair as plain multiline strings (in unencrypted format) in the ansible_user_data.yml file under the 'cert' and 'key' subkeys respectively.
+
+### Step 3: Launch an empty cloud VM instance on which core MiCADO services will be installed
+
+Use any of aws, ec2, nova command-line tools or web interface of the target cloud. Make sure you can ssh to it (without password) and your user is a sudoer. Store its IP address which will be referred as `IP` in the following steps.
+
 ##### Step 3: (Optional) Specify details of your private Docker repository.
 
 Set the Docker login credentials of your private Docker registries in which your personal containers are stored. We recommend to make a copy of our predefined template and edit it. The ansible playbook expects the docker registry details in a file, called docker-cred.yml. Please, do not modify the structure of the template!
