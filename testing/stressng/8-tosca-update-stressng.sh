@@ -11,4 +11,4 @@ if [ -z "$MICADO_MASTER" ]; then
 fi
 ID_APP=$1
 
-curl -d input="https://raw.githubusercontent.com/jaydesl/COLARepo/master/examples/stressng_update.yaml" -X PUT http://$MICADO_MASTER:5050/update/$ID_APP
+curl -d input="https://raw.githubusercontent.com/COLAProject/COLARepo/master/examples/stressng_update.yaml" -X PUT http://$MICADO_MASTER:5050/update/$ID_APP
