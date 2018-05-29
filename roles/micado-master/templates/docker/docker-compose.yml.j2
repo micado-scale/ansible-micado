@@ -132,4 +132,6 @@ services:
     command: "-h 0.0.0.0 -p 5050"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/lib/toscasubmitter/system:/var/lib/submitter/system/"
+      - "/var/lib/toscasubmitter/outputs:/var/lib/submitter/files/output_configs"
     user: "root"

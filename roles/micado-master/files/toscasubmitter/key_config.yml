@@ -1,0 +1,17 @@
+config:
+  dry_run: False
+  path_log: "/var/lib/submitter/submitter.log"
+
+Adaptor_config:
+ DummySeAdaptor:
+   types:
+     - "tosca.policies.Scaling.*"
+   endoint: "endpoint"
+   volume: "/var/lib/submitter/security_workdir_example/"
+
+
+ DockerAdaptor:
+   types:
+     - "tosca.nodes.MiCADO.Container.Application.Docker"
+   endoint: "endpoint"
+   volume: "/var/lib/submitter/files/output_configs/"
