@@ -43,9 +43,7 @@ docker node update --availability drain $(hostname)
 
 ## Insert policykeeper source code as volume in its container (temporary solution)
 git clone https://github.com/micado-scale/component-policy-keeper.git /var/lib/micado/policykeeper/src
-git clone https://github.com/micado-scale/component_submitter.git /var/lib/toscasubmitter/src
-cd /var/lib/toscasubmitter/src
-git checkout adaptor_integration
+git clone https://github.com/micado-scale/component_submitter.git /var/lib/micado/toscasubmitter/src
 
 export IP=$(hostname -I | cut -d\  -f1)
 docker-compose -f /var/lib/micado/docker-compose.yml up -d
