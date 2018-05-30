@@ -139,5 +139,6 @@ services:
     command: "-h 0.0.0.0 -p 5050"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "/var/lib/toscasubmitter/src:/var/lib/submitter"
+      - "/var/lib/micado/toscasubmitter/src:/var/lib/submitter"
+      - "/var/lib/micado/toscasubmitter/system/:/var/lib/submitter/system"
     user: "root"
