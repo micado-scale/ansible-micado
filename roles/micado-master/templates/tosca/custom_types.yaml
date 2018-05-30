@@ -1,0 +1,384 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+relationship_types:
+  ## relationship types for Docker
+  tosca.relationships.MiCADO.ConnectsTo:
+    derived_from: tosca.relationships.ConnectsTo
+    properties:
+      network:
+        type: string
+        description: Name of Docker network to connect containers over
+        required: true
+
+capability_types:
+  ## capabilty types for Docker
+  tosca.capabilities.MiCADO.Container.Docker:
+    derived_from: tosca.capabilities.Container.Docker
+    properties:
+      num_cpus:
+        type: float
+        required: false
+        constraints:
+          - greater_or_equal: 0.0
+
+  ## capabilty types for EC2
+  tosca.capabilities.MiCADO.Occopus.EC2.Cloud:
+    derived_from: tosca.capabilities.Container
+    properties:
+      region_name:
+        type: string
+        required: true
+      image_id:
+        type: string
+        required: true
+      instance_type:
+        type: string
+        required: true
+      key_name:
+        type: string
+        required: false
+      security_groups_ids:
+        type: string
+        required: false
+      subnet_id:
+        type: string
+        required: false
+
+  ## capabilty types for CloudSigma
+  tosca.capabilities.MiCADO.Occopus.CloudSigma.Cloud:
+    derived_from: tosca.capabilities.Container
+    properties:
+      libdrive_id:
+        type: string
+        required: true
+      vnc_password:
+        type: string
+        required: false
+      host_name:
+        type: string
+        required: false
+      public_key_id:
+        type: string
+        required: false
+      firewall_policy:
+        type: string
+        required: false
+      description:
+        type: string
+        required: false
+        description: overrides the capability type
+
+  ## capabilty types for Nova
+  tosca.capabilities.MiCADO.Occopus.Nova.Cloud:
+    derived_from: tosca.capabilities.Container
+    properties:
+      image_id:
+        type: string
+        required: true
+      flavour_name:
+        type: string
+        required: true
+      tenant_name:
+        type: string
+        required: false
+      project_id:
+        type: string
+        required: false
+      user_domain_name:
+        type: string
+        required: false
+      network_id:
+        type: string
+        required: false
+      server_name:
+        type: string
+        required: false
+      key_name:
+        type: string
+        required: false
+      security_groups:
+        type: string
+        required: false
+      floating_ip:
+        type: string
+        required: false
+      floating_ip_pool:
+        type: string
+        required: false
+
+  ## capabilty types for CloudBroker
+  tosca.capabilities.MiCADO.Occopus.CloudBroker.Cloud:
+    derived_from: tosca.capabilities.Container
+    properties:
+      deployment_id:
+        type: string
+        required: true
+      instance_type_id:
+        type: string
+        required: true
+      key_pair_id:
+        type: string
+        required: false
+      opened_port:
+        type: string
+        required: false
+
+artifact_types:
+  tosca.artifacts.File.Config.Docker:
+    derived_from: tosca.artifacts.File
+    properties:
+      name:
+        type: string
+        required: false
+      file:
+        type: string
+        required: false
+      external:
+        type: boolean
+        required: false
+    tosca.artifacts.File.Secrets.Docker:
+      derived_from: tosca.artifacts.File
+      properties:
+        name:
+          type: string
+          required: false
+        file:
+          type: string
+          required: false
+        external:
+          type: boolean
+          required: false
+
+data_types:
+  ## Daattype that describe the main cloud properties
+  tosca.datatypes.MiCADO.Occopus.Cloud:
+    derived_from: tosca.datatypes.Root
+    properties:
+      interface_cloud:
+        type: string
+        required: yes
+        constraints:
+          - valid_values: [ 'ec2', 'nova', 'cloudsigma', 'cloudbroker' ]
+      endpoint_cloud:
+        type: string
+        required: yes
+      credentials:
+        type: tosca.datatypes.credentials
+        required: false
+  deploy_type:
+    properties:
+      replicas:
+        type: integer
+        required: false
+      resources:
+        type: resource_type
+        required: false
+      labels:
+        type: map
+        required: false
+      placement:
+        type: placement_type
+        required: false
+      restart_policy:
+        type: map
+        required: false
+      update_config:
+        type: map
+        required: false
+  resource_type:
+    properties:
+      reservations:
+        type: map
+        required: false
+      limits:
+        type: map
+        required: false
+  placement_type:
+    properties:
+      constraints:
+        required: false
+        type: list
+      preferences:
+        required: false
+        type: list
+
+node_types:
+  ## Node type that describe the Virtual Machine on which
+  ## the container is supposed to run
+  tosca.nodes.MiCADO.Compute:
+    derived_from: tosca.nodes.Compute
+    properties:
+      cloud:
+        type: tosca.datatypes.MiCADO.Occopus.Cloud
+
+    capabilities:
+      host:
+        type: tosca.capabilities.MiCADO.Occopus.Cloud
+
+  ## specific node type to describe the instance on  CloudSigma
+  tosca.nodes.MiCADO.Occopus.CloudSigma.Compute:
+    derived_from: tosca.nodes.MiCADO.Compute
+    properties:
+      cloud:
+        type: tosca.datatypes.MiCADO.Occopus.Cloud
+    capabilities:
+      host:
+        type: tosca.capabilities.MiCADO.Occopus.CloudSigma.Cloud
+
+  ## specific node type to describe the instance on  EC2
+  tosca.nodes.MiCADO.Occopus.EC2.Compute:
+    derived_from: tosca.nodes.MiCADO.Compute
+    properties:
+      cloud:
+        type: tosca.datatypes.MiCADO.Occopus.Cloud
+
+    capabilities:
+      host:
+        type: tosca.capabilities.MiCADO.Occopus.EC2.Cloud
+
+  ## specific node type to describe the instance on  CloudBroker
+  tosca.nodes.MiCADO.Occopus.CloudBroker.Compute:
+    derived_from: tosca.nodes.MiCADO.Compute
+    properties:
+      cloud:
+        type: tosca.datatypes.MiCADO.Occopus.Cloud
+
+    capabilities:
+      host:
+        type: tosca.capabilities.MiCADO.Occopus.CloudBroker.Cloud
+
+  ## specific node type to describe the instance on  Nova
+  tosca.nodes.MiCADO.Occopus.Nova.Compute:
+    derived_from: tosca.nodes.MiCADO.Compute
+    properties:
+      cloud:
+        type: tosca.datatypes.MiCADO.Occopus.Cloud
+
+    capabilities:
+      host:
+        type: tosca.capabilities.MiCADO.Occopus.Nova.Cloud
+
+
+  ## Node Type to describe  docker nodes (it will contains the command
+  ## line to pass to the docker)
+  ## ** Properties altered to match keys under the top-level "services:" of a Docker-Compose file
+
+  tosca.nodes.MiCADO.network.Network.Docker:
+    derived_from: tosca.nodes.network.Network
+    description: description of a Docker network
+    properties:
+      attachable:
+        type: boolean
+        description: is attachable
+        required: false
+      driver:
+        type: string
+        description: network driver
+        required: false
+      ip_version:
+        type: integer
+        required: false
+        default: null
+      dhcp_enabled:
+        type: boolean
+        required: false
+        default: null
+
+  tosca.nodes.MiCADO.Volume.Docker:
+    derived_from: tosca.nodes.BlockStorage
+    description: description of a Docker volume
+    properties:
+      name:
+        type: string
+        description: name of the volume
+        required: false
+      labels:
+        type: map
+        description: map of metadata labels
+        required: false
+      size:
+        type: scalar.unit-size
+        description: overwrite size requirement
+        required: false
+    capabilities:
+      volume:
+        type: tosca.capabilities.Attachment
+
+  tosca.nodes.MiCADO.Container.Application.Docker:
+    derived_from: tosca.nodes.Container.Application.Docker
+    description: description of a Docker service
+    properties:
+      command:
+        type: string
+        description: command line to be executed by the container.
+        required: false
+      configs:
+        type: list
+        description: grant access to a docker config (define artifact first)
+        required: false
+      deploy:
+        type: deploy_type
+        description: swarm-specific configuration settings
+        required: false
+      entrypoint:
+        type: string
+        desciption: override the default entrypoint of container
+        required: false
+      environment:
+        type: map
+        description: map of all the environment variable required.
+        required: false
+        entry_schema:
+          type: string
+      expose:
+        type: list
+        description: ports to expose internally
+        required: false
+      image:
+        type: string
+        description: docker image, prefixed by repository if private
+        required: false
+      labels:
+        required: false
+        type: map
+        entry_schema:
+          type: string
+      logging:
+        required: false
+        type: map
+      networks:
+        required: false
+        type: list
+      volumes:
+        required: false
+        type: list
+      ports:
+        type: list
+        description: port exposed inside container
+        required: false
+      secrets:
+        type: list
+        required: false
+
+    attributes:
+      ip_address:
+        type: string
+      port:
+        type: integer
+    capabilities:
+      service:
+        type: tosca.capabilities.Endpoint
+
+    requirements:
+      - service:
+          capability: tosca.capabilities.Endpoint
+          node: tosca.nodes.MiCADO.Container.Application.Docker
+          relationship: tosca.relationships.MiCADO.ConnectsTo
+      - host:
+          capability: tosca.capabilities.Container
+          node: tosca.nodes.MiCADO.Compute
+          relationship: tosca.relationships.HostedOn
+      - volume:
+          capability: tosca.capabilities.Attachment
+          node: tosca.nodes.MiCADO.Volume.Docker
+          relationship: tosca.relationships.AttachesTo

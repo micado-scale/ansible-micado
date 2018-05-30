@@ -1,0 +1,23 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - https://raw.githubusercontent.com/micado-scale/ansible-micado/0.3.x/roles/micado-master/templates/tosca/custom_types.yaml
+
+repositories:
+  docker_hub: https://hub.docker.com/
+
+topology_template:
+  node_templates:
+    stressng:
+       type: tosca.nodes.MiCADO.Container.Application.Docker
+       properties:
+           command: "--cpu 0 --cpu-method pi -l 85"
+           deploy:
+             resources:
+               reservations:
+                 cpus: '1.0'
+       artifacts:
+         image:
+           type: tosca.artifacts.Deployment.Image.Container.Docker
+           file: lorel/docker-stress-ng
+           repository: docker_hub
