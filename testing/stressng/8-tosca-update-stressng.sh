@@ -11,4 +11,4 @@ if [ -z "$MICADO_MASTER" ]; then
 fi
 ID_APP=$1
 
-curl -d input="https://raw.githubusercontent.com/micado-scale/ansible-micado/0.3.x/roles/micado-master/templates/tosca/stressng_update.yaml" -X PUT http://$MICADO_MASTER:5050/update/$ID_APP
+curl --data-binary @stressng-update.yaml -X PUT http://$MICADO_MASTER:5050/v1.0/app/update/$ID_APP
