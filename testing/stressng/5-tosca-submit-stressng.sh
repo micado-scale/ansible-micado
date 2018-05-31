@@ -10,4 +10,4 @@ if [ -z "$MICADO_MASTER" ]; then
     MICADO_MASTER=$1
 fi
 
-curl -d input="https://raw.githubusercontent.com/micado-scale/ansible-micado/0.3.x/roles/micado-master/templates/tosca/stressng.yaml" -X POST http://$MICADO_MASTER:5050/engine/
+curl --data-binary @stressng.yaml -X POST http://$MICADO_MASTER:5050/v1.0/app/launch/file/

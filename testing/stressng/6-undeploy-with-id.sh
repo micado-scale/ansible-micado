@@ -11,4 +11,4 @@ if [ -z "$MICADO_MASTER" ]; then
 fi
 ID_APP=$1
 
-curl -X DELETE http://$MICADO_MASTER:5050/undeploy/$ID_APP
+curl -X DELETE http://$MICADO_MASTER:5050/v1.0/app/undeploy/$ID_APP
