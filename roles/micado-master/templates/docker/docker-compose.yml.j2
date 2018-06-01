@@ -8,27 +8,6 @@ services:
       MICADO_FRONTEND_IP: {{ ansible_default_ipv4.address }}
      ports:
       - 4000:4000
-   submitter:
-     image: {{docker_images.submitter}}
-     container_name: micado-submitter
-     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "/var/lib/micado/occopus/data/:/var/lib/micado/occopus/data/"
-      - "/var/lib/micado/submitter/data/:/var/lib/micado/submitter/data/"
-     environment:
-       # Input template files
-       TEMP_AUTH_DATA_FILE: /var/lib/micado/occopus/data/auth_data.yaml
-       TEMP_NODE_DEF_FILE: /var/lib/micado/submitter/data/temp_node_definitions.yaml
-       TEMP_INFRA_DEF_FILE: /var/lib/micado/submitter/data/temp_infrastructure_descriptor.yaml
-       # Input user data files
-       USER_DATA_FILE: /var/lib/micado/submitter/data/temp_user_data.yaml
-       # Output occopus descriptors
-       AUTH_DATA_FILE: /var/lib/micado/occopus/data/auth_data.yaml
-       NODE_DEF_FILE: /var/lib/micado/occopus/data/nodes/node_definitions.yaml
-       INFRA_DEF_FILE: /var/lib/micado/occopus/data/infrastructure_descriptor.yaml
-       MASTER_IP: {{ ansible_default_ipv4.address }}
-       WORKER_INFRA_NAME: micado_worker_infra
-     command: python /app/submitter/submitter.py
 
    redis:
     image: {{docker_images.redis}}
@@ -43,12 +22,13 @@ services:
     container_name: occopus
     depends_on:
       - redis
-      - submitter
     ports:
       - 5000:5000
     volumes:
       - "/var/lib/micado/occopus/data/:/var/lib/micado/occopus/data/"
       - "/var/lib/micado/occopus/log/:/var/log/occopus"
+      - "/var/lib/micado/toscasubmitter/src/files/output_configs/:/var/lib/micado/occopus/submitter/"
+
     environment:
       - REDIS_NAME=redis
       - LOG_DIR=/var/log/occopus
