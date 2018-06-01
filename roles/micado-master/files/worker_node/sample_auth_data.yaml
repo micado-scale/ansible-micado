@@ -1,0 +1,21 @@
+resource:
+  -
+    type: ec2
+    auth_data:
+        accesskey: 
+        secretkey: 
+  -
+     type: cloudsigma
+     auth_data:
+        email: 
+        password: 
+  -
+     type: cloudbroker
+     auth_data:
+        email: 
+        password: 
+  -
+     type: nova
+     auth_data:
+        username: 
+        password: 
