@@ -10,4 +10,4 @@ if [ -z "$MICADO_MASTER" ]; then
     MICADO_MASTER=$2
 fi
 
-curl -X GET http://$MICADO_MASTER:5050/list_app
+curl -X GET http://$MICADO_MASTER:5050/v1.0/list_app
