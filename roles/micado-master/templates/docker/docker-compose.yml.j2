@@ -32,7 +32,7 @@ services:
     environment:
       - REDIS_NAME=redis
       - LOG_DIR=/var/log/occopus
-    command: occopus-rest-service --auth_data_path /var/lib/micado/occopus/data/auth_data.yaml --host 0.0.0.0
+    command: occopus-rest-service --auth_data_path /var/lib/micado/occopus/data/auth_data.yaml --host 0.0.0.0 --parallelize
 
    consul:
     image: {{docker_images.consul}}

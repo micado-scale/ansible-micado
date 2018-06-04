@@ -8,7 +8,7 @@
 
 - name: Create auth_data.yaml for Occopus
   copy:
-      src: worker_node/auth_data.yaml
+      src: "{{ cred_path }}"
       dest: "/var/lib/micado/occopus/data/auth_data.yaml"
 
 - name: "Worker node: Occopus nodes: Copy cloud-config"

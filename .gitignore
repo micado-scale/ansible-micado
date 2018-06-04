@@ -1,4 +1,3 @@
-ansible_user_data.yml
 hosts
 *.retry
-roles/micado-master/files/worker_node/auth_data.yaml
+credentials.yml

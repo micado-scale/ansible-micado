@@ -19,7 +19,6 @@
     - docker_compose_pip_version: pip
     - docker_images:
         dashboard: micado/dashboard:0.1.0
-        submitter: micado/micado-submitter:1.1
         redis: redis
         occopus: micado/occopus:1.6-rc1
         consul: consul:1.0.0
@@ -28,4 +27,4 @@
         policykeeper: micado/policykeeper:0.1-dev-frame
         dockervisualizer: jaydes/dockerviz:min-refresh
         grafana: grafana/grafana:5.1.0
-        toscasubmitter: micado/toscasubmitter:0.1
+        toscasubmitter: micado/toscasubmitter:0.1.1
