@@ -6,38 +6,6 @@ imports:
 repositories:
   docker_hub: https://hub.docker.com/
 
-policy_types:
-  tosca.policies.Scaling.stressng:
-    derived_from: tosca.policies.Scaling
-    description: base policy defining sources, constants and queries for the stressng test
-    properties:
-      constants:
-        type: map
-        description: constants as a dictionary
-        default:
-          NODE_TH_MAX: '60'
-          NODE_TH_MIN: '20'
-          SERVICE_NAME: 'stressng'
-          SERVICE_FULL_NAME: 'stressng_stressng'
-          SERVICE_TH_MAX: '60'
-          SERVICE_TH_MIN: '20'
-      alerts:
-        type: list
-        description: alerts to consider
-        default:
-          - alert: node_overloaded
-            expr: '(100-(avg(rate(node_cpu{group="worker_cluster",mode="idle"}[60s]))*100)) > {{NODE_TH_MAX}}'
-            for: 1m
-          - alert: node_underloaded
-            expr: '(100-(avg(rate(node_cpu{group="worker_cluster",mode="idle"}[60s]))*100)) < {{NODE_TH_MIN}}'
-            for: 1m
-          - alert: service_overloaded
-            expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name="{{SERVICE_FULL_NAME}}"}[30s]))*100 > {{SERVICE_TH_MAX}}'
-            for: 30s
-          - alert: service_underloaded
-            expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name="{{SERVICE_FULL_NAME}}"}[30s]))*100 < {{SERVICE_TH_MIN}}'
-            for: 30s
-
 topology_template:
   node_templates:
     stressng:
@@ -70,11 +38,19 @@ topology_template:
 
   policies:
     - scalability:
-        type: tosca.policies.Scaling.stressng
+        type: tosca.policies.Scaling.MiCADO
         targets: [ worker_node ]
         properties:
-          stage: runtime
-          priority: 100
+          constants:
+            NODE_TH_MAX: '60'
+            NODE_TH_MIN: '20'
+          alerts:
+          - alert: node_overloaded
+            expr: '(100-(avg(rate(node_cpu{group="worker_cluster",mode="idle"}[60s]))*100)) > {{NODE_TH_MAX}}'
+            for: 1m
+          - alert: node_underloaded
+            expr: '(100-(avg(rate(node_cpu{group="worker_cluster",mode="idle"}[60s]))*100)) < {{NODE_TH_MIN}}'
+            for: 1m
           min_instances: 1
           max_instances: 3
           scaling_rule: |
@@ -86,11 +62,21 @@ topology_template:
             else:
               print('Transient phase, skipping update of nodes...')
     - scalability:
-        type: tosca.policies.Scaling.stressng
+        type: tosca.policies.Scaling.MiCADO
         targets: [ stressng ]
         properties:
-          stage: runtime
-          priority: 100
+          constants:
+            SERVICE_NAME: 'stressng'
+            SERVICE_FULL_NAME: '{{stack}}_stressng'
+            SERVICE_TH_MAX: '60'
+            SERVICE_TH_MIN: '20'
+          alerts:
+          - alert: service_overloaded
+            expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name="{{SERVICE_FULL_NAME}}"}[30s]))*100 > {{SERVICE_TH_MAX}}'
+            for: 30s
+          - alert: service_underloaded
+            expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name="{{SERVICE_FULL_NAME}}"}[30s]))*100 < {{SERVICE_TH_MIN}}'
+            for: 30s
           min_instances: 1
           max_instances: 3
           scaling_rule: |
