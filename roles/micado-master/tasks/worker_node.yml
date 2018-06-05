@@ -5,38 +5,20 @@
     state: directory
     mode: 0775
     recurse: yes
-- name: "Worker node: Occopus: Copy auth data"
+
+- name: Create auth_data.yaml for Occopus
   copy:
-    src: worker_node/auth_data.yaml
-    dest: /var/lib/micado/occopus/data/auth_data.yaml
-    mode: 0644
+      src: "{{ cred_path }}"
+      dest: "/var/lib/micado/occopus/data/auth_data.yaml"
 
-
-- name: "Worker node: Occopus nodes: Create directory"
-  file:
-    path: /var/lib/micado/occopus/data/nodes/
-    state: directory
-    mode: 0775
-    recurse: yes
 - name: "Worker node: Occopus nodes: Copy cloud-config"
   copy:
     src: worker_node/cloud_init_worker.yaml
-    dest: /var/lib/micado/occopus/data/nodes/cloud_init_worker.yaml
+    dest: /var/lib/micado/toscasubmitter/system/cloud_init_worker.yaml
     mode: 0644
 
-- name: "Worker node: Submitter: Create directory"
-  file:
-    path: /var/lib/micado/submitter/data/
-    state: directory
-    mode: 0775
-    recurse: yes
-- name: "Worker node: Submitter: Copy node definitions"
-  copy:
-    src: worker_node/temp_node_definitions.yaml
-    dest: /var/lib/micado/submitter/data/temp_node_definitions.yaml
-    mode: 0644
-- name: "Worker node: Submitter: Copy infrastructure descriptor"
-  copy:
-    src: worker_node/temp_infrastructure_descriptor.yaml
-    dest: /var/lib/micado/submitter/data/temp_infrastructure_descriptor.yaml
+- name: "Worker node: Occopus  infrastructure descriptor"
+  template:
+    src: user_data/temp_infrastructure_descriptor.yaml.j2
+    dest: /var/lib/micado/toscasubmitter/system/infrastructure_descriptor.yaml
     mode: 0644

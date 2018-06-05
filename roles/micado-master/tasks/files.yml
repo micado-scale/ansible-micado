@@ -1,16 +1,4 @@
 ---
-
-- name: Create directory /var/lib/micado/submitter/data/
-  file:
-    path: /var/lib/micado/submitter/data/
-    state: directory
-    mode: 0775
-    recurse: yes
-- name: Create temp_user_data.yaml for Micado submitter
-  template:
-      src: user_data/temp_user_data.yml.j2
-      dest: "/var/lib/micado/submitter/data/temp_user_data.yaml"
-
 - name: "Consul config: Create directory"
   file:
     path: /var/lib/micado/consul/config/

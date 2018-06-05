@@ -24,10 +24,6 @@
   docker_image:
       name: "{{docker_images.grafana}}"
 
-- name: 'Downloading docker image: Submitter'
-  docker_image:
-      name: "{{docker_images.submitter}}"
-
 - name: 'Downloading docker image: Policykeeper'
   docker_image:
       name: "{{docker_images.policykeeper}}"

@@ -15,3 +15,10 @@ Adaptor_config:
      - "tosca.nodes.MiCADO.Container.Application.Docker"
    endoint: "endpoint"
    volume: "/var/lib/submitter/files/output_configs/"
+
+
+ OccopusAdaptor:
+   types:
+     - "tosca.nodes.MiCADO.Occopus.*"
+   endoint: "endpoint"
+   volume: "/var/lib/submitter/files/output_configs/"

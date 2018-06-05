@@ -4,12 +4,6 @@
 
 # TODO: Configure hostname here
 
-- name: Load the user_data variable file from the playbook or from a default location (used for ansible-pull)
-  include_vars: "{{ item }}"
-  with_first_found:
-    - "ansible_user_data.yml"
-    - "/var/lib/micado/ansible_user_data.yml"
-
 - name: 'Installing packages'
   apt:
     pkg: "{{ item }}"
