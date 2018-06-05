@@ -22,3 +22,10 @@ Adaptor_config:
      - "tosca.nodes.MiCADO.Occopus.*"
    endoint: "endpoint"
    volume: "/var/lib/submitter/files/output_configs/"
+
+
+ PkAdaptor:
+   types:
+     - "tosca.policies.Scaling.MiCADO"
+   endpoint: "policykeeper:12345"
+   volume: "/var/lib/submitter/files/output_configs/"
