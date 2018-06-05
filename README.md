@@ -25,9 +25,9 @@ git checkout 0.3.x
 ### Step 2: Specify details for instantiating MiCADO worker nodes
 
 ```
-cp sample-ansible_user_data.yml ansible_user_data.yml
+cp sample-credentials.yml credentials.yml
 ```
-Edit ansible_user_data.yml to add all cloud-related information for worker instantiation
+Edit credentials.yml to add all cloud-related information for worker instantiation
 
 ### Step 3: Launch an empty cloud VM instance on which core MiCADO services will be installed
 
