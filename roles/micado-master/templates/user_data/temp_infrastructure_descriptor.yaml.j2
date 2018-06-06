@@ -1,5 +1,5 @@
 user_id: userid
-infra_name: MICADO-worker
+infra_name: micado_worker_infra
 
 nodes:
 - &Worker_cluster 
@@ -10,4 +10,4 @@ nodes:
     max: 1
 
 variables:
-  master_host_ip: {{ ansible_host }}
+  master_host_ip: {{ ansible_default_ipv4.address }}
