@@ -296,7 +296,7 @@ class FormAuthHttpProxy(SessionHttpProxy):
 
     def getAuthForm(self, url):
         import urllib
-        f = open("usr/share/zorp/http/en/authform.html", 'r')
+        f = open("/etc/zorp/authform.html", 'r')
         authform = f.read()
         f.close()
         authform = authform.replace('name="redirect_location" value=""', 'name="redirect_location" value="%s"' % (urllib.quote(url),))

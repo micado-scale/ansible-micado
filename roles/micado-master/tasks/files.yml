@@ -145,6 +145,11 @@
     src: zorp/policy.py
     dest: /var/lib/micado/zorp/config/policy.py
     mode: 0644
+- name: "Zorp HTTP login form: Copy file"
+  copy:
+    src: zorp/authform.html
+    dest: /var/lib/micado/zorp/config/authform.html
+    mode: 0644
 - name: "Zorp entrypoint: Create directory"
   file:
     path: /var/lib/micado/zorp/scripts/
