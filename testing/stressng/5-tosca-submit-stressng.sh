@@ -9,5 +9,10 @@ if [ -z "$MICADO_MASTER" ]; then
     fi
     MICADO_MASTER=$1
 fi
+APP_ID=$1
 
-curl --data-binary @stressng.yaml -X POST http://$MICADO_MASTER:5050/v1.0/app/launch/file/
+if [ -z "$APP_ID" ]; then
+    curl -F file=@"stressng.yaml" -X POST http://$MICADO_MASTER:5050/v1.0/app/launch/file/
+else
+    curl -F file=@"stressng.yaml" -F id=$APP_ID -X POST http://$MICADO_MASTER:5050/v1.0/app/launch/file/
+fi

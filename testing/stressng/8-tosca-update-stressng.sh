@@ -11,4 +11,4 @@ if [ -z "$MICADO_MASTER" ]; then
 fi
 ID_APP=$1
 
-curl --data-binary @stressng-update.yaml -X PUT http://$MICADO_MASTER:5050/v1.0/app/update/$ID_APP
+curl -F file=@"stressng-update.yaml" -X PUT http://$MICADO_MASTER:5050/v1.0/app/update/file/$ID_APP
