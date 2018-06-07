@@ -12,7 +12,7 @@ fi
 APP_ID=$1
 
 if [ -z "$APP_ID" ]; then
-    curl -F file=@"stressng.yaml" -X POST http://$MICADO_MASTER:5050/v1.0/app/launch/file/
+    curl -F file=@"inycom.yaml" -X POST http://$MICADO_MASTER:5050/v1.0/app/launch/file/
 else
-    curl -F file=@"stressng.yaml" -F id=$APP_ID -X POST http://$MICADO_MASTER:5050/v1.0/app/launch/file/
+    curl -F file=@"inycom.yaml" -F id=$APP_ID -X POST http://$MICADO_MASTER:5050/v1.0/app/launch/file/
 fi

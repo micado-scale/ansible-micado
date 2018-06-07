@@ -98,9 +98,6 @@ You can find test application(s) under the subdirectories of the 'testing' direc
 
   Optional steps for testing TOSCA submission of stressng:
   - Step1: set the MICADO_MASTER variable to contain the IP of the MiCADO master with ```export MICADO_MASTER=x.x.x.x```
-  - Step2: run ```5-tosca-submit-stressng.sh``` to deploy the stressng service using TOSCA
-  - Step3: Edit ```policy-stressng.yaml``` and change the constant service name to include the id of the deployment (ie. SERVICE_FULL_NAME: '<app_id>_stressng')
-  - Step4: run ```2-start-scaling-policy-stressng.sh``` to activate the monitoring/scaling components. Observe the scaleup response.
-  - Step5: run ```8-tosca-update-stressng.sh <app_id>``` to update the service and reduce the CPU load. Observe the scaledown response.
-  - Step6: run ```6-undeploy-with-id.sh <app_id>``` to remove the stressng service
-  - Step7: run ```4-stop-scaling-policy-stressng.sh``` to deactivate the monitoring/scaling components
+  - Step2: run ```5-tosca-submit-stressng.sh``` to deploy the virtual machine and stressng service using TOSCA *optionally add as an argument a user-defined app_id (ie. ./5-tosca-submit-stressng.sh <app_id> ). Observe the scaleup response
+  - Step3: run ```8-tosca-update-stressng.sh <app_id>``` to update the service and reduce the CPU load. Observe the scaledown response.
+  - Step4: run ```6-undeploy-with-id.sh <app_id>``` to remove the stressng service and the virtual machine node
