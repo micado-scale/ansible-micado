@@ -88,16 +88,8 @@ You can find test application(s) under the subdirectories of the 'testing' direc
 - stressng
 
   This application contains a single service, performing constant load. Policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Both compose and policy files are ready to be submitted with the helper scripts:
-  - Step1: set the MICADO_MASTER variable to contain the IP of the MiCADO master
-  - Step2: run ```1-deploy-stressng.sh``` to deploy the stressng service
-  - Step3: run ```2-start-scaling-policy-stressng.sh``` to activate the monitoring/scaling components
-  - Step4: inspect the system during its operation by visiting the pages defined above in the Monitoring section. MiCADO will scale its workers up to their maximum count which is 3. Note, that it may take about 5-10 minutes to play this scenario.
-  - Step5: run ```3-undeploy-stressng.sh``` and inspect how the worker nodes scale down.
-  - Step6: run ```4-stop-scaling-policy-stressng.sh``` to deactivate the monitoring/scaling components
-  - Step7: optionally, run ```curl -s -X POST http://$MICADO_MASTER:5000/infrastructures/micado_worker_infra/scaleto/worker/1``` to scale MiCADO workers back to their minimal count
-
-  Optional steps for testing TOSCA submission of stressng:
   - Step1: set the MICADO_MASTER variable to contain the IP of the MiCADO master with ```export MICADO_MASTER=x.x.x.x```
-  - Step2: run ```5-tosca-submit-stressng.sh``` to deploy the virtual machine and stressng service using TOSCA *optionally add as an argument a user-defined app_id (ie. ./5-tosca-submit-stressng.sh <app_id> ). Observe the scaleup response
-  - Step3: run ```8-tosca-update-stressng.sh <app_id>``` to update the service and reduce the CPU load. Observe the scaledown response.
-  - Step4: run ```6-undeploy-with-id.sh <app_id>``` to remove the stressng service and the virtual machine node
+  - Step2: run ```1-submit-tosca-stressng.sh``` to deploy the virtual machine and stressng service using TOSCA *optionally add as an argument a user-defined app_id (ie. ```1-submit-tosca-stressng.sh <app_id>``` ). Observe the scaleup response
+  - Step2a: run ```2-list-apps.sh``` to see currently running applications and their IDs
+  - Step3: run ```3-update-tosca-stressng.sh <app_id>``` to update the service and reduce the CPU load. Observe the scaledown response.
+  - Step4: run ```4-undeploy-with-id.sh <app_id>``` to remove the stressng service and the virtual machine node
