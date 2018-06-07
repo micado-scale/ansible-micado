@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/COLAProject/COLARepo/master/nodes/custom_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/master/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -11,7 +11,7 @@ topology_template:
     stressng:
       type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
-         command: "--cpu 0 --cpu-method pi -l 5"
+         command: "--cpu 0 --cpu-method pi -l 10"
          deploy:
            resources:
              reservations:
