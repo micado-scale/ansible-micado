@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/COLAProject/COLARepo/master/nodes/custom_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/master/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -41,9 +41,9 @@ topology_template:
         host:
           properties:
             num_cpus: 2000
-            mem_size: 1073741824
+            mem_size: 4294967296
             vnc_password: secret
-            libdrive_id: 87ce928e-e0bc-4cab-9502-514e523783e3
+            libdrive_id: 390d52b5-4a2c-48ca-af7a-341a051dd09e
 
   policies:
     - scalability:
@@ -61,7 +61,7 @@ topology_template:
             expr: '(100-(avg(rate(node_cpu{group="worker_cluster",mode="idle"}[60s]))*100)) < {{NODE_TH_MIN}}'
             for: 1m
           min_instances: 1
-          max_instances: 3
+          max_instances: 4
           scaling_rule: |
             if len(m_nodes) <= m_node_count and m_time_since_node_count_changed > 60:
               if node_overloaded:
@@ -75,7 +75,7 @@ topology_template:
         targets: [ magician ]
         properties:
           constants:
-            SERVICE_NAME: ' magician'
+            SERVICE_NAME: 'magician'
             SERVICE_FULL_NAME: '{{stack}}_magician'
             SERVICE_TH_MAX: '60'
             SERVICE_TH_MIN: '20'
