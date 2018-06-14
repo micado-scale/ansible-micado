@@ -35,6 +35,8 @@ topology_template:
             mem_size: 1073741824
             vnc_password: secret
             libdrive_id: 87ce928e-e0bc-4cab-9502-514e523783e3
+            public_key_id: ADD_YOUR_ID_HERE
+            firewall_policy: ADD_YOUR_ID_HERE
 
   policies:
     - scalability:
