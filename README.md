@@ -27,7 +27,7 @@ git checkout 0.3.x
 ```
 cp sample-credentials.yml credentials.yml
 ```
-Edit credentials.yml to add all cloud-related information for worker instantiation
+Edit credentials.yml to add all cloud-related information for worker instantiation.
 
 ### Step 3: Launch an empty cloud VM instance on which core MiCADO services will be installed
 
@@ -83,11 +83,11 @@ MiCADO exposes the following webpages:
 
 ## Testing
 
-You can find test application(s) under the subdirectories of the 'testing' directory.
+You can find test application(s) under the subdirectories of the 'testing' directory. The current tests are written for CloudSigma.
 
 - stressng
 
-  This application contains a single service, performing constant load. Policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Both compose and policy files are ready to be submitted with the helper scripts:
+  This application contains a single service, performing constant load. Policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Both compose and policy files are ready to be submitted with the helper scripts. But before you start the process please verify that you already give the correct ```public_key_id``` and ```firewall_policy``` IDs in the ```stressng.yaml``` file.
   - Step1: set the MICADO_MASTER variable to contain the IP of the MiCADO master with ```export MICADO_MASTER=x.x.x.x```
   - Step2: run ```1-submit-tosca-stressng.sh``` to deploy the virtual machine and stressng service using TOSCA *optionally add as an argument a user-defined app_id (ie. ```1-submit-tosca-stressng.sh <app_id>``` ). Observe the scaleup response
   - Step2a: run ```2-list-apps.sh``` to see currently running applications and their IDs
