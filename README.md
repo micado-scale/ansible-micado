@@ -19,7 +19,7 @@ Perform the following steps on the Controller machine:
 ```
 git clone https://github.com/micado-scale/ansible-micado.git ansible-micado
 cd ansible-micado
-git checkout 0.3.x
+git checkout develop
 ```
 
 ### Step 2: Specify details for instantiating MiCADO worker nodes
