@@ -1,5 +1,4 @@
 ---
-
 - name: 'Docker: Installing dependencies'
   apt:
     pkg: "{{ item }}"
@@ -7,6 +6,8 @@
   with_items:
     - apt-transport-https
     - ca-certificates
+    - curl
+    - software-properties-common
 
 - name: 'Docker: Adding APT key'
   apt_key:
@@ -55,3 +56,12 @@
     name: docker-compose
     version: "{{ docker_compose_version if docker_compose_version else omit }}"
     state: present
+
+- name: 'Docker Swarm: Initialization'
+  shell: docker swarm init
+        --listen-addr {{ ansible_default_ipv4.address }}
+        --advertise-addr {{ ansible_default_ipv4.address }}
+
+- name: 'Docker Swarm: Change manager availability to drain'
+  shell: docker node update
+        --availability drain {{ micado_master_name }}
