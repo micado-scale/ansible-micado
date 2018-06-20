@@ -1,5 +1,4 @@
 ---
-
 - name: 'Downloading docker image: Redis'
   docker_image:
       name: "{{docker_images.redis}}"
