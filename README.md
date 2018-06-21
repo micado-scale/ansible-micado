@@ -27,7 +27,7 @@ git checkout 0.3.x
 ```
 cp sample-credentials.yml credentials.yml
 ```
-Edit credentials.yml to add all cloud-related information for worker instantiation
+Edit credentials.yml to add all cloud-related information for worker instantiation.
 
 ### Step 3: Launch an empty cloud VM instance on which core MiCADO services will be installed
 
@@ -83,13 +83,15 @@ MiCADO exposes the following webpages:
 
 ## Testing
 
-You can find test application(s) under the subdirectories of the 'testing' directory.
+You can find test application(s) under the subdirectories of the 'testing' directory. The current tests are written for CloudSigma.
 
 - stressng
 
-  This application contains a single service, performing constant load. Policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Both compose and policy files are ready to be submitted with the helper scripts:
-  - Step1: set the MICADO_MASTER variable to contain the IP of the MiCADO master with ```export MICADO_MASTER=x.x.x.x```
-  - Step2: run ```1-submit-tosca-stressng.sh``` to deploy the virtual machine and stressng service using TOSCA *optionally add as an argument a user-defined app_id (ie. ```1-submit-tosca-stressng.sh <app_id>``` ). Observe the scaleup response
-  - Step2a: run ```2-list-apps.sh``` to see currently running applications and their IDs
-  - Step3: run ```3-update-tosca-stressng.sh <app_id>``` to update the service and reduce the CPU load. Observe the scaledown response.
-  - Step4: run ```4-undeploy-with-id.sh <app_id>``` to remove the stressng service and the virtual machine node
+  This application contains a single service, performing constant load. Policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Helper scripts has been added to the directory to ease application handling. 
+  - Step1: add your ```public_key_id``` to both the ```stressng.yaml``` and ```stressng-update.yaml``` files. Without this CloudSigma does not execute the contextualisation on the MiCADO worker nodes. The ID must point to your public ssh key under your account in CloudSigma. You can find it on the CloudSigma Web UI under the "Access & Security/Keys Management" menu.
+  - Step2: add a proper ```firewall_policy``` to both the ```stressng.yaml``` and ```stressng-update.yaml``` files. Without this MiCADO master will not reach MiCADO worker nodes. Firewall policy ID can be retrieved from a rule defined under the "Networking/Policies" menu. The following ports must be opened for MiCADO workers: all inbound connections from MiCADO master <to be defined in more detials>
+  - Step3: set the MICADO_MASTER variable to contain the IP of the MiCADO master node with ```export MICADO_MASTER=a.b.c.d```
+  - Step4: run ```1-submit-tosca-stressng.sh``` to create the minimum number of MiCADO worker nodes and to deploy the docker stack including the stressng service defined in the ```stressng.yaml``` TOSCA description. Optionally, add as an argument a user-defined application id (ie. ```1-submit-tosca-stressng.sh stressng``` ). Observe the scaleup response
+  - Step4a: run ```2-list-apps.sh``` to see currently running applications and their IDs
+  - Step5: run ```3-update-tosca-stressng.sh stressng``` to update the service and reduce the CPU load. Observe the scaledown response.
+  - Step6: run ```4-undeploy-with-id.sh stressng``` to remove the stressng stack and all the MiCADO worker nodes
