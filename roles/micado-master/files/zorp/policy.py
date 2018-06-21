@@ -44,6 +44,79 @@ EncryptionPolicy(
     )
 )
 
+
+class MicadoCredmanAuthenticationBackend(AbstractAuthenticationBackend):
+    def __init__(self, url):
+        self.url = url
+        self.sessions = {}
+    def startSession(self, session_id, session):
+        pass
+
+    def stopSession(self, session_id):
+        del self.sessions[session_id]
+
+    def getMethods(self, session_id, entity):
+        user = None
+        for (headername, value) in entity:
+            if headername == "User":
+                user = value
+        if not user:
+            log(session_id, CORE_AUTH, 1, "Could not parse user, rejecting;")
+            return Z_AUTH_REJECT
+        else:
+            self.sessions[session_id] = user
+        return (2, [('Method', 'PASSWD.NONE:0:0:Password Authentication/credman')])
+
+    def setMethod(self, session_id, method):
+        return (4, [])
+
+    def converse(self, session_id, credentials):
+        from urllib import urlencode
+        from urllib2 import Request, urlopen, URLError, HTTPError
+        from json import loads
+
+        passwd = None
+        for (method, cred) in credentials:
+            if method == "Password":
+                passwd = cred
+        if not passwd:
+            log(session_id, CORE_AUTH, 1, "Could not parse password, rejecting;")
+            return Z_AUTH_REJECT
+        else:
+            user = self.sessions[session_id]
+            api_payload = urlencode({'username': user, 'password': passwd})
+            req = Request(self.url, data=api_payload)
+            try:
+                resp = urlopen(req)
+            except URLError as e:
+                log(session_id, CORE_AUTH, 1, "Error accessing credman API; %s", (e, ))
+                return Z_AUTH_REJECT
+            except HTTPError as e:
+                # This would happen if credman would use proper HTTP errors
+                log(session_id, CORE_AUTH, 3, "Authentication error; %s", (e, ))
+                return Z_AUTH_REJECT
+            try:
+                j_body = loads(''.join(resp.readlines()))
+            except ValueError as e:
+                log(session_id, CORE_AUTH, 2, "Mailformed response on credman API; %s", (e,))
+                return Z_AUTH_REJECT
+            code = j_body.get('code', 400)
+            if code == 423:
+                log(session_id, CORE_AUTH, 3, "Authentication failure, user account locked; code=%s, msg=%s",
+                    (code, j_body.get('result', ''), )
+                    )
+                return Z_AUTH_REJECT
+            elif code != 200:
+                log(session_id, CORE_AUTH, 3, "Authentication failure; code=%s, msg=%s",
+                    (code, j_body.get('result', ''), )
+                    )
+                return Z_AUTH_REJECT
+            log(session_id, CORE_AUTH, 3, "Authentication success; code=%s, msg=%s",
+                (code, j_body.get('result', ''), )
+                )
+            return Z_AUTH_ACCEPT
+
+
 class HtpasswdAuthenticationBackend(AbstractAuthenticationBackend):
     def __init__(self, filename):
         from passlib.apache import HtpasswdFile
@@ -221,7 +294,7 @@ class SessionHttpProxy(HttpProxy):
 class FormAuthParseLoginProxy(AnyPyProxy):
     def config(self):
         self.client_max_line_length=16384
-        self.auth = HtpasswdAuthenticationBackend("/etc/zorp/users.htpass")
+        self.auth = MicadoCredmanAuthenticationBackend('http://credman:5001/v1.1/verify')
 
     def __post_config__(self):
         super(FormAuthParseLoginProxy, self).__post_config__()
