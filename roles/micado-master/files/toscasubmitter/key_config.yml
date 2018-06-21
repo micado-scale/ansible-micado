@@ -1,6 +1,6 @@
 config:
   dry_run: False
-  path_log: "/var/lib/submitter/submitter.log"
+  path_log: "/var/log/submitter/submitter.log"
 
 Adaptor_config:
  DummySeAdaptor:

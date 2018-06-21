@@ -101,6 +101,13 @@
     src: toscasubmitter/key_config.yml
     dest: /var/lib/micado/toscasubmitter/system/key_config.yml
     mode: 0644
+    
+- name: "Redis logging: Create log directory"
+  file:
+    path: /var/log/micado/redis/
+    state: directory
+    mode: 0777
+    recurse: yes
 
 - name: "Docker-compose: Copy file"
   template:
