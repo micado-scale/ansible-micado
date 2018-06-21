@@ -5,11 +5,13 @@
     state: directory
     mode: 0775
     recurse: yes
+
 - name: "Consul config: Copy file"
   copy:
     src: consul/config.json
     dest: /var/lib/micado/consul/config/config.json
     mode: 0644
+
 - name: "Consul config: create checks.json"
   template:
     src: consul/checks.json.j2
@@ -22,6 +24,7 @@
     state: directory
     mode: 0775
     recurse: yes
+    
 - name: "Prometheus config: Copy file"
   copy:
     src: prometheus/prometheus.yml
