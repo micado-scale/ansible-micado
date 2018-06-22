@@ -37,6 +37,7 @@
     state: directory
     mode: 0775
     recurse: yes
+
 - name: "Alertmanager config: Copy file"
   copy:
     src: alertmanager/config.yml
@@ -49,10 +50,12 @@
     state: directory
     mode: 0775
     recurse: yes
+
 - name: "Policy-keeper: Copy config file"
   template:
     src: policykeeper/policykeeper_config.yaml.j2
     dest: /var/lib/micado/policykeeper/config/policykeeper_config.yaml
+
 - name: "Policy-keeper: Copy prometheus file"
   copy:
     src: policykeeper/prometheus_config_template.yaml
@@ -65,28 +68,33 @@
     state: directory
     mode: 0775
     recurse: yes
+
 - name: "Grafana config: Copy dashboard file"
   copy:
     src: grafana/data-dashboards-micado.json
     dest: /var/lib/micado/grafana/data/dashboards/micado.json
     mode: 0644
+
 - name: "Grafana config: Create dashboard providers directory"
   file:
     path: /var/lib/micado/grafana/provisioning/dashboards
     state: directory
     mode: 0775
     recurse: yes
+
 - name: "Grafana config: Copy dashboard provider file"
   copy:
     src: grafana/provisioning-dashboards-provider.yaml
     dest: /var/lib/micado/grafana/provisioning/dashboards/provider.yaml
     mode: 0644
+
 - name: "Grafana config: Create datasource directory"
   file:
     path: /var/lib/micado/grafana/provisioning/datasources
     state: directory
     mode: 0775
     recurse: yes
+
 - name: "Grafana config: Copy datasource file"
   copy:
     src: grafana/provisioning-datasources-prometheus.yaml
@@ -99,6 +107,7 @@
     state: directory
     mode: 0775
     recurse: yes
+
 - name: "TOSCAsubmitter config: Copy config file"
   copy:
     src: toscasubmitter/key_config.yml
@@ -111,6 +120,71 @@
     state: directory
     mode: 0777
     recurse: yes
+
+- name: "Consul logging: Create log directory"
+  file:
+    path: /var/log/micado/consul/
+    state: directory
+    mode: 0775
+    recurse: yes
+
+- name: "Consul logging: Check logs"
+  copy:
+    content: "Check the logs by the following command:\ndocker logs consul\n"
+    dest: /var/log/micado/consul/README
+    mode: 0644
+
+- name: "Prometheus logging: Create log directory"
+  file:
+    path: /var/log/micado/prometheus/
+    state: directory
+    mode: 0775
+    recurse: yes
+
+- name: "Prometheus logging: Check logs"
+  copy:
+    content: "Check the logs by the following command:\ndocker logs prometheus\n"
+    dest: /var/log/micado/prometheus/README
+    mode: 0644
+
+- name: "Alertmanager logging: Create log directory"
+  file:
+    path: /var/log/micado/alertmanager/
+    state: directory
+    mode: 0775
+    recurse: yes
+
+- name: "Alertmanager logging: Check logs"
+  copy:
+    content: "Check the logs by the following command:\ndocker logs alertmanager\n"
+    dest: /var/log/micado/alertmanager/README
+    mode: 0644
+
+- name: "Dashboard logging: Create log directory"
+  file:
+    path: /var/log/micado/dashboard/
+    state: directory
+    mode: 0775
+    recurse: yes
+
+- name: "Dashboard logging: Check logs"
+  copy:
+    content: "Check the logs by the following command:\ndocker logs micado-dashboard\n"
+    dest: /var/log/micado/dashboard/README
+    mode: 0644
+
+- name: "Visualizer logging: Create log directory"
+  file:
+    path: /var/log/micado/visualizer/
+    state: directory
+    mode: 0775
+    recurse: yes
+
+- name: "Visualizer logging: Check logs"
+  copy:
+    content: "Check the logs by the following command:\ndocker logs dockervisualizer\n"
+    dest: /var/log/micado/visualizer/README
+    mode: 0644
 
 - name: "Docker-compose: Copy file"
   template:

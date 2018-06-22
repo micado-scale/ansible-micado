@@ -29,7 +29,6 @@ services:
       - "/var/lib/micado/occopus/data/:/var/lib/micado/occopus/data/"
       - "/var/lib/micado/toscasubmitter/src/files/output_configs/:/var/lib/micado/occopus/submitter/"
       - "/var/log/micado/occopus/:/var/log/occopus/"
-
     environment:
       - REDIS_NAME=redis
       - LOG_DIR=/var/log/occopus
