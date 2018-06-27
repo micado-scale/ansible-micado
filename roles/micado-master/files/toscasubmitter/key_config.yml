@@ -1,15 +1,31 @@
-config:
+main_config:
   dry_run: False
-  path_log: "/var/lib/submitter/submitter.log"
+  log_level: DEBUG
+  path_log: "/var/log/submitter/submitter.log"
 
-Adaptor_config:
- DummySeAdaptor:
-   types:
-     - "tosca.policies.Scaling.*"
-   endoint: "endpoint"
-   volume: "/var/lib/submitter/security_workdir_example/"
+step:
+  translate:
+    - DockerAdaptor
+    - OccopusAdaptor
+    - PkAdaptor
+  execute:
+    - DockerAdaptor
+    - OccopusAdaptor
+    - PkAdaptor
+  update:
+    - DockerAdaptor
+    - OccopusAdaptor
+    - PkAdaptor
+  undeploy:
+    - DockerAdaptor
+    - OccopusAdaptor
+    - PkAdaptor
+  cleanup:
+    - DockerAdaptor
+    - OccopusAdaptor
+    - PkAdaptor
 
-
+adaptor_config:
  DockerAdaptor:
    types:
      - "tosca.nodes.MiCADO.Container.Application.Docker"

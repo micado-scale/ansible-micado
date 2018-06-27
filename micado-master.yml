@@ -13,18 +13,20 @@
     - micado-master
 
   vars:
-    - grafana_admin_pwd: secret
-    - docker_package: docker-ce=17.09.1~ce-0~ubuntu
-    - docker_compose_version: 1.16.1
     - docker_compose_pip_version: pip
+    - docker_compose_version: 1.16.1
     - docker_images:
-        dashboard: micado/dashboard:0.1.0
-        redis: redis
-        occopus: micado/occopus:1.6-rc1
-        consul: consul:1.0.0
-        prometheus: prom/prometheus:v2.1.0
         alertmanager: prom/alertmanager:v0.12.0
-        policykeeper: micado/policykeeper:0.1-dev-frame
+        consul: consul:1.0.0
+        dashboard: micado/dashboard:0.1.0
         dockervisualizer: jaydes/dockerviz:min-refresh
         grafana: grafana/grafana:5.1.0
+        occopus: micado/occopus:1.6-rc1
+        policykeeper: micado/policykeeper:0.1-dev-frame
+        prometheus: prom/prometheus:v2.1.0
+        redis: redis:4.0
         toscasubmitter: micado/toscasubmitter:0.1.1
+    - docker_package: docker-ce=17.09.1~ce-0~ubuntu
+    - grafana_admin_pwd: secret
+    - micado_master_name: micado-master
+    
