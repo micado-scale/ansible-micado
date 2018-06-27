@@ -1,0 +1,14 @@
+---
+- name: "Start MiCADO: Clone policy keeper"
+  git:
+    repo: https://github.com/micado-scale/component-policy-keeper.git
+    dest: /var/lib/micado/policykeeper/src
+
+- name: "Start MiCADO: Clone tosca-submitter"
+  git:
+    repo: https://github.com/micado-scale/component_submitter.git
+    dest: /var/lib/micado/toscasubmitter/src
+
+- name: "Start MiCADO: Docker compose up"
+  docker_service:
+    project_src: /var/lib/micado/

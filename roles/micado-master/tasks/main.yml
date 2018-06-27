@@ -2,28 +2,19 @@
 - name: "Disable updates"
   script: files/misc/disable-updates.sh
 
-# TODO: Configure hostname here
+- name: Ensure Google DNS server added
+  lineinfile:
+    path: /etc/resolv.conf
+    line: 'nameserver 8.8.8.8'
 
-- name: 'Installing packages'
-  apt:
-    pkg: "{{ item }}"
-    state: present
-  with_items:
-    - apt-transport-https # TODO: Docker part will install this
-    - ca-certificates # TODO: Docker part will install this
-    - curl 
-    - software-properties-common 
-    - wget 
-    - unzip 
-    - jq 
-    - dnsmasq
+- name: Change hostname
+  hostname:
+    name: "{{ micado_master_name }}"
 
-# FIXME: Why do we need this?
-- name: 'Create Prometheus user'
-  user:
-    name: prometheus
-    createhome: no
-    state: present
+- name: Ensure that the hostfile contains the actual hostname
+  lineinfile:
+    path: /etc/hosts
+    line: "127.0.0.1\tlocalhost\t{{ micado_master_name }}"
 
 - include: docker-install.yml
 
@@ -33,5 +24,4 @@
 
 - include: docker-pull-images.yml
 
-- name: "Run runcmd.sh script #FIXME"
-  script: files/misc/runcmd.sh
+- include: start_micado.yml
