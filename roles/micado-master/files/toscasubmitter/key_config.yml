@@ -1,6 +1,6 @@
 main_config:
   dry_run: False
-  log_level: DEBUG
+  log_level: INFO
   path_log: "/var/log/submitter/submitter.log"
 
 step:
