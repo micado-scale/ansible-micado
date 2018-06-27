@@ -1,6 +1,8 @@
 main_config:
   dry_run: False
+  log_level: DEBUG
   path_log: "/var/log/submitter/submitter.log"
+
 step:
   translate:
     - DockerAdaptor
