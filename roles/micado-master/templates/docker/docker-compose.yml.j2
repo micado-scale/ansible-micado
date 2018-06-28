@@ -117,6 +117,7 @@ services:
    toscasubmitter:
     image: {{docker_images.toscasubmitter}}
     container_name: toscasubmitter
+    restart: always
     ports:
       - 5050:5050
     command: "-h 0.0.0.0 -p 5050"
