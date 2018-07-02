@@ -1,3 +1,4 @@
 hosts
 *.retry
 credentials.yml
+docker-cred.yml

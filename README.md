@@ -29,6 +29,14 @@ cp sample-credentials.yml credentials.yml
 ```
 Edit credentials.yml to add all cloud-related information for worker instantiation.
 
+#### Optional: Specify details for Docker login and private Docker repositories
+
+```
+cp sample-docker-cred.yml docker-cred.yml
+```
+Edit docker-cred.yml and add username, password, and repository url.
+To login to the default docker_hub, leave DOCKER_REPO as is (a blank string).
+
 ### Step 3: Launch an empty cloud VM instance on which core MiCADO services will be installed
 
 Use any of aws, ec2, nova command-line tools or web interface of the target cloud. Make sure you can ssh to it (without password) and your user is a sudoer. Store its IP address which will be referred as `IP` in the following steps.
@@ -87,7 +95,7 @@ You can find test application(s) under the subdirectories of the 'testing' direc
 
 - stressng
 
-  This application contains a single service, performing constant load. Policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Helper scripts has been added to the directory to ease application handling. 
+  This application contains a single service, performing constant load. Policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Helper scripts has been added to the directory to ease application handling.
   - Step1: add your ```public_key_id``` to both the ```stressng.yaml``` and ```stressng-update.yaml``` files. Without this CloudSigma does not execute the contextualisation on the MiCADO worker nodes. The ID must point to your public ssh key under your account in CloudSigma. You can find it on the CloudSigma Web UI under the "Access & Security/Keys Management" menu.
   - Step2: add a proper ```firewall_policy``` to both the ```stressng.yaml``` and ```stressng-update.yaml``` files. Without this MiCADO master will not reach MiCADO worker nodes. Firewall policy ID can be retrieved from a rule defined under the "Networking/Policies" menu. The following ports must be opened for MiCADO workers: all inbound connections from MiCADO master <to be defined in more detials>
   - Step3: set the MICADO_MASTER variable to contain the IP of the MiCADO master node with ```export MICADO_MASTER=a.b.c.d```
