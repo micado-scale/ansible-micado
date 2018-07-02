@@ -16,7 +16,7 @@ write_files:
     "encrypt": "uohStneoKEoVYZIASGp6Nw==",
     "log_level": "INFO",
     "enable_syslog": false,
-    "retry_join": ["{{variables.master_host_ip}}"],
+    "retry_join": ["{{ ansible_default_ipv4.address }}"],
     "rejoin_after_leave": true,
     "services": [{"name":"worker_cluster","port":9100}, {"name":"app_docker_cluster","port":9200}]
     }
@@ -48,7 +48,7 @@ write_files:
 
     services:
        consul:
-        image: consul:1.0.0
+        image: {{ docker_images.consul }}
         container_name: consul
         ports:
           - 8300:8300
@@ -61,16 +61,16 @@ write_files:
           - 8600:8600/udp
         volumes:
           - "/etc/consul/:/etc/consul/"
-        command: agent -advertise=$IP -retry-join={{variables.master_host_ip}} -config-file=/etc/consul/config.json
+        command: agent -advertise=$IP -retry-join={{ ansible_default_ipv4.address }} -config-file=/etc/consul/config.json
 
        node-exporter:
-        image: prom/node-exporter:v0.15.2
+        image: {{ docker_images.node_exporter }}
         container_name: node-exporter
         ports:
           - 9100:9100
 
        cadvisor:
-        image: google/cadvisor:v0.28.3
+        image: {{ docker_images.cadvisor }}
         container_name: cadvisor
         ports:
           - 9200:8080
@@ -103,19 +103,16 @@ runcmd:
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
   - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - apt-get update
-  - apt-get install -y docker-ce=17.09.1~ce-0~ubuntu
+  - apt-get install -y {{ docker_package }}
   - systemctl enable docker
   # Install Docker Compose
-  - curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
   - chmod +x /usr/local/bin/docker-compose
 # Connect to Swarm
-  - wget --retry-connrefused -qO /tmp/swarm_join {{variables.master_host_ip}}:2375/v1.26/swarm
+  - wget --retry-connrefused -qO /tmp/swarm_join {{ ansible_default_ipv4.address }}:2375/v1.26/swarm
   - export TOKEN=$(grep -Eo 'SWMTKN-[[:alnum:]]*-[[:alnum:]]*-[[:alnum:]]*' /tmp/swarm_join | head -1)
-  - docker swarm join --token $TOKEN {{variables.master_host_ip}}:2377
+  - docker swarm join --token $TOKEN {{ ansible_default_ipv4.address }}:2377
 
 # Infra services start
   - export IP=$(hostname -I | cut -d\  -f1)
   - docker-compose -f /etc/micado/docker-compose.yml up -d
-#  - sudo docker run -d -p 9100:9100 prom/node-exporter:v0.15.2
-#  - sudo docker run -d --net=host -e 'CONSUL_LOCAL_CONFIG={"leave_on_terminate":true}' -p 8301:8301 -p 8301:8301/udp -p 8300:8300 -p 8302:8302 -p 8302:8302/udp -p 8400:8400 -p 8500:8500 -p 8600:8600/udp -v /etc/consul/:/etc/consul consul:1.0.0 agent -advertise=$IP -retry-join={{variables.master_host_ip}} -config-file=/etc/consul/config.json
-#  - sudo docker run  --volume=/:/rootfs:ro  --volume=/var/run:/var/run:rw  --volume=/sys:/sys:ro  --volume=/var/lib/docker/:/var/lib/docker:ro  --publish=9200:8080  --detach=true  --name=cadvisor google/cadvisor:v0.28.3

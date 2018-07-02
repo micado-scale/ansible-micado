@@ -26,6 +26,8 @@
         prometheus: prom/prometheus:v2.1.0
         redis: redis:4.0
         toscasubmitter: micado/toscasubmitter:0.1.1
+        node_exporter: prom/node-exporter:v0.15.2
+        cadvisor: google/cadvisor:v0.28.3
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
     - grafana_admin_pwd: secret
     - micado_master_name: micado-master
