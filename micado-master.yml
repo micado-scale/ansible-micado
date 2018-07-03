@@ -24,3 +24,4 @@
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
     - grafana_admin_pwd: secret
     - micado_master_name: micado-master
+
