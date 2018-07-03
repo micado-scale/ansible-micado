@@ -25,25 +25,18 @@ write_files:
   permissions: '755'
   content: |
     #!/bin/bash
-
     echo "Setup NETWORK starts."
     myhost=`hostname`
     ipaddress=`ifconfig | awk '/inet addr/{print substr($2,6)}' | grep -v 127.0.0.1 | head -n 1`
     cp /etc/hosts /etc/hosts.old
     grep -v "$myhost" /etc/hosts.old > /etc/hosts
+
     echo "IPADDRESS: $ipaddress"
     echo "$ipaddress $myhost" >> /etc/hosts
+
     rm -rf /etc/resolvconf/*
     echo "Setup NETWORK finished."
 
-- path: /tmp/wait-updates.sh
-  permissions: '755'
-  content: |
-    #!/bin/bash
-
-    while [[ `ps aufx | grep -v "grep" | grep "apt.systemd.daily" | wc -l` -gt 0 ]]; do
-      sleep 1
-    done
 
 - path: /etc/resolvconf/resolv.conf.d/base
   content: |
@@ -89,7 +82,8 @@ write_files:
           - "/dev/disk/:/dev/disk/"
 
 runcmd:
-  - /tmp/wait-updates.sh
+  - adduser --disabled-password --gecos "" prometheus
+  - echo 'APT::Periodic::Unattended-Upgrade "0";' > /etc/apt/apt.conf.d/20auto-upgrades
   - /bin/consul-set-network.sh
   - dhclient
   - oldhostname=$(hostname -s)
@@ -99,12 +93,11 @@ runcmd:
   - line=127.0.1.1'\t'$new_host_name
   - sed -i "s/$oldhostname/$new_host_name/g" /etc/hosts
   - echo $line >> /etc/hosts
+  - export DEBIAN_FRONTEND=noninteractive
   - dpkg-reconfigure openssh-server
-  - echo nameserver 8.8.8.8 >> /etc/resolv.conf
   - resolvconf -u
-
-  # Docker
-
+  - echo nameserver 8.8.8.8 >> /etc/resolv.conf
+# Docker
   - apt-get update
   - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common wget unzip
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
@@ -112,19 +105,14 @@ runcmd:
   - apt-get update
   - apt-get install -y {{ docker_package }}
   - systemctl enable docker
-
   # Install Docker Compose
-
   - curl -L https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
   - chmod +x /usr/local/bin/docker-compose
-  
-  # Connect to Swarm
-
+# Connect to Swarm
   - wget --retry-connrefused -qO /tmp/swarm_join {{ ansible_default_ipv4.address }}:2375/v1.26/swarm
   - export TOKEN=$(grep -Eo 'SWMTKN-[[:alnum:]]*-[[:alnum:]]*-[[:alnum:]]*' /tmp/swarm_join | head -1)
   - docker swarm join --token $TOKEN {{ ansible_default_ipv4.address }}:2377
 
-  # Infra services start
-
+# Infra services start
   - export IP=$(hostname -I | cut -d\  -f1)
   - docker-compose -f /etc/micado/docker-compose.yml up -d
