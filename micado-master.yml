@@ -2,13 +2,6 @@
 - name: Deploy MiCADO master (and spawn a worker...)
   hosts: micado-master
 
-  pre_tasks:
-    - name: Verify Ansible meets the version requirements (>=2.2).
-      assert:
-        that: "ansible_version.full is version_compare('2.2', '>=')"
-        msg: >
-          "You must update Ansible to at least 2.2. Use update-ansible.yml."
-
   roles:
     - micado-master
 
@@ -17,10 +10,12 @@
     - docker_compose_version: 1.16.1
     - docker_images:
         alertmanager: prom/alertmanager:v0.12.0
+        cadvisor: google/cadvisor:v0.28.3
         consul: consul:1.0.0
         dashboard: micado/dashboard:0.1.0
         dockervisualizer: jaydes/dockerviz:min-refresh
         grafana: grafana/grafana:5.1.0
+        node_exporter: prom/node-exporter:v0.15.2
         occopus: micado/occopus:1.6-rc1
         policykeeper: micado/policykeeper:0.1-dev-frame
         prometheus: prom/prometheus:v2.1.0
@@ -29,4 +24,3 @@
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
     - grafana_admin_pwd: secret
     - micado_master_name: micado-master
-    
