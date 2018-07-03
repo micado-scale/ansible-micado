@@ -3,11 +3,13 @@
   git:
     repo: https://github.com/micado-scale/component-policy-keeper.git
     dest: /var/lib/micado/policykeeper/src
+    version: "{{github_versions.policykeeper}}"
 
 - name: "Start MiCADO: Clone tosca-submitter"
   git:
     repo: https://github.com/micado-scale/component_submitter.git
     dest: /var/lib/micado/toscasubmitter/src
+    version: "{{github_versions.toscasubmitter}}"
 
 - name: "Start MiCADO: Docker compose up"
   docker_service:

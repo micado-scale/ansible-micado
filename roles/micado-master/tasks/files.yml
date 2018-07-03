@@ -31,6 +31,15 @@
     dest: /var/lib/micado/prometheus/config/prometheus.yml
     mode: 0644
 
+- name: "Prometheus data: Create directory"
+  file:
+    path: /var/lib/micado/prometheus/data/
+    state: directory
+    owner: nobody
+    group: nogroup
+    mode: 0775
+    recurse: yes
+
 - name: "Alertmanager config: Create directory"
   file:
     path: /var/lib/micado/alertmanager/config/
