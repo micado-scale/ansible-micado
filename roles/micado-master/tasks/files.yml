@@ -137,7 +137,7 @@
     mode: 0775
     recurse: yes
 
-- name: "Consul logging: Check logs"
+- name: "Consul logging: Create log output info"
   copy:
     content: "Check the logs by the following command:\ndocker logs consul\n"
     dest: /var/log/micado/consul/README
@@ -150,7 +150,7 @@
     mode: 0775
     recurse: yes
 
-- name: "Prometheus logging: Check logs"
+- name: "Prometheus logging: Create log output info"
   copy:
     content: "Check the logs by the following command:\ndocker logs prometheus\n"
     dest: /var/log/micado/prometheus/README
@@ -163,7 +163,7 @@
     mode: 0775
     recurse: yes
 
-- name: "Alertmanager logging: Check logs"
+- name: "Alertmanager logging: Create log output info"
   copy:
     content: "Check the logs by the following command:\ndocker logs alertmanager\n"
     dest: /var/log/micado/alertmanager/README
@@ -176,7 +176,7 @@
     mode: 0775
     recurse: yes
 
-- name: "Dashboard logging: Check logs"
+- name: "Dashboard logging: Create log output info"
   copy:
     content: "Check the logs by the following command:\ndocker logs micado-dashboard\n"
     dest: /var/log/micado/dashboard/README
@@ -189,7 +189,7 @@
     mode: 0775
     recurse: yes
 
-- name: "Visualizer logging: Check logs"
+- name: "Visualizer logging: Create log output info"
   copy:
     content: "Check the logs by the following command:\ndocker logs dockervisualizer\n"
     dest: /var/log/micado/visualizer/README

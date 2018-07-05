@@ -1,0 +1,17 @@
+---
+- name: Waiting for automatic security updates
+  script: files/misc/wait-updates.sh
+
+- name: Ensure Google DNS server added
+  lineinfile:
+    path: /etc/resolv.conf
+    line: 'nameserver 8.8.8.8'
+
+- name: Change hostname
+  hostname:
+    name: "{{ micado_master_name }}"
+
+- name: Ensure that the hostfile contains the actual hostname
+  lineinfile:
+    path: /etc/hosts
+    line: "127.0.0.1\tlocalhost\t{{ micado_master_name }}"

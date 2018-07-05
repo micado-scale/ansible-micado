@@ -46,6 +46,7 @@
   action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=present"
   with_items:
     - python-setuptools
+    - python3-pip
 
 - name: 'Docker-compose: Install dependencies'
   easy_install:
