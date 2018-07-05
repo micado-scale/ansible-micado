@@ -1,6 +1,24 @@
 ---
-- name: Deploy MiCADO master (and spawn a worker...)
+- name: Deploy MiCADO master
   hosts: micado-master
+  gather_facts: False
+
+  pre_tasks:
+    - name: Ensure that python3 installed
+      raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
+      register: output
+      changed_when: output.stdout != ""
+
+    - name: Turn back gather_fact
+      setup:
+
+    - name: Verify OS meets the version requirements (Ubuntu 16.04).
+      assert:
+        that:
+          - "ansible_os_family == 'Debian'"
+          - "ansible_distribution_version is version('16.04', '==')"
+        msg: >
+          "The required OS is Ubuntu 16.04"
 
   roles:
     - micado-master

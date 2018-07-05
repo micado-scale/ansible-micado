@@ -1,5 +1,5 @@
 ---
-- name: Wait for automatic security updates
+- name: Waiting for automatic security updates
   script: files/misc/wait-updates.sh
 
 - name: Ensure Google DNS server added
