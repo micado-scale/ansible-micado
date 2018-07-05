@@ -176,7 +176,7 @@
     mode: 0775
     recurse: yes
 
-- name: "Dashboard logging: Check logs"
+- name: "Dashboard logging: Create log output info"
   copy:
     content: "Check the logs by the following command:\ndocker logs micado-dashboard\n"
     dest: /var/log/micado/dashboard/README
