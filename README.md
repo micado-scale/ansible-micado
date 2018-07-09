@@ -1,4 +1,20 @@
-# Deploy Micado with Ansible
+# Ansible MiCADO
+
+## Table of Contents
+* [Overview](#overview)
+* [Deployment](#deployment)
+* [Prerequisites](#prerequisites)
+* [Installation](#installation)
+* [Health checking](#health-checking)
+* [Monitoring](#monitoring)
+* [Demo](#demo)
+* [REST API](#rest-api)
+* [TOSCA file](#tosca-file)
+
+## Overview
+
+
+## Deployment
 
 There are 3 different roles for machines in this scenario:
  - Controller machine: a machine from which you control the MiCADO service installation
@@ -80,6 +96,7 @@ At the end of the deployment, core MiCADO services will be running on the MiCADO
 ## Monitoring
 
 MiCADO exposes the following webpages:
+
 - Dashboard:
 ```http://IP:4000```
 - Prometheus:
@@ -89,7 +106,7 @@ MiCADO exposes the following webpages:
 - Grafana:
 ```http://IP:3000/d/micado```
 
-## Testing
+## Demo
 
 You can find test application(s) under the subdirectories of the 'testing' directory. The current tests are written for CloudSigma.
 
@@ -103,3 +120,7 @@ You can find test application(s) under the subdirectories of the 'testing' direc
   - Step4a: run ```2-list-apps.sh``` to see currently running applications and their IDs
   - Step5: run ```3-update-tosca-stressng.sh stressng``` to update the service and reduce the CPU load. Observe the scaledown response.
   - Step6: run ```4-undeploy-with-id.sh stressng``` to remove the stressng stack and all the MiCADO worker nodes
+
+## REST API
+
+## TOSCA file
