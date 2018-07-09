@@ -1,20 +1,34 @@
-# Deploy Micado with Ansible
+# Ansible MiCADO
+
+## Table of Contents
+
+* [Introduction](#introduction)
+* [Deployment](#deployment)
+* [Dashboard](#dashboard)
+* [REST API](#rest-api)
+* [TOSCA description](#tosca-description)
+* [Demo application](#demo-application)
+
+## Introduction
+
+
+## Deployment
 
 There are 3 different roles for machines in this scenario:
  - Controller machine: a machine from which you control the MiCADO service installation
  - MiCADO master machine: preferebly a virtual machine in cloud on which you will install the core MiCADO services
  - MiCADO worker machine(s): further virtual machine(s) in cloud which will be automatically launched by the core MiCADO services
 
-## Prerequisites
+### Prerequisites
 
  - All 3 type of machines should be Ubuntu 16.04
  - Installed ansible and git is needed on the Controller machine
 
-## Installation
+### Installation
 
 Perform the following steps on the Controller machine:
 
-### Step 1: Download the Micado ansible playbook
+#### Step 1: Download the Micado ansible playbook
 
 ```
 git clone https://github.com/micado-scale/ansible-micado.git ansible-micado
@@ -22,14 +36,14 @@ cd ansible-micado
 git checkout master
 ```
 
-### Step 2: Specify details for instantiating MiCADO worker nodes
+#### Step 2: Specify details for instantiating MiCADO worker nodes
 
 ```
 cp sample-credentials.yml credentials.yml
 ```
 Edit credentials.yml to add all cloud-related information for worker instantiation.
 
-#### Optional: Specify details for Docker login and private Docker repositories
+##### Optional: Specify details for Docker login and private Docker repositories
 
 ```
 cp sample-docker-cred.yml docker-cred.yml
@@ -37,36 +51,36 @@ cp sample-docker-cred.yml docker-cred.yml
 Edit docker-cred.yml and add username, password, and repository url.
 To login to the default docker_hub, leave DOCKER_REPO as is (a blank string).
 
-### Step 3: Launch an empty cloud VM instance on which core MiCADO services will be installed
+#### Step 3: Launch an empty cloud VM instance on which core MiCADO services will be installed
 
 Use any of aws, ec2, nova command-line tools or web interface of the target cloud. Make sure you can ssh to it (without password) and your user is a sudoer. Store its IP address which will be referred as `IP` in the following steps.
 
-### Step 4: Make sure python 2.7 is installed on the MiCADO master machine
+#### Step 4: Make sure python 2.7 is installed on the MiCADO master machine
 
 ```
 ssh <IP> sudo apt-get --yes install python
 ```
 
-### Step 5: Set target machine in the 'hosts' file
+#### Step 5: Set target machine in the 'hosts' file
 
 ```
 cp sample-hosts hosts
 ```
 Edit the `hosts` file (on the Cotnroller machine) to set ansible variables like host, connection, user, etc. for MiCADO master machine. Do not forget to set `ansible_host=<IP>` and `ansible_connection=ssh`.
 
-### Step 6: Update ansible on the MiCADO master node
+#### Step 6: Update ansible on the MiCADO master node
 
 ```
 ansible-playbook -i hosts update-ansible.yml
 ```
 
-### Step 7: Launch the installation of core MiCADO services
+#### Step 7: Launch the installation of core MiCADO services
 
 ```
 ansible-playbook -i hosts micado-master.yml
 ```
 
-## Health checking
+### Health checking
 
 At the end of the deployment, core MiCADO services will be running on the MiCADO master machine. Here are the commands to test the operation of some of the core MiCADO services:
 
@@ -77,9 +91,10 @@ At the end of the deployment, core MiCADO services will be running on the MiCADO
 - Prometheus
 ```curl -s http://IP:9090/api/v1/status/config | jq '.status'```
 
-## Monitoring
+## Dashboard
 
 MiCADO exposes the following webpages:
+
 - Dashboard:
 ```http://IP:4000```
 - Prometheus:
@@ -89,7 +104,11 @@ MiCADO exposes the following webpages:
 - Grafana:
 ```http://IP:3000/d/micado```
 
-## Testing
+## REST API
+
+## TOSCA description
+
+## Demo application
 
 You can find test application(s) under the subdirectories of the 'testing' directory. The current tests are written for CloudSigma.
 
