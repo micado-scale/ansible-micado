@@ -6,6 +6,28 @@
     file: "credentials.yml"
     name: config
 
+- name: 'Installing packages'
+  apt:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - apt-transport-https # TODO: Docker part will install this
+    - ca-certificates # TODO: Docker part will install this
+    - curl 
+    - software-properties-common 
+    - wget 
+    - unzip 
+    - jq 
+    - dnsmasq
+
+- name: 'Installing mictl dependencies'
+  pip:
+    name:
+      - requests
+      - click
+      - terminaltables
+    state: present
+
 - include: docker-install.yml
 
 - include: files.yml
