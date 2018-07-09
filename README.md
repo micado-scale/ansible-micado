@@ -2,14 +2,14 @@
 
 ## Table of Contents
 
-* [Inroduction](#inroduction)
+* [Introduction](#introduction)
 * [Deployment](#deployment)
 * [Dashboard](#dashboard)
 * [REST API](#rest-api)
 * [TOSCA description](#tosca-description)
 * [Demo application](#demo-application)
 
-## Inroduction
+## Introduction
 
 
 ## Deployment
