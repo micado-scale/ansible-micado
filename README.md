@@ -115,27 +115,42 @@ MiCADO exposes the following webpages:
 ## REST API
 
 - To launch an application from a file that you pass to the api you can use one of the following curl command line:
-    - ```curl -F file=@[Path to the File] -X POST http://[IP]:[Port]/v1.0/app/launch/file/```
-    - ```curl -F file=@[Path to the File] -F id=[SOMEID]  -X POST http://[IP]:[Port]/v1.0/app/launch/file/```
+```
+curl -F file=@[Path to the File] -X POST http://[IP]:[Port]/v1.0/app/launch/file/
+```
+```
+curl -F file=@[Path to the File] -F id=[SOMEID]  -X POST http://[IP]:[Port]/v1.0/app/launch/file/
+```
 
 - To launch an application from an url you can use one of the following curl command line:
-    - ```curl -d input="[url to TOSCA Template]" -X POST http://[IP]:[Port]/v1.0/app/launch/url/```
-    - ```curl -d input="[url to TOSCA Template]" -d id=[ID] -X POST http://[IP]:[Port]/v1.0/app/launch/url/```
+```
+curl -d input="[url to TOSCA Template]" -X POST http://[IP]:[Port]/v1.0/app/launch/url/
+```
+```
+curl -d input="[url to TOSCA Template]" -d id=[ID] -X POST http://[IP]:[Port]/v1.0/app/launch/url/
+```
 
 - To update from a file a wanted application you can use one of this following curl command:
-```curl -F file=@"[Path to the file]" -X PUT http://[IP]:[Port]/v1.0/app/udpate/file/[ID_APP]```
-
+```
+curl -F file=@"[Path to the file]" -X PUT http://[IP]:[Port]/v1.0/app/udpate/file/[ID_APP]
+```
 - To update from an url a wanted application you can use one of this following curl command:
-```curl -d input="[url to TOSCA template]" -X PUT http://[IP]:[Port]/v1.0/app/udpate/file/[ID_APP]```
+```
+curl -d input="[url to TOSCA template]" -X PUT http://[IP]:[Port]/v1.0/app/udpate/file/[ID_APP]
+```
 
 - To undeploy a wanted application you need to feed it the id:
-```curl -X DELETE http://[IP]:[Port]/v1.0/app/undeploy/[ID_APP]```
-
+```
+curl -X DELETE http://[IP]:[Port]/v1.0/app/undeploy/[ID_APP]
+```
 - To get the ids of the application deployed and its information related:
-```curl -X GET http://[IP]:[Port]/v1.0/list_app/```
-
+```
+curl -X GET http://[IP]:[Port]/v1.0/list_app/
+```
 - To get only the information for only one app:
-```curl -X GET http://[IP]:[Port]/v1.0/app/[ID_APP]```
+```
+curl -X GET http://[IP]:[Port]/v1.0/app/[ID_APP]
+```
 
 
 ## TOSCA description
@@ -210,12 +225,10 @@ topology_template:
 The properties are based on the original docker-compose file fields. Therefore, you could find more information about the properties in the [docker compose documentation](https://docs.docker.com/compose/compose-file/#service-configuration-reference).
 Under the DOCKER_SERVICE properties field you can add your docker service specific properties:
 - **command**: command line expression to be executed by the container.
-- **configs**: ?
 - **deploy**: Swarm specific deployment options.
 - **entrypoint**: Override the default entrypoint of container.
 - **environment**: Map of all required environment variables.
 - **expose**: Expose ports without publishing them to the host machine.
-- **image**: ?
 - **labels**: Map of metadata like Docker labels.
 - **logging**: Map of the logging configuration.
 - **networks**: List of connected networks for the service.
@@ -227,8 +240,6 @@ Optionally, you can define docker networks under the DOCKER_NETWORK section. You
 
 - **attachable**: If set to true, then standalone containers can attach to this network, in addition to services
 - **driver**: Specify which driver should be used for this network. (overlay, bridge, etc.)
-- **ip_version**: ?
-- **dhcp_enabled**: ?
 
 ### Virtual Machine description
 The TOSCA template occopus relevant part looks like this.
