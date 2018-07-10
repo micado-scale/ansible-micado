@@ -14,9 +14,10 @@
 
 - include: docker-pull-images.yml
 
-- include: start_micado.yml
-
 - include: docker-login.yml
 
 - name: Enable packet filtering
   shell: systemctl enable --now iptables
+
+- name: Enable and start MiCADO systemd service
+  shell: systemctl enable --now micado

@@ -249,3 +249,10 @@
     src: iptables/iptables.service
     dest: /etc/systemd/system/iptables.service
     mode: 0644
+
+- name: "MiCADO systemd unit file: Copy file"
+  copy:
+    src: micado/micado.service
+    dest: /etc/systemd/system/micado.service
+    mode: 0644
+
