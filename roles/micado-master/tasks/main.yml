@@ -17,3 +17,6 @@
 - include: start_micado.yml
 
 - include: docker-login.yml
+
+- name: Enable packet filtering
+  shell: systemctl enable --now iptables

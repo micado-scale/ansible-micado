@@ -238,3 +238,14 @@
     src: docker/docker-compose.yml.j2
     dest: /var/lib/micado/docker-compose.yml
     mode: 0644
+
+- name: "Iptables configuration: Copy file"
+  copy:
+    src: iptables/iptables.conf
+    dest: /etc/iptables.conf
+    mode: 0640
+- name: "Iptables systemd unit file: Copy file"
+  copy:
+    src: iptables/iptables.service
+    dest: /etc/systemd/system/iptables.service
+    mode: 0644

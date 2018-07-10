@@ -133,3 +133,11 @@ services:
     volumes:
       - "/var/lib/micado/zorp/config/:/etc/zorp/"
       - "/var/lib/micado/zorp/scripts/:/app/"
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.31.0.0/16
