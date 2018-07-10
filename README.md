@@ -11,12 +11,20 @@
 
 ## Introduction
 
+MiCADO is an auto-scaling framework for Docker applications. It supports autoscaling at two levels. At virtual machine (VM) level, a built-in Docker Swarm cluster is dynamically extended or reduced by adding/removing cloud virtual machines. At docker service level, the number of replicas implementing a Docker Service can be increased/decreased.
+
+MiCADO requires a TOSCA based Application Description to be submitted containing three sections: 1) the definition of the interconnected Docker services, 2) the specification of the virtual machine and 3) the implementation of scaling policy for both scaling levels. The format of the Application Description for MiCADO is detailed later.
+
+To use MiCADO, first the MiCADO core services must be deployed on a virtual machine (called MiCADO Master) by an Ansible playbook. MiCADO Master contains Docker engine (configured as Swarm manager), Occopus (to scale VMs), Prometheus (for monitoring), Policy Keeper (to perform decision on scaling) and Submitter (to provide submission endpoint) microservices to realize the autoscaling control loops. During operation MiCADO workers (realised on new VMs) are instantiated on demand which deploy Prometheus Node Exporter, CAdvisor and Docker engine through contextualisation. The Docker engine of the newly instantiated MiCADO workers joins the Swarm manager on the MiCADO Master.
+
+In the current release, the status of the system can be inspected through the following ways: REST API provides interface for submission, update and list functionalities over applications. Dashboard provides three graphical view to inspect the VMs and Docker services. They are Docker Visualizer, Grafana and Prometheus. Finally, advanced users may find the logs of the MiCADO core services useful on MiCADO master.
+
 
 ## Deployment
 
 There are 3 different roles for machines in this scenario:
  - Controller machine: a machine from which you control the MiCADO service installation
- - MiCADO master machine: preferebly a virtual machine in cloud on which you will install the core MiCADO services
+ - MiCADO master machine: preferably a virtual machine in cloud on which you will install the core MiCADO services
  - MiCADO worker machine(s): further virtual machine(s) in cloud which will be automatically launched by the core MiCADO services
 
 ### Prerequisites
@@ -106,7 +114,222 @@ MiCADO exposes the following webpages:
 
 ## REST API
 
+- To launch an application from a file that you pass to the api you can use one of the following curl command line:
+    - ```curl -F file=@[Path to the File] -X POST http://[IP]:[Port]/v1.0/app/launch/file/```
+    - ```curl -F file=@[Path to the File] -F id=[SOMEID]  -X POST http://[IP]:[Port]/v1.0/app/launch/file/```
+
+- To launch an application from an url you can use one of the following curl command line:
+    - ```curl -d input="[url to TOSCA Template]" -X POST http://[IP]:[Port]/v1.0/app/launch/url/```
+    - ```curl -d input="[url to TOSCA Template]" -d id=[ID] -X POST http://[IP]:[Port]/v1.0/app/launch/url/```
+
+- To update from a file a wanted application you can use one of this following curl command:
+```curl -F file=@"[Path to the file]" -X PUT http://[IP]:[Port]/v1.0/app/udpate/file/[ID_APP]```
+
+- To update from an url a wanted application you can use one of this following curl command:
+```curl -d input="[url to TOSCA template]" -X PUT http://[IP]:[Port]/v1.0/app/udpate/file/[ID_APP]```
+
+- To undeploy a wanted application you need to feed it the id:
+```curl -X DELETE http://[IP]:[Port]/v1.0/app/undeploy/[ID_APP]```
+
+- To get the ids of the application deployed and its information related:
+```curl -X GET http://[IP]:[Port]/v1.0/list_app/```
+
+- To get only the information for only one app:
+```curl -X GET http://[IP]:[Port]/v1.0/app/[ID_APP]```
+
+
 ## TOSCA description
+
+The main structure of the TOSCA description:
+
+```
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - https://raw.githubusercontent.com/micado-scale/tosca/master/micado_types.yaml
+
+repositories:
+  docker_hub: https://hub.docker.com/
+
+topology_template:
+  node_templates:
+    ADD_YOUR_DOCKER_SERVICE:
+          type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+            ...
+          artifacts:
+            ...
+
+    ADD_YOUR_VIRTUAL_MACHINE:
+          type: tosca.nodes.MiCADO.Occopus.<CLOUD_API_TYPE>.Compute
+      properties:
+        cloud:
+          interface_cloud: ...
+          endpoint_cloud: ...
+      capabilities:
+        host:
+          properties:
+                    ...
+
+  policies:
+  - scalability:
+    type: tosca.policies.Scaling.MiCADO
+    targets: [ ADD_YOUR_VIRTUAL_MACHINE ]
+        properties:
+      ...
+
+  - scalability:
+    type: tosca.policies.Scaling.MiCADO
+    targets: [ ADD_YOUR_DOCKER_SERVICE ]
+        properties:
+      ...
+```
+
+### Docker based application description
+
+The TOSCA template Docker relevnat part has a following structure:
+
+```
+topology_template:
+  node_templates:
+    ADD_YOUR_DOCKER_SERVICE:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+         ...
+      artifacts:
+       image:
+         type: tosca.artifacts.Deployment.Image.Container.Docker
+         file: ADD_YOUR_DOCKER_IMAGE
+         repository: docker_hub
+    ADD_YOUR_DOCKER_NETWORK:
+      type: tosca.nodes.MiCADO.network.Network.Docker
+      properties:
+        ...
+```
+
+The properties are based on the original docker-compose file fields. Therefore, you could find more information about the properties in the [docker compose documentation](https://docs.docker.com/compose/compose-file/#service-configuration-reference).
+Under the DOCKER_SERVICE properties field you can add your docker service specific properties:
+- **command**: command line expression to be executed by the container.
+- **configs**: ?
+- **deploy**: Swarm specific deployment options.
+- **entrypoint**: Override the default entrypoint of container.
+- **environment**: Map of all required environment variables.
+- **expose**: Expose ports without publishing them to the host machine.
+- **image**: ?
+- **labels**: Map of metadata like Docker labels.
+- **logging**: Map of the logging configuration.
+- **networks**: List of connected networks for the service.
+- **volumes**: List of connected volumes for the service.
+- **ports**: List of published ports to the host machine.
+- **secrets**: List of per-service secrets to grant access for the service.
+
+Optionally, you can define docker networks under the DOCKER_NETWORK section. You can set the following fields for the docker network:
+
+- **attachable**: If set to true, then standalone containers can attach to this network, in addition to services
+- **driver**: Specify which driver should be used for this network. (overlay, bridge, etc.)
+- **ip_version**: ?
+- **dhcp_enabled**: ?
+
+### Virtual Machine description
+The TOSCA template occopus relevant part looks like this.
+
+```
+topology_template:
+  node_templates:
+    worker_node:
+      type: ADD_YOUR_TOSCA_NODES_TYPE
+      properties:
+        cloud:
+          interface_cloud: SELECT_YOUR_INTERFACE_TYPE
+          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g for cloudsigma https://zrh.cloudsigma.com/api/2.0 )
+      capabilities:
+        host:
+          properties:
+
+            [NOVA]
+
+            image_id: ADD_YOUR_ID_HERE
+            flavor_name: ADD_YOUR_ID_HERE
+            project_id: ADD_YOUR_ID_HERE
+            network_id: ADD_YOUR_ID_HERE
+
+            [CLOUDBROKER]
+
+            deployment_id: ADD_YOUR_ID_HERE
+            instance_type_id: ADD_YOUR_ID_HERE
+
+            [EC2]
+
+            region_name: ADD_YOUR_REGION_NAME_HERE
+            image_id: ADD_YOUR_ID_HERE
+            instance_type: ADD_YOUR_INSTANCE_TYPE_HERE
+
+            [CLOUDSIGMA]
+
+            num_cpus: ADD_NUM_CPUS_FREQ
+            mem_size: ADD_MEM_SIZE
+            vnc_password: ADD_YOUR_PW
+            libdrive_id: ADD_YOUR_ID_HERE
+            public_key_id: ADD_YOUR_ID_HERE
+            firewall_policy: ADD_YOUR_ID_HERE
+```
+
+Currently we support 4 cloud interface which could be one of the following:
+- tosca.nodes.MiCADO.Occopus.EC2.Compute
+- tosca.nodes.MiCADO.Occopus.Nova.Compute
+- tosca.nodes.MiCADO.Occopus.CloudSigma.Compute
+- tosca.nodes.MiCADO.Occopus.CloudBroker.Compute
+
+It follows that the interface is one of them:
+- ec2
+- nova
+- cloudsigma
+- cloudbroker
+
+Under the properties field, you can add your cloudspecific properties. There are some required, and the others are optional. See more details below.
+
+
+The Occopus adaptor **requires** region_name, image_id and instance_type to create a valid *EC2* node definition. You could also give some other properties to extends your description. The properties could be found below.
+
+- **region_name** is the region name within an EC2 cloud (e.g. eu-west-1).
+- **image_id** is the image id (e.g. ami-12345678) on your EC2 cloud. Select an image containing a base os installation with cloud-init support!
+- **instance_type** is the instance type (e.g. t1.small) of your VM to be instantiated.
+- **key_name** optionally specifies the keypair (e.g. my_ssh_keypair) to be deployed on your VM.
+- **security_groups_ids** optionally specify security settings (you can define multiple security groups in the form of a list, e.g. sg-93d46bf7) of your VM.
+- **subnet_id** optionally specifies subnet identifier (e.g. subnet-644e1e13) to be attached to the VM.
+
+
+The Occopus adaptor **requires** image_id flavor_name, project_id and network_id to create a valid *Nova* node definition. You could also give some other properties to extends your description. The properties could be found below.
+
+- **project_id** is the id of project you would like to use on your target Nova cloud.
+- **image_id** is the image id on your Nova cloud. Select an image containing a base os installation with cloud-init support!
+- **flavor_name** is the name of flavor to be instantiated on your Nova cloud.
+- **server_name** optionally defines the hostname of VM (e.g.:”helloworld”).
+- **key_name** optionally sets the name of the keypair to be associated to the instance. Keypair name must be defined on the target nova cloud before launching the VM.
+- **security_groups** optionally specify security settings (you can define multiple security groups in the form of a list) for your VM.
+- **network_id** is the id of the network you would like to use on your target Nova cloud.
+
+The Occopus adaptor **requires** deployment_id and instance_type_id to create a valid *CloudBroker* node definition. You could also give some other properties to extends your description. The properties could be found below.
+
+- **deployment_id** is the id of a preregistered deployment in CloudBroker referring to a cloud, image, region, etc. Make sure the image contains a base os (preferably Ubuntu) installation with cloud-init support! The id is the UUID of the deployment which can be seen in the address bar of your browser when inspecting the details of the deployment.
+- **instance_type_id** is the id of a preregistered instance type in CloudBroker referring to the capacity of the virtual machine to be deployed. The id is the UUID of the instance type which can be seen in the address bar of your browser when inspecting the details of the instance type.
+- **key_pair_id** is the id of a preregistered ssh public key in CloudBroker which will be deployed on the virtual machine. The id is the UUID of the key pair which can be seen in the address bar of your browser when inspecting the details of the key pair.
+- **opened_port** is one or more ports to be opened to the world. This is a string containing numbers separated by a comma.
+
+
+The Occopus adaptor **requires** libdrive_id, num_cpus, mem_size, vnc_password and public_key_id to create a valid *CloudSigma* node definition. You could also give some other properties to extends your description. The properties could be found below.
+
+
+- **libdrive_id** is the image id (e.g. 40aa6ce2-5198-4e6b-b569-1e5e9fbaf488) on your CloudSigma cloud. Select an image containing a base os installation with cloud-init support!
+- **num_cpu** is the speed of CPU (e.g. 2000) in terms of MHz of your VM to be instantiated. The CPU frequency required to be between 250 and 100000
+- **mem_size** is the amount of RAM (e.g. 1073741824) in terms of bytes to be allocated for your VM. The memory required to be between 268435456 and 137438953472
+- **vnc_password** set the password for your VNC session.
+- **public_key_id** specifies the keypairs (e.g. f80c3ffb-3ab5-461e-ad13-4b253da122bd) to be assigned to your VM.
+- **firewall_policy** optionally specifies network policies (you can define multiple security groups in the form of a list, e.g. 8cd00652-c5c8-4af0-bdd6-0e5204c66dc5) of your VM.
+
+### Policy description
+
+
 
 ## Demo application
 
