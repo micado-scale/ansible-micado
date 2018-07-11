@@ -64,7 +64,7 @@ To login to the default docker_hub, leave DOCKER_REPO as is (a blank string).
 
 #### Step 4: Launch an empty cloud VM instance for MiCADO master.
 
-This new VM will host the MiCADO master core services. Use any of aws, ec2, nova, etc command-line tools or web interface of your target cloud to launch a new VM. We recommend a VM with 2 cores, 4GB RAM, 100GB disk. Make sure you can ssh to it (password-free i.e. ssh public key is deployed) and your user is able to sudo (to install MiCADO as root). Store its IP address which will be referred as `IP` in the following steps. 
+This new VM will host the MiCADO master core services. Use any of aws, ec2, nova, etc command-line tools or web interface of your target cloud to launch a new VM. We recommend a VM with 2 cores, 4GB RAM, 20GB disk. Make sure you can ssh to it (password-free i.e. ssh public key is deployed) and your user is able to sudo (to install MiCADO as root). Store its IP address which will be referred as `IP` in the following steps. 
 
 #### Step 5: Customize the inventory file for the MiCADO master.
 
@@ -73,7 +73,7 @@ We recommend to make a copy of our predefined template and edit it. Use the temp
 cp sample-hosts hosts
 vi hosts
 ```
-Edit the `hosts` file to set ansible variables for MiCADO master machine. Update the following parameters: ansible_host=<IP>, ansible_connection=ssh and ansible_user=<YOUR SUDOER ACCOUNT>. Please, revise the other parameters as well, however in most cases the default values are correct.
+Edit the `hosts` file to set ansible variables for MiCADO master machine. Update the following parameters: ansible_host=*IP*, ansible_connection=*ssh* and ansible_user=*YOUR SUDOER ACCOUNT*. Please, revise the other parameters as well, however in most cases the default values are correct.
 
 #### Step 6: Start the installation of MiCADO master.
 
