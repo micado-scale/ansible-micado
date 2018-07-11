@@ -86,74 +86,75 @@ ansible-playbook -i hosts micado-master.yml
 At the end of the deployment, core MiCADO services will be running on the MiCADO master machine. Here are the commands to test the operation of some of the core MiCADO services:
 
 - Occopus:
-```curl -s -X GET http://IP:5000/infrastructures```
+```curl -s -X GET http://IP:5000/infrastructures/```
 - Swarm
 ```curl -s http://IP:2375/swarm | jq '.JoinTokens'```
 - Prometheus
 ```curl -s http://IP:9090/api/v1/status/config | jq '.status'```
+- Alternatively, you can ssh into MiCADO master and check the logs under ```/var/log/micado```. Scaling decisions can be inspected under policykeeper.
 
 ## Dashboard
 
-MiCADO exposes the following webpages:
+MiCADO has a simple dashboard that collects web-based user interfaces into a single view. To access the Dashboard, visit ```http://IP:4000```.
 
-- Dashboard:
-```http://IP:4000```
-- Prometheus:
-```http://IP:9090```
-- Docker visualizer:
-```http://IP:8080```
-- Grafana:
-```http://IP:3000/d/micado```
+The following webpages are currently exposed:
+- Docker visualizer: it graphically visualize the Swarm nodes and the containers running on them.
+- Grafana: graphically visualize the resources (nodes, containers) in time.
+- Prometheus: monitoring subsystem. Recommended for developers, experts.
 
 ## REST API
 
-- To launch an application from a file that you pass to the api you can use one of the following curl command line:
-```
-curl -F file=@[Path to the File] -X POST http://[IP]:[Port]/v1.0/app/launch/file/
-```
-```
-curl -F file=@[Path to the File] -F id=[SOMEID]  -X POST http://[IP]:[Port]/v1.0/app/launch/file/
-```
+MiCADO has a TOSCA compliant submitter to submit, update, list and remove MiCADO applications. The submitter exposes the following REST API:
 
-- To launch an application from an url you can use one of the following curl command line:
+- To launch an application specified by a TOSCA description stored locally, use this command:
 ```
-curl -d input="[url to TOSCA Template]" -X POST http://[IP]:[Port]/v1.0/app/launch/url/
+curl -F file=@[path to the TOSCA description] -X POST http://[IP]:[Port]/v1.0/app/launch/file/
 ```
+- To launch an application specified by a TOSCA description stored locally and specify an application id, use this command:
 ```
-curl -d input="[url to TOSCA Template]" -d id=[ID] -X POST http://[IP]:[Port]/v1.0/app/launch/url/
+curl -F file=@[path to the TOSCA description] -F id=[APPLICATION_ID]  -X POST http://[IP]:[Port]/v1.0/app/launch/file/
 ```
-
-- To update from a file a wanted application you can use one of this following curl command:
+- To launch an application specified by a TOSCA description stored behind a url, use this command:
 ```
-curl -F file=@"[Path to the file]" -X PUT http://[IP]:[Port]/v1.0/app/udpate/file/[ID_APP]
+curl -d input="[url to TOSCA description]" -X POST http://[IP]:[Port]/v1.0/app/launch/url/
 ```
-- To update from an url a wanted application you can use one of this following curl command:
+- To launch an application specified by a TOSCA description stored behind an url and specify an application id, use this command:
 ```
-curl -d input="[url to TOSCA template]" -X PUT http://[IP]:[Port]/v1.0/app/udpate/file/[ID_APP]
+curl -d input="[url to TOSCA description]" -d id=[ID] -X POST http://[IP]:[Port]/v1.0/app/launch/url/
 ```
-
-- To undeploy a wanted application you need to feed it the id:
+- To update a running MiCADO application using a TOSCA description stored locally, use this command:
 ```
-curl -X DELETE http://[IP]:[Port]/v1.0/app/undeploy/[ID_APP]
+curl -F file=@"[path to the TOSCA description]" -X PUT http://[IP]:[Port]/v1.0/app/udpate/file/[APPLICATION_ID]
 ```
-- To get the ids of the application deployed and its information related:
+- To update a running MiCADO application using a TOSCA description stored behind a url, use this command:
+```
+curl -d input="[url to TOSCA description]" -X PUT http://[IP]:[Port]/v1.0/app/udpate/file/[APPLICATION_ID]
+```
+- To undeploy a running MiCADO application, use this command:
+```
+curl -X DELETE http://[IP]:[Port]/v1.0/app/undeploy/[APPLICATION_ID]
+```
+- To query all the running MiCADO applications, use this command:
 ```
 curl -X GET http://[IP]:[Port]/v1.0/list_app/
 ```
-- To get only the information for only one app:
+- To query one running MiCADO application, use this command:
 ```
-curl -X GET http://[IP]:[Port]/v1.0/app/[ID_APP]
+curl -X GET http://[IP]:[Port]/v1.0/app/[APPLICATION_ID]
 ```
 
 
 ## TOSCA description
 
-The main structure of the TOSCA description. The TOSCA decrpiton has four main part:
-- **tosca_definitions_version**: fix value: ```tosca_simple_yaml_1_0```
-- **imports**: A list of other TOSCA definitions. We used it to import our custom definied TOSCA types.
-- **repositories**: Map of the defined repositories and their addresses.
-- **topology_template**: The main part of the TOSCA description to define the application which will be deployed in MiCADO. This section is consist of two main other parts the **node_templates** and the **policies**. This sections will be detaild in the following sections.
+MiCADO requires a description of an application to be executed in TOSCA format. This section details the structure of the application description. 
 
+Applciation decrpiton has four main parts:
+- **tosca_definitions_version**: fix value: ```tosca_simple_yaml_1_0```.
+- **imports**: a list of urls pointing to custom TOSCA types. The default url points to the custom types defined for MiCADO. Please, do not modify this url.
+- **repositories**: docker repositories with their addresses.
+- **topology_template**: the main part of the application description to define 1) docker services, 2) virtual machine (under the **node_templates** section) and 3) the scaling policy under the **policies** subsection. These sections will be detailed in subsections below.
+
+Here is an overview of the structure of the MiCADO application description:
 ```
 tosca_definitions_version: tosca_simple_yaml_1_0
 
@@ -166,14 +167,25 @@ repositories:
 topology_template:
   node_templates:
     YOUR_DOCKER_SERVICE:
-          type: tosca.nodes.MiCADO.Container.Application.Docker
+      type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
-            ...
-          artifacts:
-            ...
+        ...
+      artifacts:
+        ...
+    ...
+    YOUR_OTHER_DOCKER_SERVICE:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+        ...
+      artifacts:
+        ...
+    YOUR_DOCKER_NETWORK:
+      type: tosca.nodes.MiCADO.network.Network.Docker
+      properties:
+        ...
 
     YOUR_VIRTUAL_MACHINE:
-          type: tosca.nodes.MiCADO.Occopus.<CLOUD_API_TYPE>.Compute
+      type: tosca.nodes.MiCADO.Occopus.<CLOUD_API_TYPE>.Compute
       properties:
         cloud:
           interface_cloud: ...
@@ -181,25 +193,29 @@ topology_template:
       capabilities:
         host:
           properties:
-                    ...
+            ...
 
   policies:
   - scalability:
     type: tosca.policies.Scaling.MiCADO
     targets: [ YOUR_VIRTUAL_MACHINE ]
-        properties:
+      properties:
       ...
-
   - scalability:
     type: tosca.policies.Scaling.MiCADO
     targets: [ YOUR_DOCKER_SERVICE ]
-        properties:
-      ...
+      properties:
+        ...
+  - scalability:
+    type: tosca.policies.Scaling.MiCADO
+    targets: [ YOUR_OTHER_DOCKER_SERVICE ]
+      properties:
+        ...
 ```
 
-### Docker based application description
+### Specification of Docker services
 
-The TOSCA template Docker relevnat part has a following structure. Under the node_templates section you can define one docker service. One docker service definiton is consit of three main part: type, properties, artifacts. The type has a fix value: ```tosca.nodes.MiCADO.Container.Application.Docker```. The properties section will be discussed later. Under the artifacts section you could define the docker image for the service. Optionally, you can define docker networks under the YOUR_DOCKER_NETWORK section like in a docker-compose file.
+Under the node_templates section you can define any number of interconnected Docker service (see **YOUR_DOCKER_SERVICE**) similarly as in a docker-compose file. Each docker service definition consists of three main parts: type, properties and artifacts. The value of the **type** keyword for a Docker service must always be ```tosca.nodes.MiCADO.Container.Application.Docker```. The **properties** section will contain most of the setting of the Docker service. Under the **artifacts** section the Docker image (see **YOUR_DOCKER_IMAGE**) must be defined. Optionally, Docker networks can be defined in the same way as in a docker-compose file (see **YOUR_DOCKER_NETWORK**).
 
 ```
 topology_template:
@@ -219,35 +235,36 @@ topology_template:
         ...
 ```
 
-The properties are based on the original docker-compose file fields. Therefore, you can find more information about the properties in the [docker compose documentation](https://docs.docker.com/compose/compose-file/#service-configuration-reference). The syntax of the property values is the same as in the docker-compose file.
+The **properties** of the Docker service definition are derived from the docker-compose file. Therefore, you can additional information about the properties in the [docker compose documentation](https://docs.docker.com/compose/compose-file/#service-configuration-reference). The syntax of the property values is the same as in the docker-compose file.
 
-Under the YOUR_DOCKER_SERVICE properties section you can add your docker service specific properties. 
+Under the **properties** section of a Docker service (see **YOUR_DOCKER_SERVICE**) you can specify the following keywords: 
 - **command**: command line expression to be executed by the container.
 - **deploy**: Swarm specific deployment options.
-- **entrypoint**: Override the default entrypoint of container.
-- **environment**: Map of all required environment variables.
-- **expose**: Expose ports without publishing them to the host machine.
-- **labels**: Map of metadata like Docker labels.
-- **logging**: Map of the logging configuration.
-- **networks**: List of connected networks for the service.
-- **volumes**: List of connected volumes for the service.
-- **ports**: List of published ports to the host machine.
-- **secrets**: List of per-service secrets to grant access for the service.
+- **entrypoint**: override the default entrypoint of container.
+- **environment**: map of all required environment variables.
+- **expose**: expose ports without publishing them to the host machine.
+- **labels**: map of metadata like Docker labels.
+- **logging**: map of the logging configuration.
+- **networks**: list of connected networks for the service.
+- **volumes**: list of connected volumes for the service.
+- **ports**: list of published ports to the host machine.
+- **secrets**: list of per-service secrets to grant access for the service.
 
-Under the artifacts section you can defined the docker image for the docker service. In the image section you can define three fileds:
-- **type**: fix value: ```tosca.artifacts.Deployment.Image.Container.Docker```
-- **file**: Your docker image for the docker service. (e.g. sztakilpds/cqueue_frontend:latest )
-- **repository**: The name of the repository where the image is located. This name have to be defined in the top of the TOSCA file. (e.g. docker_hub)
+Under the **artifacts** section you can define the docker image for the docker service. Three fileds must be defined:
+- **type**: ```tosca.artifacts.Deployment.Image.Container.Docker```
+- **file**: docker image for the docker service. (e.g. sztakilpds/cqueue_frontend:latest )
+- **repository**: name of the repository where the image is located. The name used here (e.g. docker_hub), must be defined at the top of the description under the **repositories** section.
 
-Under the YOUR_DOCKER_NETWORK section you can set the following fields for the docker network:
+To define a Docker network (see **YOUR_DOCKER_NETWORK**) the following fields must be specified:
 
-- **attachable**: If set to true, then standalone containers can attach to this network, in addition to services
-- **driver**: Specify which driver should be used for this network. (overlay, bridge, etc.)
+- **attachable**: if set to true, then standalone containers can attach to this network, in addition to services
+- **driver**: specify which driver should be used for this network. (overlay, bridge, etc.)
 
 ### Virtual Machine description
-The TOSCA template occopus relevant part looks like this. Currently we support 4 cloud interface.
+The network of Docker services specified in the previos section is executed under Docker Swarm. This section introduces how virtual machines can be configured which then hosts the worker nodes of the Docker Swarm. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. The following subsections details how to configure them.
 
 #### CloudSigma
+To instantiate MiCADO workers on CloudSigma, please use the template below. MiCADO **requires** num_cpus, mem_size, vnc_password, libdrive_id and public_key_id to instantiate VM on *CloudSigma*. 
 ```
 topology_template:
   node_templates:
@@ -268,16 +285,15 @@ topology_template:
             firewall_policy: ADD_YOUR_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
 ```
 
-The Occopus adaptor **requires** libdrive_id, num_cpus, mem_size, vnc_password and public_key_id to create a valid *CloudSigma* node definition. You could also give some other properties to extends your description. The properties could be found below.
-
-- **libdrive_id** is the image id (e.g. 87ce928e-e0bc-4cab-9502-514e523783e3) on your CloudSigma cloud. Select an image containing a base os installation with cloud-init support!
 - **num_cpu** is the speed of CPU (e.g. 4096) in terms of MHz of your VM to be instantiated. The CPU frequency required to be between 250 and 100000
 - **mem_size** is the amount of RAM (e.g. 4294967296) in terms of bytes to be allocated for your VM. The memory required to be between 268435456 and 137438953472
 - **vnc_password** set the password for your VNC session (e.g. secret).
+- **libdrive_id** is the image id (e.g. 87ce928e-e0bc-4cab-9502-514e523783e3) on your CloudSigma cloud. Select an image containing a base os installation with cloud-init support!
 - **public_key_id** specifies the keypairs (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e) to be assigned to your VM.
 - **firewall_policy** optionally specifies network policies (you can define multiple security groups in the form of a list, e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d) of your VM.
 
 #### CloudBroker
+To instantiate MiCADO workers on CloudBroker, please use the template below. MiCADO **requires** deployment_id and instance_type_id to instantiate a VM on *CloudBroker*. 
 ```
 topology_template:
   node_templates:
@@ -286,7 +302,7 @@ topology_template:
       properties:
         cloud:
           interface_cloud: cloudbroker
-          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g for cloudsigma https://zrh.cloudsigma.com/api/2.0 )
+          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://cola-prototype.cloudbroker.com )
       capabilities:
         host:
           properties:
@@ -295,14 +311,13 @@ topology_template:
 
 ```
 
-The Occopus adaptor **requires** deployment_id and instance_type_id to create a valid *CloudBroker* node definition. You could also give some other properties to extends your description. The properties could be found below.
-
 - **deployment_id** is the id of a preregistered deployment in CloudBroker referring to a cloud, image, region, etc. Make sure the image contains a base os (preferably Ubuntu) installation with cloud-init support! The id is the UUID of the deployment which can be seen in the address bar of your browser when inspecting the details of the deployment.
 - **instance_type_id** is the id of a preregistered instance type in CloudBroker referring to the capacity of the virtual machine to be deployed. The id is the UUID of the instance type which can be seen in the address bar of your browser when inspecting the details of the instance type.
 - **key_pair_id** is the id of a preregistered ssh public key in CloudBroker which will be deployed on the virtual machine. The id is the UUID of the key pair which can be seen in the address bar of your browser when inspecting the details of the key pair.
 - **opened_port** is one or more ports to be opened to the world. This is a string containing numbers separated by a comma.
 
 #### EC2
+To instantiate MiCADO workers on a cloud through EC2 interface, please use the template below. MiCADO **requires** region_name, image_id and instance_type to instantiate a VM through *EC2*. 
 ```
 topology_template:
   node_templates:
@@ -311,7 +326,7 @@ topology_template:
       properties:
         cloud:
           interface_cloud: ec2
-          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g for cloudsigma     ec2.eu-west-1.amazonaws.com )
+          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g ec2.eu-west-1.amazonaws.com )
       capabilities:
         host:
           properties:
@@ -319,8 +334,6 @@ topology_template:
             image_id: ADD_YOUR_ID_HERE (e.g. ami-12345678)
             instance_type: ADD_YOUR_INSTANCE_TYPE_HERE (e.g. t1.small)
 ```
-
-The Occopus adaptor **requires** region_name, image_id and instance_type to create a valid *EC2* node definition. You could also give some other properties to extends your description. The properties could be found below.
 
 - **region_name** is the region name within an EC2 cloud (e.g. eu-west-1).
 - **image_id** is the image id (e.g. ami-12345678) on your EC2 cloud. Select an image containing a base os installation with cloud-init support!
@@ -330,6 +343,7 @@ The Occopus adaptor **requires** region_name, image_id and instance_type to crea
 - **subnet_id** optionally specifies subnet identifier (e.g. subnet-644e1e13) to be attached to the VM.
 
 #### Nova
+To instantiate MiCADO workers on a cloud through Nova interface, please use the template below. MiCADO **requires** image_id flavor_name, project_id and network_id to instantiate a VM through *Nova*. 
 ```
 topology_template:
   node_templates:
@@ -338,7 +352,7 @@ topology_template:
       properties:
         cloud:
           interface_cloud: nova
-          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g for cloudsigma https://zrh.cloudsigma.com/api/2.0 )
+          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
       capabilities:
         host:
           properties:
@@ -347,10 +361,6 @@ topology_template:
             project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
             network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
 ```
-
-Under the properties field, you can add your cloudspecific properties. There are some required, and the others are optional. See more details below.
-
-The Occopus adaptor **requires** image_id flavor_name, project_id and network_id to create a valid *Nova* node definition. You could also give some other properties to extends your description. The properties could be found below.
 
 - **project_id** is the id of project you would like to use on your target Nova cloud.
 - **image_id** is the image id on your Nova cloud. Select an image containing a base os installation with cloud-init support!
@@ -364,9 +374,11 @@ The Occopus adaptor **requires** image_id flavor_name, project_id and network_id
 
 
 
+
+
 ## Demo application
 
-You can find test application(s) under the subdirectories of the 'testing' directory. The current tests are written for CloudSigma.
+You can find test application(s) under the subdirectories of the 'testing' directory. The current tests are configured for CloudSigma.
 
 - stressng
 
@@ -378,3 +390,24 @@ You can find test application(s) under the subdirectories of the 'testing' direc
   - Step4a: run ```2-list-apps.sh``` to see currently running applications and their IDs
   - Step5: run ```3-update-tosca-stressng.sh stressng``` to update the service and reduce the CPU load. Observe the scaledown response.
   - Step6: run ```4-undeploy-with-id.sh stressng``` to remove the stressng stack and all the MiCADO worker nodes
+
+- cqueue
+  
+  This application demonstrates a deadline policy using CQueue. CQueue provides a lightweight queueing service for executing containers. CQueue server (implemented by RabbitMQ, Redis and a web-based frontend) stores items where each represents a container execution. CQueue worker fetches an item and preform the execution of the container locally. The demonstration below shows that the items can be consumed by deadline using MiCADO for scaling the CQueue worker. The demonstration requires the deployment of a CQueue server separately, then the submission of the CQueue worker to MiCADO with the appropriate (predefined) scaling policy.
+
+  - Step1: Launch a separate VM and deploy CQueue server using the compose file, called ```docker-compose-cqueue-server.yaml```. You need to install docker and docker-compose to use the compose file. This will be your cqueue server to store items representing container execution requests. Important: you have to open ports defined under the 'ports' section for each of the four services defined in the compose file.
+  - Step2: Update the parameter file, called ```_settings``` . You need the ip address for the MiCADO master and for the CQueue server. 
+  - Step3: Run ```./1-submit-jobs.sh 50``` to generate and send 50 jobs to CQueue server. Each item will be a simple Hello World app (combined with some sleep) realized in a container. You can later override this with your own container.
+  - Step4: Edit the TOSCA description file, called ```micado-cqworker.yaml```.
+    - Replace each 'cqueue.server.ip.address' string with the real ip of CQueue server.
+    - Update each 'ADD_YOUR_ID_HERE' string with the proper value retrieved under your CloudSigma account.
+  - Step5: Run ```./2-get_date_in_epoch_plus_seconds.sh 600``` to calculate the unix timestamp representing the deadline by which the items (containers) must be finished. Take the value from the last line of the output produced by the script. The value is 600 seconds from now.
+  - Step6: Edit the TOSCA description file, called ```micado-cqworker.yaml```.
+    - Update the value for the 'DEADLINE' which is under the 'policies/scalability/properties/constants' section. The value has been extracted in the previous step. Please, note that defining a deadline in the past results the MiCADO workers to scale up to maximum (which is 2).
+  - Step7: Run ```./3-deploy-cq-worker-to-micado.sh``` to deploy the CQworker service, which will consume the items from the CQueue server i.e. execute the containers specified by the items.
+  - Step8: Monitor the application:
+    - visit http://micado.master.ip:4000/docker-visualizer to see the number of nodes and containers.
+    - watch the log of policy keeper on the MiCADO master (/var/log/micado/policykeeper).
+  - Step9: Run ```./4-list-running-apps.sh``` to list the apps you are running under MiCADO.
+  - Step10: Run ```./5-undeploy-cq-worker-from-micado.sh``` to remove your application from MiCADO when all items are consumed.
+  - Step11: You can have a look at the state ```./cqueue-get-job-status.sh <task_id>``` or stdout of container executions ```./cqueue-get-job-status.sh <task_id>``` using one of the task id values printed during Step 3.
