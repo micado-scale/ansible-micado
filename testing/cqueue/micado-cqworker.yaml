@@ -1,0 +1,95 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - https://raw.githubusercontent.com/micado-scale/tosca/master/micado_types.yaml
+
+repositories:
+  docker_hub: https://hub.docker.com/
+
+topology_template:
+  node_templates:
+    cqueue_worker:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+        environment:
+          BROKER: amqp://guest:guest@cqueue.server.ip.address:5672
+          RESULT_BACKEND: redis://cqueue.server.ip.address:6379
+        deploy:
+          restart_policy:
+            condition: any
+        volumes:
+          - /usr/bin/docker:/usr/bin/docker
+          - /var/run/docker.sock:/var/run/docker.sock
+      artifacts:
+       image:
+         type: tosca.artifacts.Deployment.Image.Container.Docker
+         file: sztakilpds/cqueue_worker
+         repository: docker_hub
+
+    worker_node:
+      type: tosca.nodes.MiCADO.Occopus.CloudSigma.Compute
+      properties:
+        cloud:
+          interface_cloud: cloudsigma
+          endpoint_cloud: https://zrh.cloudsigma.com/api/2.0
+      capabilities:
+        host:
+          properties:
+            num_cpus: 2000
+            mem_size: 1073741824
+            vnc_password: secret
+            libdrive_id: 87ce928e-e0bc-4cab-9502-514e523783e3
+            public_key_id: ADD_YOUR_ID_HERE
+            firewall_policy: ADD_YOUR_ID_HERE
+
+  policies:
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO
+        targets: [ worker_node ]
+        properties:
+          sources:
+          - 'cqueue.server.ip.address:8090'
+          constants: 
+            AET: 30
+            DEADLINE: 1530270216
+            MAXNODES: 2
+            MAXCONTAINERS: 10
+          queries:
+            REMAININGTIME: '{{DEADLINE}}-time()'
+            ITEMS: 'rabbitmq_queue_messages_persistent{queue="machinery_tasks"}'
+          min_instances: 1
+          max_instances: '{{MAXNODES}}'
+          scaling_rule: |
+            reqnodes=0
+            if ITEMS>0:
+              reqconts = ceil(AET/(REMAININGTIME/ITEMS)) if REMAININGTIME>0 else MAXCONTAINERS
+              reqnodes = ceil(reqconts/5)
+              if reqnodes<m_node_count-1:
+                m_node_count-=1
+              if reqnodes>m_node_count:
+                m_node_count+=1
+            else:
+              m_node_count = 0
+            print "Number of required nodes:",reqnodes
+            print "Number of requested nodes:",m_node_count
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO
+        targets: [ cqueue_worker ]
+        properties:
+          min_instances: 1
+          max_instances: '{{MAXCONTAINERS}}'
+          scaling_rule: |
+            print "Length of queue:",ITEMS
+            required_count = 0
+            if ITEMS>0:
+              required_count = ceil(AET/(REMAININGTIME/ITEMS)) if REMAININGTIME>0 else MAXCONTAINERS
+              m_container_count = min(required_count, len(m_nodes) * 5)
+            else:
+              m_container_count = 0
+            print "Number of required containers:",required_count
+            print "Number of requested containers:",m_container_count
+
+
+          
+
+
