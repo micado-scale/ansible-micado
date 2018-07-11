@@ -1,4 +1,4 @@
-# Ansible MiCADO
+# MiCADO - the autoscaling framework for Docker services on Cloud
 
 ## Table of Contents
 
@@ -6,8 +6,8 @@
 * [Deployment](#deployment)
 * [Dashboard](#dashboard)
 * [REST API](#rest-api)
-* [TOSCA description](#tosca-description)
-* [Demo application](#demo-application)
+* [Application description](#application-description)
+* [Tutorials](#tutorials)
 
 ## Introduction
 
@@ -144,9 +144,9 @@ curl -X GET http://[IP]:[Port]/v1.0/app/[APPLICATION_ID]
 ```
 
 
-## TOSCA description
+## Application description
 
-MiCADO requires a description of an application to be executed in TOSCA format. This section details the structure of the application description. 
+MiCADO executes applications described by the Application Descriptions following the TOSCA format. This section details the structure of the application description. 
 
 Application description has four main sections:
 - **tosca_definitions_version**: ```tosca_simple_yaml_1_0```.
@@ -154,7 +154,7 @@ Application description has four main sections:
 - **repositories**: docker repositories with their addresses.
 - **topology_template**: the main part of the application description to define 1) docker services, 2) virtual machine (under the **node_templates** section) and 3) the scaling policy under the **policies** subsection. These sections will be detailed in subsections below.
 
-Here is an overview of the structure of the MiCADO application description:
+Here is an overview example for the structure of the MiCADO application description:
 ```
 tosca_definitions_version: tosca_simple_yaml_1_0
 
@@ -199,18 +199,18 @@ topology_template:
   - scalability:
     type: tosca.policies.Scaling.MiCADO
     targets: [ YOUR_VIRTUAL_MACHINE ]
-      properties:
+    properties:
       ...
   - scalability:
     type: tosca.policies.Scaling.MiCADO
     targets: [ YOUR_DOCKER_SERVICE ]
-      properties:
-        ...
+    properties:
+      ...
   - scalability:
     type: tosca.policies.Scaling.MiCADO
     targets: [ YOUR_OTHER_DOCKER_SERVICE ]
-      properties:
-        ...
+    properties:
+      ...
 ```
 
 ### Specification of Docker services 
@@ -372,13 +372,96 @@ topology_template:
 
 ### Description of the scaling policy
 
+To utilize the autocaling functionality of MiCADO, scaling policies can be defined on virtual machine and on docker service level. Scaling policies can be listed under the **policies** section. Each **scalability** subsection must have the **type** set to the value of ```tosca.policies.Scaling.MiCADO``` and must be linked to a node defined under **node_template**. The link can be implemented by specifying the name of the node under the **targets** subsection. The details of the scaling policy can be defined under the **properties** subsection. The structure of the **policies** section can be seen below. 
 
+```
+topology_template:
+  node_templates:
+    YOUR_DOCKER_SERVICE:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      ...
+    ...
+    YOUR_OTHER_DOCKER_SERVICE:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      ...
+    YOUR_VIRTUAL_MACHINE:
+      type: tosca.nodes.MiCADO.Occopus.<CLOUD_API_TYPE>.Compute
+      ...
 
+  policies:
+  - scalability:
+    type: tosca.policies.Scaling.MiCADO
+    targets: [ YOUR_VIRTUAL_MACHINE ]
+    properties:
+      ...
+  - scalability:
+    type: tosca.policies.Scaling.MiCADO
+    targets: [ YOUR_DOCKER_SERVICE ]
+    properties:
+      ...
+  - scalability:
+    type: tosca.policies.Scaling.MiCADO
+    targets: [ YOUR_OTHER_DOCKER_SERVICE ]
+    properties:
+      ...
+```
 
+The scaling policies are evaluated periodically. In every turn, the virtual machine level scaling is evaluated, followed by the evaluation of each scaling policies belonging to Docker services. 
 
+The **properties** subsection defines the scaling policy itself. For monitoring purposes, MiCADO integrates the Prometheus monitoring tool with two built-in exporters on each worker node: Node exporter (to collect data on nodes) and CAdvisor (to collect data on containers). Based on Prometheus, any monitored information can be extracted using the Prometheus query language and the returned value can be associated to a user-defined variable. Once variables are updated, scaling rule is evaluated. It can be specified by a short Python code which can refer to the monitored information. The structure of the scaling policy can be seen below.
 
+```
+  - scalability:
+      ...
+      properties:
+        sources:
+          - 'myprometheus.exporter.ip.address:portnumber'
+        constants:
+          LOWER_THRESHOLD: 50
+          UPPER_THRESHOLD: 90
+          MYCONST: 'any string'
+        queries:
+          THELOAD: 'Prometheus query expression'
+          MYEXPR: 'something refering to {{MYCONST}}'
+        alerts: 
+          - alert: myalert
+            expr: 'Prometheus expression for an event important for scaling'
+            for: 1m
+        min_instances: 1
+        max_instances: 5
+        scaling_rule: |
+          if myalert:
+            m_node_count=5
+          if THELOAD>UPPER_THRESHOLD:
+            m_node_count+=1
+          if THELOAD<LOWER_THRESHOLD:
+            m_node_count-=1
+```
 
-## Demo application
+The subsections have the following roles:
+- **sources** supports the dynamic attachment of an external exporter by specifying a list endpoints of exporters (see example above). Each item found under this subsection is configured under Prometheus to start collecting the information provided/exported by the exporters. Once done, the values of the parameters provided by the exporters become available. 
+- **constants** subsection is used to predefined fixed parameters. Values associated to the parameters can be referred by the scaling rule as variable (see ```LOWER_THRESHOLD``` above) or in any other sections referred as Jinja2 variable (see ```MYEXPR``` above).
+- **queries** contains the list of Prometheus query expressions to be executed and their variable name associated (see ```THELOAD``` above)
+- **alerts** subsection enables the utilisation of the alerting system of Prometheus. Each alert defined here is registered under Prometheus and fired alerts are represented with a variable of their name set to True during the evaluation of the scaling rule (see ```myalert``` above).
+- **min_instances** keyword specifies the lowest number of instances valid for the node.
+- **max_instances** keyword specifies the highest number of instances valid for the node.
+- **scaling_rule** specifies Python code to be evaluated periodically to decide on the number of instances. The Python expression must be formalized with the following conditions: 
+  - Each constant defined under the ‘constants’ section can be referred; its value is the one defined by the user.
+  - Each variable defined under the ‘queries’ section can be referred; its value is the result returned by Prometheus in response to the query string. 
+  - Each alert name defined under the ‘alerts’ section can be referred, its value is a logical True in case the alert is firing, False otherwise
+  - Expression must follow the syntax of the Python language
+  - Expression can be multiline
+  - The following predefined variables can be referred; their values are defined and updated before the evaluation of the scaling rule
+    - m_nodes: python list of nodes belonging to the docker swarm cluster
+    - m_node_count: the target number of nodes
+    - m_container_count: the target number of containers for the service the evaluation belongs to 
+    - m_time_since_node_count_changed: time in seconds elapsed since the number of nodes changed 
+  - In a scaling rule belonging to the virtual machine, the name of the variable to be updated is ```m_node_count```; as an effect the number stored in this variable will be set as target instance number for the virtual machines. 
+  - In a scaling rule belonging to a docker service, the name of the variable to be set is ```m_container_count```; as an effect the number stored in this variable will be set as target instance number for the docker service. 
+
+For further examples, inspect the scaling policies of the demo examples detailed in the next section.
+
+## Tutorials
 
 You can find test application(s) under the subdirectories of the 'testing' directory. The current tests are configured for CloudSigma.
 
