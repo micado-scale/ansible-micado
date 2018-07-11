@@ -148,8 +148,8 @@ curl -X GET http://[IP]:[Port]/v1.0/app/[APPLICATION_ID]
 
 MiCADO requires a description of an application to be executed in TOSCA format. This section details the structure of the application description. 
 
-Applciation decrpiton has four main parts:
-- **tosca_definitions_version**: fix value: ```tosca_simple_yaml_1_0```.
+Application description has four main sections:
+- **tosca_definitions_version**: ```tosca_simple_yaml_1_0```.
 - **imports**: a list of urls pointing to custom TOSCA types. The default url points to the custom types defined for MiCADO. Please, do not modify this url.
 - **repositories**: docker repositories with their addresses.
 - **topology_template**: the main part of the application description to define 1) docker services, 2) virtual machine (under the **node_templates** section) and 3) the scaling policy under the **policies** subsection. These sections will be detailed in subsections below.
@@ -213,7 +213,7 @@ topology_template:
         ...
 ```
 
-### Specification of Docker services
+### Specification of Docker services 
 
 Under the node_templates section you can define any number of interconnected Docker service (see **YOUR_DOCKER_SERVICE**) similarly as in a docker-compose file. Each docker service definition consists of three main parts: type, properties and artifacts. The value of the **type** keyword for a Docker service must always be ```tosca.nodes.MiCADO.Container.Application.Docker```. The **properties** section will contain most of the setting of the Docker service. Under the **artifacts** section the Docker image (see **YOUR_DOCKER_IMAGE**) must be defined. Optionally, Docker networks can be defined in the same way as in a docker-compose file (see **YOUR_DOCKER_NETWORK**).
 
@@ -235,7 +235,7 @@ topology_template:
         ...
 ```
 
-The **properties** of the Docker service definition are derived from the docker-compose file. Therefore, you can additional information about the properties in the [docker compose documentation](https://docs.docker.com/compose/compose-file/#service-configuration-reference). The syntax of the property values is the same as in the docker-compose file.
+The fields under the **properties** section of the Docker service are derived from the docker-compose file. Therefore, you can additional information about the properties in the [docker compose documentation](https://docs.docker.com/compose/compose-file/#service-configuration-reference). The syntax of the property values is the same as in the docker-compose file.
 
 Under the **properties** section of a Docker service (see **YOUR_DOCKER_SERVICE**) you can specify the following keywords: 
 - **command**: command line expression to be executed by the container.
@@ -260,8 +260,8 @@ To define a Docker network (see **YOUR_DOCKER_NETWORK**) the following fields mu
 - **attachable**: if set to true, then standalone containers can attach to this network, in addition to services
 - **driver**: specify which driver should be used for this network. (overlay, bridge, etc.)
 
-### Virtual Machine description
-The network of Docker services specified in the previos section is executed under Docker Swarm. This section introduces how virtual machines can be configured which then hosts the worker nodes of the Docker Swarm. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. The following subsections details how to configure them.
+### Specification of the Virtual Machine
+The network of Docker services specified in the previous section is executed under Docker Swarm. This section introduces how the parameters of the virtual machine can be configured which will be hosts the Docker worker node. During operation MiCADO will instantiate as many virtual machines with the parameters defined here as required during scaling. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. The following subsections details how to configure them.
 
 #### CloudSigma
 To instantiate MiCADO workers on CloudSigma, please use the template below. MiCADO **requires** num_cpus, mem_size, vnc_password, libdrive_id and public_key_id to instantiate VM on *CloudSigma*. 
@@ -311,7 +311,7 @@ topology_template:
 
 ```
 
-- **deployment_id** is the id of a preregistered deployment in CloudBroker referring to a cloud, image, region, etc. Make sure the image contains a base os (preferably Ubuntu) installation with cloud-init support! The id is the UUID of the deployment which can be seen in the address bar of your browser when inspecting the details of the deployment.
+- **deployment_id** is the id of a preregistered deployment in CloudBroker referring to a cloud, image, region, etc. Make sure the image contains a base OS (preferably Ubuntu) installation with cloud-init support! The id is the UUID of the deployment which can be seen in the address bar of your browser when inspecting the details of the deployment.
 - **instance_type_id** is the id of a preregistered instance type in CloudBroker referring to the capacity of the virtual machine to be deployed. The id is the UUID of the instance type which can be seen in the address bar of your browser when inspecting the details of the instance type.
 - **key_pair_id** is the id of a preregistered ssh public key in CloudBroker which will be deployed on the virtual machine. The id is the UUID of the key pair which can be seen in the address bar of your browser when inspecting the details of the key pair.
 - **opened_port** is one or more ports to be opened to the world. This is a string containing numbers separated by a comma.
@@ -370,7 +370,9 @@ topology_template:
 - **security_groups** optionally specify security settings (you can define multiple security groups in the form of a list) for your VM.
 - **network_id** is the id of the network you would like to use on your target Nova cloud.
 
-### Policy description
+### Description of the scaling policy
+
+
 
 
 
@@ -403,7 +405,7 @@ You can find test application(s) under the subdirectories of the 'testing' direc
     - Update each 'ADD_YOUR_ID_HERE' string with the proper value retrieved under your CloudSigma account.
   - Step5: Run ```./2-get_date_in_epoch_plus_seconds.sh 600``` to calculate the unix timestamp representing the deadline by which the items (containers) must be finished. Take the value from the last line of the output produced by the script. The value is 600 seconds from now.
   - Step6: Edit the TOSCA description file, called ```micado-cqworker.yaml```.
-    - Update the value for the 'DEADLINE' which is under the 'policies/scalability/properties/constants' section. The value has been extracted in the previous step. Please, note that defining a deadline in the past results the MiCADO workers to scale up to maximum (which is 2).
+    - Update the value for the 'DEADLINE' which is under the 'policies/scalability/properties/constants' section. The value has been extracted in the previous step. Please, note that defining a deadline in the past results in scaling the application to the maximum (2 nodes and 10 containers).
   - Step7: Run ```./3-deploy-cq-worker-to-micado.sh``` to deploy the CQworker service, which will consume the items from the CQueue server i.e. execute the containers specified by the items.
   - Step8: Monitor the application:
     - visit http://micado.master.ip:4000/docker-visualizer to see the number of nodes and containers.
