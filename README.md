@@ -22,21 +22,20 @@ In the current release, the status of the system can be inspected through the fo
 
 ## Deployment
 
-There are 3 different roles for machines in this scenario:
- - Controller machine: a machine from which you control the MiCADO service installation
- - MiCADO master machine: preferably a virtual machine in cloud on which you will install the core MiCADO services
- - MiCADO worker machine(s): further virtual machine(s) in cloud which will be automatically launched by the core MiCADO services
+As stated in the above section, to use MiCADO, you need to deploy the MiCADO services on a (separate) virtual machine, called MiCADO master. We recommend to do the installation remotely i.e. to download the Ansible playbook on your local machine and run the deployment on an empty virtul machine dedicated for this purpose on your preferred cloud.
 
 ### Prerequisites
 
- - All 3 type of machines should be Ubuntu 16.04
- - Installed ansible and git is needed on the Controller machine
+ - Operating system for MiCADO master (in the cloud) should be Ubuntu 16.04
+ - Ansible and git is needed on your (local) machine to run the Ansible playbook
 
 ### Installation
 
-Perform the following steps on the Controller machine:
+Perform the following steps on your local machine.
 
-#### Step 1: Download the Micado ansible playbook
+#### Step 1: Download the ansible playbook.
+
+Currently, MiCADO v5 version is available.
 
 ```
 git clone https://github.com/micado-scale/ansible-micado.git ansible-micado
@@ -44,45 +43,39 @@ cd ansible-micado
 git checkout master
 ```
 
-#### Step 2: Specify details for instantiating MiCADO worker nodes
+#### Step 2: Specify credential for instantiating MiCADO workers. 
 
+MiCADO master will use this credential to start/stop VM instances (MiCADO workers) to realize scaling. Credentials here should belong to the same cloud as where MiCADO master is running. We recommend to make a copy of our predefined template and edit it. The ansible playbook expects the credential in a file, called credentials.yml. Please, do not modify the structure of the template!
 ```
 cp sample-credentials.yml credentials.yml
+vi credentials.yml
 ```
-Edit credentials.yml to add all cloud-related information for worker instantiation.
+Edit credentials.yml to add cloud credentials. You will find predefined sections in the template for each cloud interface type MiCADO supports. Fill only the section belonging to your target cloud.
 
-##### Optional: Specify details for Docker login and private Docker repositories
+##### Step 3: (Optional) Specify details of your private Docker repository.
 
+Set the Docker login credentials of your private Docker registries in which your personal containers are stored. We recommend to make a copy of our predefined template and edit it. The ansible playbook expects the docker registry details in a file, called docker-cred.yml. Please, do not modify the structure of the template!
 ```
 cp sample-docker-cred.yml docker-cred.yml
+vi docker-cred.yml
 ```
 Edit docker-cred.yml and add username, password, and repository url.
 To login to the default docker_hub, leave DOCKER_REPO as is (a blank string).
 
-#### Step 3: Launch an empty cloud VM instance on which core MiCADO services will be installed
+#### Step 4: Launch an empty cloud VM instance for MiCADO master.
 
-Use any of aws, ec2, nova command-line tools or web interface of the target cloud. Make sure you can ssh to it (without password) and your user is a sudoer. Store its IP address which will be referred as `IP` in the following steps.
+This new VM will host the MiCADO master core services. Use any of aws, ec2, nova, etc command-line tools or web interface of your target cloud to launch a new VM. We recommend a VM with 2 cores, 4GB RAM, 100GB disk. Make sure you can ssh to it (password-free i.e. ssh public key is deployed) and your user is able to sudo (to install MiCADO as root). Store its IP address which will be referred as `IP` in the following steps. 
 
-#### Step 4: Make sure python 2.7 is installed on the MiCADO master machine
+#### Step 5: Customize the inventory file for the MiCADO master.
 
-```
-ssh <IP> sudo apt-get --yes install python
-```
-
-#### Step 5: Set target machine in the 'hosts' file
-
+We recommend to make a copy of our predefined template and edit it. Use the template inventory file, called sample-hosts for customisation. 
 ```
 cp sample-hosts hosts
+vi hosts
 ```
-Edit the `hosts` file (on the Cotnroller machine) to set ansible variables like host, connection, user, etc. for MiCADO master machine. Do not forget to set `ansible_host=<IP>` and `ansible_connection=ssh`.
+Edit the `hosts` file to set ansible variables for MiCADO master machine. Update the following parameters: ansible_host=<IP>, ansible_connection=ssh and ansible_user=<YOUR SUDOER ACCOUNT>. Please, revise the other parameters as well, however in most cases the default values are correct.
 
-#### Step 6: Update ansible on the MiCADO master node
-
-```
-ansible-playbook -i hosts update-ansible.yml
-```
-
-#### Step 7: Launch the installation of core MiCADO services
+#### Step 6: Start the installation of MiCADO master.
 
 ```
 ansible-playbook -i hosts micado-master.yml
@@ -93,7 +86,7 @@ ansible-playbook -i hosts micado-master.yml
 At the end of the deployment, core MiCADO services will be running on the MiCADO master machine. Here are the commands to test the operation of some of the core MiCADO services:
 
 - Occopus:
-```curl -s -X GET http://IP:5000/infrastructures/micado_worker_infra```
+```curl -s -X GET http://IP:5000/infrastructures```
 - Swarm
 ```curl -s http://IP:2375/swarm | jq '.JoinTokens'```
 - Prometheus
