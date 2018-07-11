@@ -155,7 +155,11 @@ curl -X GET http://[IP]:[Port]/v1.0/app/[ID_APP]
 
 ## TOSCA description
 
-The main structure of the TOSCA description:
+The main structure of the TOSCA description. The TOSCA decrpiton has four main part:
+- **tosca_definitions_version**: fix value: ```tosca_simple_yaml_1_0```
+- **imports**: A list of other TOSCA definitions. We used it to import our custom definied TOSCA types.
+- **repositories**: Map of the defined repositories and their addresses.
+- **topology_template**: The main part of the TOSCA description to define the application which will be deployed in MiCADO. This section is consist of two main other parts the **node_templates** and the **policies**. This sections will be detaild in the following sections.
 
 ```
 tosca_definitions_version: tosca_simple_yaml_1_0
@@ -168,14 +172,14 @@ repositories:
 
 topology_template:
   node_templates:
-    ADD_YOUR_DOCKER_SERVICE:
+    YOUR_DOCKER_SERVICE:
           type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
             ...
           artifacts:
             ...
 
-    ADD_YOUR_VIRTUAL_MACHINE:
+    YOUR_VIRTUAL_MACHINE:
           type: tosca.nodes.MiCADO.Occopus.<CLOUD_API_TYPE>.Compute
       properties:
         cloud:
@@ -189,41 +193,42 @@ topology_template:
   policies:
   - scalability:
     type: tosca.policies.Scaling.MiCADO
-    targets: [ ADD_YOUR_VIRTUAL_MACHINE ]
+    targets: [ YOUR_VIRTUAL_MACHINE ]
         properties:
       ...
 
   - scalability:
     type: tosca.policies.Scaling.MiCADO
-    targets: [ ADD_YOUR_DOCKER_SERVICE ]
+    targets: [ YOUR_DOCKER_SERVICE ]
         properties:
       ...
 ```
 
 ### Docker based application description
 
-The TOSCA template Docker relevnat part has a following structure:
+The TOSCA template Docker relevnat part has a following structure. Under the node_templates section you can define one docker service. One docker service definiton is consit of three main part: type, properties, artifacts. The type has a fix value: ```tosca.nodes.MiCADO.Container.Application.Docker```. The properties section will be discussed later. Under the artifacts section you could define the docker image for the service. Optionally, you can define docker networks under the YOUR_DOCKER_NETWORK section like in a docker-compose file.
 
 ```
 topology_template:
   node_templates:
-    ADD_YOUR_DOCKER_SERVICE:
+    YOUR_DOCKER_SERVICE:
       type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
          ...
       artifacts:
        image:
          type: tosca.artifacts.Deployment.Image.Container.Docker
-         file: ADD_YOUR_DOCKER_IMAGE
+         file: YOUR_DOCKER_IMAGE
          repository: docker_hub
-    ADD_YOUR_DOCKER_NETWORK:
+    YOUR_DOCKER_NETWORK:
       type: tosca.nodes.MiCADO.network.Network.Docker
       properties:
         ...
 ```
 
-The properties are based on the original docker-compose file fields. Therefore, you could find more information about the properties in the [docker compose documentation](https://docs.docker.com/compose/compose-file/#service-configuration-reference).
-Under the DOCKER_SERVICE properties field you can add your docker service specific properties:
+The properties are based on the original docker-compose file fields. Therefore, you can find more information about the properties in the [docker compose documentation](https://docs.docker.com/compose/compose-file/#service-configuration-reference). The syntax of the property values is the same as in the docker-compose file.
+
+Under the YOUR_DOCKER_SERVICE properties section you can add your docker service specific properties. 
 - **command**: command line expression to be executed by the container.
 - **deploy**: Swarm specific deployment options.
 - **entrypoint**: Override the default entrypoint of container.
@@ -236,69 +241,91 @@ Under the DOCKER_SERVICE properties field you can add your docker service specif
 - **ports**: List of published ports to the host machine.
 - **secrets**: List of per-service secrets to grant access for the service.
 
-Optionally, you can define docker networks under the DOCKER_NETWORK section. You can set the following fields for the docker network:
+Under the artifacts section you can defined the docker image for the docker service. In the image section you can define three fileds:
+- **type**: fix value: ```tosca.artifacts.Deployment.Image.Container.Docker```
+- **file**: Your docker image for the docker service. (e.g. sztakilpds/cqueue_frontend:latest )
+- **repository**: The name of the repository where the image is located. This name have to be defined in the top of the TOSCA file. (e.g. docker_hub)
+
+Under the YOUR_DOCKER_NETWORK section you can set the following fields for the docker network:
 
 - **attachable**: If set to true, then standalone containers can attach to this network, in addition to services
 - **driver**: Specify which driver should be used for this network. (overlay, bridge, etc.)
 
 ### Virtual Machine description
-The TOSCA template occopus relevant part looks like this.
+The TOSCA template occopus relevant part looks like this. Currently we support 4 cloud interface.
 
+#### CloudSigma
 ```
 topology_template:
   node_templates:
     worker_node:
-      type: ADD_YOUR_TOSCA_NODES_TYPE
+      type: tosca.nodes.MiCADO.Occopus.CloudSigma.Compute
       properties:
         cloud:
-          interface_cloud: SELECT_YOUR_INTERFACE_TYPE
+          interface_cloud: cloudsigma
           endpoint_cloud: ADD_YOUR_ENDPOINT (e.g for cloudsigma https://zrh.cloudsigma.com/api/2.0 )
       capabilities:
         host:
           properties:
-
-            [NOVA]
-
-            image_id: ADD_YOUR_ID_HERE
-            flavor_name: ADD_YOUR_ID_HERE
-            project_id: ADD_YOUR_ID_HERE
-            network_id: ADD_YOUR_ID_HERE
-
-            [CLOUDBROKER]
-
-            deployment_id: ADD_YOUR_ID_HERE
-            instance_type_id: ADD_YOUR_ID_HERE
-
-            [EC2]
-
-            region_name: ADD_YOUR_REGION_NAME_HERE
-            image_id: ADD_YOUR_ID_HERE
-            instance_type: ADD_YOUR_INSTANCE_TYPE_HERE
-
-            [CLOUDSIGMA]
-
-            num_cpus: ADD_NUM_CPUS_FREQ
-            mem_size: ADD_MEM_SIZE
-            vnc_password: ADD_YOUR_PW
-            libdrive_id: ADD_YOUR_ID_HERE
-            public_key_id: ADD_YOUR_ID_HERE
-            firewall_policy: ADD_YOUR_ID_HERE
+            num_cpus: ADD_NUM_CPUS_FREQ (e.g. 4096)
+            mem_size: ADD_MEM_SIZE (e.g. 4294967296)
+            vnc_password: ADD_YOUR_PW (e.g. secret)
+            libdrive_id: ADD_YOUR_ID_HERE (eg. 87ce928e-e0bc-4cab-9502-514e523783e3)
+            public_key_id: ADD_YOUR_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
+            firewall_policy: ADD_YOUR_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
 ```
 
-Currently we support 4 cloud interface which could be one of the following:
-- tosca.nodes.MiCADO.Occopus.EC2.Compute
-- tosca.nodes.MiCADO.Occopus.Nova.Compute
-- tosca.nodes.MiCADO.Occopus.CloudSigma.Compute
-- tosca.nodes.MiCADO.Occopus.CloudBroker.Compute
+The Occopus adaptor **requires** libdrive_id, num_cpus, mem_size, vnc_password and public_key_id to create a valid *CloudSigma* node definition. You could also give some other properties to extends your description. The properties could be found below.
 
-It follows that the interface is one of them:
-- ec2
-- nova
-- cloudsigma
-- cloudbroker
+- **libdrive_id** is the image id (e.g. 87ce928e-e0bc-4cab-9502-514e523783e3) on your CloudSigma cloud. Select an image containing a base os installation with cloud-init support!
+- **num_cpu** is the speed of CPU (e.g. 4096) in terms of MHz of your VM to be instantiated. The CPU frequency required to be between 250 and 100000
+- **mem_size** is the amount of RAM (e.g. 4294967296) in terms of bytes to be allocated for your VM. The memory required to be between 268435456 and 137438953472
+- **vnc_password** set the password for your VNC session (e.g. secret).
+- **public_key_id** specifies the keypairs (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e) to be assigned to your VM.
+- **firewall_policy** optionally specifies network policies (you can define multiple security groups in the form of a list, e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d) of your VM.
 
-Under the properties field, you can add your cloudspecific properties. There are some required, and the others are optional. See more details below.
+#### CloudBroker
+```
+topology_template:
+  node_templates:
+    worker_node:
+      type: tosca.nodes.MiCADO.Occopus.CloudBroker.Compute
+      properties:
+        cloud:
+          interface_cloud: cloudbroker
+          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g for cloudsigma https://zrh.cloudsigma.com/api/2.0 )
+      capabilities:
+        host:
+          properties:
+            deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
+            instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
 
+```
+
+The Occopus adaptor **requires** deployment_id and instance_type_id to create a valid *CloudBroker* node definition. You could also give some other properties to extends your description. The properties could be found below.
+
+- **deployment_id** is the id of a preregistered deployment in CloudBroker referring to a cloud, image, region, etc. Make sure the image contains a base os (preferably Ubuntu) installation with cloud-init support! The id is the UUID of the deployment which can be seen in the address bar of your browser when inspecting the details of the deployment.
+- **instance_type_id** is the id of a preregistered instance type in CloudBroker referring to the capacity of the virtual machine to be deployed. The id is the UUID of the instance type which can be seen in the address bar of your browser when inspecting the details of the instance type.
+- **key_pair_id** is the id of a preregistered ssh public key in CloudBroker which will be deployed on the virtual machine. The id is the UUID of the key pair which can be seen in the address bar of your browser when inspecting the details of the key pair.
+- **opened_port** is one or more ports to be opened to the world. This is a string containing numbers separated by a comma.
+
+#### EC2
+```
+topology_template:
+  node_templates:
+    worker_node:
+      type: tosca.nodes.MiCADO.Occopus.EC2.Compute
+      properties:
+        cloud:
+          interface_cloud: ec2
+          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g for cloudsigma     ec2.eu-west-1.amazonaws.com )
+      capabilities:
+        host:
+          properties:
+            region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
+            image_id: ADD_YOUR_ID_HERE (e.g. ami-12345678)
+            instance_type: ADD_YOUR_INSTANCE_TYPE_HERE (e.g. t1.small)
+```
 
 The Occopus adaptor **requires** region_name, image_id and instance_type to create a valid *EC2* node definition. You could also give some other properties to extends your description. The properties could be found below.
 
@@ -309,6 +336,26 @@ The Occopus adaptor **requires** region_name, image_id and instance_type to crea
 - **security_groups_ids** optionally specify security settings (you can define multiple security groups in the form of a list, e.g. sg-93d46bf7) of your VM.
 - **subnet_id** optionally specifies subnet identifier (e.g. subnet-644e1e13) to be attached to the VM.
 
+#### Nova
+```
+topology_template:
+  node_templates:
+    worker_node:
+      type: tosca.nodes.MiCADO.Occopus.Nova.Compute
+      properties:
+        cloud:
+          interface_cloud: nova
+          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g for cloudsigma https://zrh.cloudsigma.com/api/2.0 )
+      capabilities:
+        host:
+          properties:
+            image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
+            flavor_name: ADD_YOUR_ID_HERE (e.g. 3)
+            project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
+            network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
+```
+
+Under the properties field, you can add your cloudspecific properties. There are some required, and the others are optional. See more details below.
 
 The Occopus adaptor **requires** image_id flavor_name, project_id and network_id to create a valid *Nova* node definition. You could also give some other properties to extends your description. The properties could be found below.
 
@@ -319,24 +366,6 @@ The Occopus adaptor **requires** image_id flavor_name, project_id and network_id
 - **key_name** optionally sets the name of the keypair to be associated to the instance. Keypair name must be defined on the target nova cloud before launching the VM.
 - **security_groups** optionally specify security settings (you can define multiple security groups in the form of a list) for your VM.
 - **network_id** is the id of the network you would like to use on your target Nova cloud.
-
-The Occopus adaptor **requires** deployment_id and instance_type_id to create a valid *CloudBroker* node definition. You could also give some other properties to extends your description. The properties could be found below.
-
-- **deployment_id** is the id of a preregistered deployment in CloudBroker referring to a cloud, image, region, etc. Make sure the image contains a base os (preferably Ubuntu) installation with cloud-init support! The id is the UUID of the deployment which can be seen in the address bar of your browser when inspecting the details of the deployment.
-- **instance_type_id** is the id of a preregistered instance type in CloudBroker referring to the capacity of the virtual machine to be deployed. The id is the UUID of the instance type which can be seen in the address bar of your browser when inspecting the details of the instance type.
-- **key_pair_id** is the id of a preregistered ssh public key in CloudBroker which will be deployed on the virtual machine. The id is the UUID of the key pair which can be seen in the address bar of your browser when inspecting the details of the key pair.
-- **opened_port** is one or more ports to be opened to the world. This is a string containing numbers separated by a comma.
-
-
-The Occopus adaptor **requires** libdrive_id, num_cpus, mem_size, vnc_password and public_key_id to create a valid *CloudSigma* node definition. You could also give some other properties to extends your description. The properties could be found below.
-
-
-- **libdrive_id** is the image id (e.g. 40aa6ce2-5198-4e6b-b569-1e5e9fbaf488) on your CloudSigma cloud. Select an image containing a base os installation with cloud-init support!
-- **num_cpu** is the speed of CPU (e.g. 2000) in terms of MHz of your VM to be instantiated. The CPU frequency required to be between 250 and 100000
-- **mem_size** is the amount of RAM (e.g. 1073741824) in terms of bytes to be allocated for your VM. The memory required to be between 268435456 and 137438953472
-- **vnc_password** set the password for your VNC session.
-- **public_key_id** specifies the keypairs (e.g. f80c3ffb-3ab5-461e-ad13-4b253da122bd) to be assigned to your VM.
-- **firewall_policy** optionally specifies network policies (you can define multiple security groups in the form of a list, e.g. 8cd00652-c5c8-4af0-bdd6-0e5204c66dc5) of your VM.
 
 ### Policy description
 
