@@ -19,14 +19,12 @@ To use MiCADO, first the MiCADO core services must be deployed on a virtual mach
 
 In the current release, the status of the system can be inspected through the following ways: REST API provides interface for submission, update and list functionalities over applications. Dashboard provides three graphical view to inspect the VMs and Docker services. They are Docker Visualizer, Grafana and Prometheus. Finally, advanced users may find the logs of the MiCADO core services useful on MiCADO master.
 
-
 ## Deployment
 
 As stated in the above section, to use MiCADO, you need to deploy the MiCADO services on a (separate) virtual machine, called MiCADO master. We recommend to do the installation remotely i.e. to download the Ansible playbook on your local machine and run the deployment on an empty virtul machine dedicated for this purpose on your preferred cloud.
 
 ### Prerequisites
 
- - Operating system for MiCADO master (in the cloud) should be Ubuntu 16.04
  - Ansible and git is needed on your (local) machine to run the Ansible playbook
 
 ### Installation
@@ -64,7 +62,11 @@ To login to the default docker_hub, leave DOCKER_REPO as is (a blank string).
 
 #### Step 4: Launch an empty cloud VM instance for MiCADO master.
 
-This new VM will host the MiCADO master core services. Use any of aws, ec2, nova, etc command-line tools or web interface of your target cloud to launch a new VM. We recommend a VM with 2 cores, 4GB RAM, 20GB disk. Make sure you can ssh to it (password-free i.e. ssh public key is deployed) and your user is able to sudo (to install MiCADO as root). Store its IP address which will be referred as `IP` in the following steps. 
+This new VM will host the MiCADO master core services. Use any of aws, ec2, nova, etc command-line tools or web interface of your target cloud to launch a new VM. We recommend a VM with 2 cores, 4GB RAM, 20GB disk. Make sure you can ssh to it (password-free i.e. ssh public key is deployed) and your user is able to sudo (to install MiCADO as root). Store its IP address which will be referred as `IP` in the following steps. The following ports should be open on the virtual machine:
+```
+TCP: 22,2375,2377,3000,4000,5000,5050,7946,8080,8300,8301,8302,8500,8600,9090,9093,12345
+UDP: 4789,7946,8301,8302,8600
+```
 
 #### Step 5: Customize the inventory file for the MiCADO master.
 
@@ -108,41 +110,40 @@ MiCADO has a TOSCA compliant submitter to submit, update, list and remove MiCADO
 
 - To launch an application specified by a TOSCA description stored locally, use this command:
 ```
-curl -F file=@[path to the TOSCA description] -X POST http://[IP]:[Port]/v1.0/app/launch/file/
+curl -F file=@[path to the TOSCA description] -X POST http://[IP]:5050/v1.0/app/launch/file/
 ```
 - To launch an application specified by a TOSCA description stored locally and specify an application id, use this command:
 ```
-curl -F file=@[path to the TOSCA description] -F id=[APPLICATION_ID]  -X POST http://[IP]:[Port]/v1.0/app/launch/file/
+curl -F file=@[path to the TOSCA description] -F id=[APPLICATION_ID]  -X POST http://[IP]:5050/v1.0/app/launch/file/
 ```
 - To launch an application specified by a TOSCA description stored behind a url, use this command:
 ```
-curl -d input="[url to TOSCA description]" -X POST http://[IP]:[Port]/v1.0/app/launch/url/
+curl -d input="[url to TOSCA description]" -X POST http://[IP]:5050/v1.0/app/launch/url/
 ```
 - To launch an application specified by a TOSCA description stored behind an url and specify an application id, use this command:
 ```
-curl -d input="[url to TOSCA description]" -d id=[ID] -X POST http://[IP]:[Port]/v1.0/app/launch/url/
+curl -d input="[url to TOSCA description]" -d id=[ID] -X POST http://[IP]:5050/v1.0/app/launch/url/
 ```
 - To update a running MiCADO application using a TOSCA description stored locally, use this command:
 ```
-curl -F file=@"[path to the TOSCA description]" -X PUT http://[IP]:[Port]/v1.0/app/udpate/file/[APPLICATION_ID]
+curl -F file=@"[path to the TOSCA description]" -X PUT http://[IP]:5050/v1.0/app/udpate/file/[APPLICATION_ID]
 ```
 - To update a running MiCADO application using a TOSCA description stored behind a url, use this command:
 ```
-curl -d input="[url to TOSCA description]" -X PUT http://[IP]:[Port]/v1.0/app/udpate/file/[APPLICATION_ID]
+curl -d input="[url to TOSCA description]" -X PUT http://[IP]:5050/v1.0/app/udpate/file/[APPLICATION_ID]
 ```
 - To undeploy a running MiCADO application, use this command:
 ```
-curl -X DELETE http://[IP]:[Port]/v1.0/app/undeploy/[APPLICATION_ID]
+curl -X DELETE http://[IP]:5050/v1.0/app/undeploy/[APPLICATION_ID]
 ```
 - To query all the running MiCADO applications, use this command:
 ```
-curl -X GET http://[IP]:[Port]/v1.0/list_app/
+curl -X GET http://[IP]:5050/v1.0/list_app/
 ```
 - To query one running MiCADO application, use this command:
 ```
-curl -X GET http://[IP]:[Port]/v1.0/app/[APPLICATION_ID]
+curl -X GET http://[IP]:5050/v1.0/app/[APPLICATION_ID]
 ```
-
 
 ## Application description
 
@@ -261,7 +262,13 @@ To define a Docker network (see **YOUR_DOCKER_NETWORK**) the following fields mu
 - **driver**: specify which driver should be used for this network. (overlay, bridge, etc.)
 
 ### Specification of the Virtual Machine
-The network of Docker services specified in the previous section is executed under Docker Swarm. This section introduces how the parameters of the virtual machine can be configured which will be hosts the Docker worker node. During operation MiCADO will instantiate as many virtual machines with the parameters defined here as required during scaling. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. The following subsections details how to configure them.
+The network of Docker services specified in the previous section is executed under Docker Swarm. This section introduces how the parameters of the virtual machine can be configured which will be hosts the Docker worker node. During operation MiCADO will instantiate as many virtual machines with the parameters defined here as required during scaling. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. The following ports and protocols should be enabled on the virtual machine:
+```
+Protocol: ICMP
+TCP: 22,2375,2377,7946,8300,8301,8302,8500,8600,9100,9200
+UDP: 4789,7946,8301,8302,8600
+```
+The following subsections details how to configure them.
 
 #### CloudSigma
 To instantiate MiCADO workers on CloudSigma, please use the template below. MiCADO **requires** num_cpus, mem_size, vnc_password, libdrive_id and public_key_id to instantiate VM on *CloudSigma*. 
@@ -360,6 +367,9 @@ topology_template:
             flavor_name: ADD_YOUR_ID_HERE (e.g. 3)
             project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
             network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
+            key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
+            security_groups:
+              - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
 ```
 
 - **project_id** is the id of project you would like to use on your target Nova cloud.
