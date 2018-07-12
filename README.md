@@ -8,6 +8,7 @@
 * [REST API](#rest-api)
 * [Application description](#application-description)
 * [Tutorials](#tutorials)
+* [Release Notes](#release-notes)
 
 ## Introduction
 
@@ -507,3 +508,14 @@ You can find test application(s) under the subdirectories of the 'testing' direc
   - Step9: Run ```./4-list-running-apps.sh``` to list the apps you are running under MiCADO.
   - Step10: Run ```./5-undeploy-cq-worker-from-micado.sh``` to remove your application from MiCADO when all items are consumed.
   - Step11: You can have a look at the state ```./cqueue-get-job-status.sh <task_id>``` or stdout of container executions ```./cqueue-get-job-status.sh <task_id>``` using one of the task id values printed during Step 3.
+
+## Release Notes:
+
+**v0.5.0 (12 July 2018)**
+ - Introduce supporting TOSCA
+ - Introduce supporting user-defined scaling policy
+ - Dashboard added with Docker Visualizer, Grafana, Prometheus
+ - Deployment with Ansible playbook
+ - Support private docker registry
+ - Improve persistence of MiCADO master services
+
