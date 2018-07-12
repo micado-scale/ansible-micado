@@ -1,4 +1,6 @@
-# MiCADO - the autoscaling framework for Docker services on Cloud
+# MiCADO - autoscaling framework for Docker services on Cloud
+
+This software is developed by the [COLA project](https://project-cola.eu/).
 
 ## Table of Contents
 
@@ -265,7 +267,7 @@ To define a Docker network (see **YOUR_DOCKER_NETWORK**) the following fields mu
 ### Specification of the Virtual Machine
 The network of Docker services specified in the previous section is executed under Docker Swarm. This section introduces how the parameters of the virtual machine can be configured which will be hosts the Docker worker node. During operation MiCADO will instantiate as many virtual machines with the parameters defined here as required during scaling. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. The following ports and protocols should be enabled on the virtual machine:
 ```
-Protocol: ICMP
+ICMP
 TCP: 22,2375,2377,7946,8300,8301,8302,8500,8600,9100,9200
 UDP: 4789,7946,8301,8302,8600
 ```
@@ -509,7 +511,7 @@ You can find test application(s) under the subdirectories of the 'testing' direc
   - Step10: Run ```./5-undeploy-cq-worker-from-micado.sh``` to remove your application from MiCADO when all items are consumed.
   - Step11: You can have a look at the state ```./cqueue-get-job-status.sh <task_id>``` or stdout of container executions ```./cqueue-get-job-status.sh <task_id>``` using one of the task id values printed during Step 3.
 
-## Release Notes:
+## Release Notes
 
 **v0.5.0 (12 July 2018)**
  - Introduce supporting TOSCA
