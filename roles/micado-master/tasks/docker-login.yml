@@ -1,5 +1,5 @@
 ---
-- name: "Check file exists"
+- name: "Checking the existence of Docker credentials"
   local_action: stat path={{ docker_cred_path }}
   register: f
 
