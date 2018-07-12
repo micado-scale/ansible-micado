@@ -38,7 +38,7 @@ Currently, MiCADO v5 version is available.
 ```
 git clone https://github.com/micado-scale/ansible-micado.git ansible-micado
 cd ansible-micado
-git checkout master
+git checkout v0.5.0
 ```
 
 #### Step 2: Specify credential for instantiating MiCADO workers. 
@@ -160,7 +160,7 @@ Here is an overview example for the structure of the MiCADO application descript
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/master/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.5.0/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
