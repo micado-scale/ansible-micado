@@ -1,4 +1,6 @@
-# MiCADO - the autoscaling framework for Docker services on Cloud
+# MiCADO - autoscaling framework for Docker services on Cloud
+
+This software is developed by the [COLA project](https://project-cola.eu/).
 
 ## Table of Contents
 
@@ -8,6 +10,7 @@
 * [REST API](#rest-api)
 * [Application description](#application-description)
 * [Tutorials](#tutorials)
+* [Release Notes](#release-notes)
 
 ## Introduction
 
@@ -264,7 +267,7 @@ To define a Docker network (see **YOUR_DOCKER_NETWORK**) the following fields mu
 ### Specification of the Virtual Machine
 The network of Docker services specified in the previous section is executed under Docker Swarm. This section introduces how the parameters of the virtual machine can be configured which will be hosts the Docker worker node. During operation MiCADO will instantiate as many virtual machines with the parameters defined here as required during scaling. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. The following ports and protocols should be enabled on the virtual machine:
 ```
-Protocol: ICMP
+ICMP
 TCP: 22,2375,2377,7946,8300,8301,8302,8500,8600,9100,9200
 UDP: 4789,7946,8301,8302,8600
 ```
@@ -315,7 +318,8 @@ topology_template:
           properties:
             deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
             instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
-
+            key_pair_id: ADD_YOUR_ID_HERE (e.g. d865f75f-d32b-4444-9fbb-3332bcedeb75)
+            opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2375,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
 ```
 
 - **deployment_id** is the id of a preregistered deployment in CloudBroker referring to a cloud, image, region, etc. Make sure the image contains a base OS (preferably Ubuntu) installation with cloud-init support! The id is the UUID of the deployment which can be seen in the address bar of your browser when inspecting the details of the deployment.
@@ -506,3 +510,14 @@ You can find test application(s) under the subdirectories of the 'testing' direc
   - Step9: Run ```./4-list-running-apps.sh``` to list the apps you are running under MiCADO.
   - Step10: Run ```./5-undeploy-cq-worker-from-micado.sh``` to remove your application from MiCADO when all items are consumed.
   - Step11: You can have a look at the state ```./cqueue-get-job-status.sh <task_id>``` or stdout of container executions ```./cqueue-get-job-status.sh <task_id>``` using one of the task id values printed during Step 3.
+
+## Release Notes
+
+**v0.5.0 (12 July 2018)**
+ - Introduce supporting TOSCA
+ - Introduce supporting user-defined scaling policy
+ - Dashboard added with Docker Visualizer, Grafana, Prometheus
+ - Deployment with Ansible playbook
+ - Support private docker registry
+ - Improve persistence of MiCADO master services
+
