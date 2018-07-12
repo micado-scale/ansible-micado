@@ -42,12 +42,13 @@
     enabled: yes
     masked: no
 
-- name: 'Docker-compose: Installing packages'
+- name: 'Docker-compose: Installing python tools'
   action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=present"
   with_items:
     - python-setuptools
+    - python3-pip
 
-- name: 'Docker-compose: Install dependencies'
+- name: 'Docker-compose: Installing pip package manager'
   easy_install:
     name: "{{ docker_compose_pip_version }}"
 

@@ -1,0 +1,45 @@
+version: '3.3'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - "15672:15672"  # management port
+      - "5672:5672"   # amqp port
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  redis:
+    image: redis
+    restart: always
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+
+  frontend:
+    image: sanyi86/cqueue_frontend
+    environment:
+      - BROKER=amqp://guest:guest@rabbitmq:5672
+      - RESULT_BACKEND=redis://redis:6379
+    restart: always
+    depends_on:
+      - rabbitmq
+      - redis
+    links:
+      - rabbitmq
+    ports:
+      - "8888:8080"
+
+  rabbitmq_exporter:
+    image: kbudde/rabbitmq-exporter
+    restart: always
+    ports:
+      - "8090:8090" 
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBIT_URL: "http://rabbitmq:15672"
+      PUBLISH_PORT: 8090
+      RABBIT_EXPORTERS: "queue"
+

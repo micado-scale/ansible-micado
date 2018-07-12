@@ -1,0 +1,20 @@
+---
+- name: "Checking the existence of Docker credentials"
+  local_action: stat path={{ docker_cred_path }}
+  register: f
+
+- debug:
+    msg: "Docker credentials found, performing login..."
+  when: f.stat.exists
+
+- debug:
+    msg: "No Docker credentials found, skipping login..."
+  when: f.stat.exists == False
+
+- name: "Get Docker credentials"
+  include_vars: "{{ docker_cred_path }}"
+  when: f.stat.exists
+
+- name: "Perform Docker login"
+  command: docker exec toscasubmitter sh -c "docker login {{ DOCKER_REPO }} -u {{ DOCKER_USER }} -p {{ DOCKER_PASS }}"
+  when: f.stat.exists

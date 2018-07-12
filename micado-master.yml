@@ -1,13 +1,24 @@
 ---
-- name: Deploy MiCADO master (and spawn a worker...)
+- name: Deploy MiCADO master
   hosts: micado-master
+  gather_facts: False
 
   pre_tasks:
-    - name: Verify Ansible meets the version requirements (>=2.2).
+    - name: Ensure that python3 installed
+      raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
+      register: output
+      changed_when: output.stdout != ""
+
+    - name: Turn back gather_fact
+      setup:
+
+    - name: Verify OS meets the version requirements (Ubuntu 16.04).
       assert:
-        that: "ansible_version.full is version_compare('2.2', '>=')"
+        that:
+          - "ansible_os_family == 'Debian'"
+          - "ansible_distribution_version is version('16.04', '==')"
         msg: >
-          "You must update Ansible to at least 2.2. Use update-ansible.yml."
+          "The required OS is Ubuntu 16.04"
 
   roles:
     - micado-master
@@ -17,16 +28,20 @@
     - docker_compose_version: 1.16.1
     - docker_images:
         alertmanager: prom/alertmanager:v0.12.0
+        cadvisor: google/cadvisor:v0.28.3
         consul: consul:1.0.0
         dashboard: micado/dashboard:0.1.0
-        dockervisualizer: jaydes/dockerviz:min-refresh
+        dockervisualizer: micado/dockerviz:min-refresh
         grafana: grafana/grafana:5.1.0
+        node_exporter: prom/node-exporter:v0.15.2
         occopus: micado/occopus:1.6-rc1
         policykeeper: micado/policykeeper:0.1-dev-frame
         prometheus: prom/prometheus:v2.1.0
         redis: redis:4.0
         toscasubmitter: micado/toscasubmitter:0.1.1
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
+    - github_versions:
+        policykeeper: v0.5.0
+        toscasubmitter: v0.5.0
     - grafana_admin_pwd: secret
     - micado_master_name: micado-master
-    

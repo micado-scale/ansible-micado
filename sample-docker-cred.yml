@@ -1,0 +1,4 @@
+#leave DOCKER_REPO blank to default to docker_hub
+DOCKER_REPO: ""
+DOCKER_USER: username
+DOCKER_PASS: password
