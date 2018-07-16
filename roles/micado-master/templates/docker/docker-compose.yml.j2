@@ -96,6 +96,8 @@ services:
     environment:
       GF_SECURITY_ADMIN_PASSWORD: {{grafana_admin_pwd}}
       GF_LOG_MODE: "console file"
+    depends_on:
+      - prometheus
     volumes:
       - "/var/lib/micado/grafana/config/grafana.ini:/etc/grafana/grafana.ini"
       - "/var/lib/micado/grafana/data:/var/lib/grafana"
