@@ -134,6 +134,33 @@
     dest: /var/lib/micado/toscasubmitter/system/key_config.yml
     mode: 0644
     
+- name: "Zorp config: Create directory"
+  file:
+    path: /var/lib/micado/zorp/config/
+    state: directory
+    mode: 0775
+    recurse: yes
+- name: "Zorp config: Copy file"
+  copy:
+    src: zorp/policy.py
+    dest: /var/lib/micado/zorp/config/policy.py
+    mode: 0644
+- name: "Zorp entrypoint: Create directory"
+  file:
+    path: /var/lib/micado/zorp/scripts/
+    state: directory
+    mode: 0775
+    recurse: yes
+- name: "Zorp entrypoint: Copy file"
+  copy:
+    src: zorp/zorp-entrypoint.sh
+    dest: /var/lib/micado/zorp/scripts/docker-entrypoint.sh
+    mode: 0755
+- name: Create user_data_zorp.env for Zorp
+  template:
+      src: user_data/user_data_zorp.env.j2
+      dest: "/var/lib/micado/zorp/config/user_data_zorp.env"
+
 - name: "Redis logging: Create log directory"
   file:
     path: /var/log/micado/redis/
@@ -206,32 +233,18 @@
     dest: /var/log/micado/visualizer/README
     mode: 0644
 
-- name: "Zorp config: Create directory"
+- name: "Zorp logging: Create log directory"
   file:
-    path: /var/lib/micado/zorp/config/
+    path: /var/log/micado/zorp/
     state: directory
     mode: 0775
     recurse: yes
-- name: "Zorp config: Copy file"
+
+- name: "Zorp logging: Create log output info"
   copy:
-    src: zorp/policy.py
-    dest: /var/lib/micado/zorp/config/policy.py
+    content: "Check the logs by the following command:\ndocker logs zorp\n"
+    dest: /var/log/micado/zorp/README
     mode: 0644
-- name: "Zorp entrypoint: Create directory"
-  file:
-    path: /var/lib/micado/zorp/scripts/
-    state: directory
-    mode: 0775
-    recurse: yes
-- name: "Zorp entrypoint: Copy file"
-  copy:
-    src: zorp/zorp-entrypoint.sh
-    dest: /var/lib/micado/zorp/scripts/docker-entrypoint.sh
-    mode: 0755
-- name: Create user_data_zorp.env for Zorp
-  template:
-      src: user_data/user_data_zorp.env.j2
-      dest: "/var/lib/micado/zorp/config/user_data_zorp.env"
 
 - name: "Docker-compose: Copy file"
   template:

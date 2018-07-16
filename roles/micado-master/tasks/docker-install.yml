@@ -28,6 +28,11 @@
     - python-setuptools
     - "{{ docker_package }}"
 
+- name: 'Docker: prevent package from being upgraded'
+  dpkg_selections:
+    name: docker-ce
+    selection: hold
+
 - name: 'Docker: Replace ExecStart for systemd'
   lineinfile:
     dest: /lib/systemd/system/docker.service 
