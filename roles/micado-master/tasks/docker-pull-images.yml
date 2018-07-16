@@ -38,3 +38,7 @@
 - name: 'Downloading docker image: ToscaSubmitter'
   docker_image:
       name: "{{docker_images.toscasubmitter}}"
+
+- name: 'Downloading docker image: Zorp'
+  docker_image:
+      name: "{{docker_images.zorp}}"
