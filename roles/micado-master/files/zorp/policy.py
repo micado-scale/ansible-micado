@@ -62,6 +62,7 @@ class MicadoMasterHttpProxy(HttpProxy):
         self.urlmapping["/grafana"] = ("grafana", 3000, True)
         self.urlmapping["/dashboard"] = ("micado-dashboard", 4000, True)
         self.urlmapping["/occopus"] = ("occopus", 5000, True)
+        self.urlmapping["/policykeeper"] = ("policykeeper", 12345, True)
         self.urlmapping["/toscasubmitter"] = ("toscasubmitter", 5050, True)
 
     def reqRedirect(self, method, url, version):
