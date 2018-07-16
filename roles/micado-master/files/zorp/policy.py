@@ -55,6 +55,7 @@ class MicadoMasterHttpProxy(HttpProxy):
         self.request["GET"] = (HTTP_REQ_POLICY, self.reqRedirect)
         self.request["POST"] = (HTTP_REQ_POLICY, self.reqRedirect)
         self.request["PUT"] = (HTTP_REQ_POLICY, self.reqRedirect)
+        self.request["DELETE"] = (HTTP_REQ_POLICY, self.reqRedirect)
         self.response_header["Strict-Transport-Security"] = (HTTP_HDR_REPLACE, "max-age=63072000; includeSubdomains;")
         self.urlmapping["/prometheus"] = ("prometheus", 9090, False)
         self.urlmapping["/alertmanager"] = ("alertmanager", 9093, True)
