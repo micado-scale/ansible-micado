@@ -75,7 +75,7 @@ To login to the default docker_hub, leave DOCKER_REPO as is (a blank string).
 
 This new VM will host the MiCADO master core services. Use any of aws, ec2, nova, etc command-line tools or web interface of your target cloud to launch a new VM. We recommend a VM with 2 cores, 4GB RAM, 20GB disk. Make sure you can ssh to it (password-free i.e. ssh public key is deployed) and your user is able to sudo (to install MiCADO as root). Store its IP address which will be referred as `IP` in the following steps. The following ports should be open on the virtual machine:
 ```
-TCP: 22,2375,2377,3000,4000,5000,5050,7946,8080,8300,8301,8302,8500,8600,9090,9093,12345
+TCP: 22,2375,2377,7946,8300,8301,8302,8500,8600
 UDP: 4789,7946,8301,8302,8600
 ```
 
@@ -99,11 +99,11 @@ ansible-playbook -i hosts micado-master.yml
 At the end of the deployment, core MiCADO services will be running on the MiCADO master machine. Here are the commands to test the operation of some of the core MiCADO services:
 
 - Occopus:
-```curl -s -X GET http://IP:5000/infrastructures/```
+```curl -s -X GET https://IP/occopus/infrastructures/```
 - Swarm
 ```curl -s http://IP:2375/swarm | jq '.JoinTokens'```
 - Prometheus
-```curl -s http://IP:9090/api/v1/status/config | jq '.status'```
+```curl -s https://IP/prometheus/api/v1/status/config | jq '.status'```
 - Alternatively, you can ssh into MiCADO master and check the logs under ```/var/log/micado```. Scaling decisions can be inspected under policykeeper.
 
 ## Dashboard
@@ -121,39 +121,39 @@ MiCADO has a TOSCA compliant submitter to submit, update, list and remove MiCADO
 
 - To launch an application specified by a TOSCA description stored locally, use this command:
 ```
-curl -F file=@[path to the TOSCA description] -X POST http://[IP]:5050/v1.0/app/launch/file/
+curl -F file=@[path to the TOSCA description] -X POST http://[IP]/toscasubmitter/v1.0/app/launch/file/
 ```
 - To launch an application specified by a TOSCA description stored locally and specify an application id, use this command:
 ```
-curl -F file=@[path to the TOSCA description] -F id=[APPLICATION_ID]  -X POST http://[IP]:5050/v1.0/app/launch/file/
+curl -F file=@[path to the TOSCA description] -F id=[APPLICATION_ID]  -X POST http://[IP]/toscasubmitter/v1.0/app/launch/file/
 ```
 - To launch an application specified by a TOSCA description stored behind a url, use this command:
 ```
-curl -d input="[url to TOSCA description]" -X POST http://[IP]:5050/v1.0/app/launch/url/
+curl -d input="[url to TOSCA description]" -X POST http://[IP]/toscasubmitter/v1.0/app/launch/url/
 ```
 - To launch an application specified by a TOSCA description stored behind an url and specify an application id, use this command:
 ```
-curl -d input="[url to TOSCA description]" -d id=[ID] -X POST http://[IP]:5050/v1.0/app/launch/url/
+curl -d input="[url to TOSCA description]" -d id=[ID] -X POST http://[IP]/toscasubmitter/v1.0/app/launch/url/
 ```
 - To update a running MiCADO application using a TOSCA description stored locally, use this command:
 ```
-curl -F file=@"[path to the TOSCA description]" -X PUT http://[IP]:5050/v1.0/app/udpate/file/[APPLICATION_ID]
+curl -F file=@"[path to the TOSCA description]" -X PUT http://[IP]/toscasubmitter/v1.0/app/udpate/file/[APPLICATION_ID]
 ```
 - To update a running MiCADO application using a TOSCA description stored behind a url, use this command:
 ```
-curl -d input="[url to TOSCA description]" -X PUT http://[IP]:5050/v1.0/app/udpate/file/[APPLICATION_ID]
+curl -d input="[url to TOSCA description]" -X PUT http://[IP]/toscasubmitter/v1.0/app/udpate/file/[APPLICATION_ID]
 ```
 - To undeploy a running MiCADO application, use this command:
 ```
-curl -X DELETE http://[IP]:5050/v1.0/app/undeploy/[APPLICATION_ID]
+curl -X DELETE http://[IP]/toscasubmitter/v1.0/app/undeploy/[APPLICATION_ID]
 ```
 - To query all the running MiCADO applications, use this command:
 ```
-curl -X GET http://[IP]:5050/v1.0/list_app/
+curl -X GET http://[IP]/toscasubmitter/v1.0/list_app/
 ```
 - To query one running MiCADO application, use this command:
 ```
-curl -X GET http://[IP]:5050/v1.0/app/[APPLICATION_ID]
+curl -X GET http://[IP]/toscasubmitter/v1.0/app/[APPLICATION_ID]
 ```
 
 ## Application description
