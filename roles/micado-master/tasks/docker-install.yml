@@ -57,10 +57,17 @@
     version: "{{ docker_compose_version if docker_compose_version else omit }}"
     state: present
 
+- name: 'Docker Swarm: check membership'
+  shell: docker node ls
+  register: swarmmember
+  changed_when: swarmmember.rc == 1
+  failed_when: swarmmember.rc not in [0,1]
+
 - name: 'Docker Swarm: Initialization'
   shell: docker swarm init
         --listen-addr {{ ansible_default_ipv4.address }}
         --advertise-addr {{ ansible_default_ipv4.address }}
+  when: swarmmember.rc == 1
 
 - name: 'Docker Swarm: Change manager availability to drain'
   shell: docker node update

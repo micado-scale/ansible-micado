@@ -6,10 +6,10 @@
     mode: 0775
     recurse: yes
 
-- name: "Worker node: Create auth_data.yaml for Occopus"
-  copy:
-      src: "{{ cred_path }}"
-      dest: "/var/lib/micado/occopus/data/auth_data.yaml"
+- name: Create auth_data.yaml for Occopus
+  template:
+    src: user_data/auth_data.yaml.j2
+    dest: "/var/lib/micado/occopus/data/auth_data.yaml"
 
 - name: "Worker node: Occopus nodes: Copy cloud-config"
   copy:
