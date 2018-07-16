@@ -17,7 +17,13 @@
 - include: docker-login.yml
 
 - name: Enable packet filtering
-  shell: systemctl enable --now iptables
+  service:
+    name: iptables
+    state: restarted
+    enabled: yes
 
 - name: Enable and start MiCADO systemd service
-  shell: systemctl enable --now micado
+  service:
+    name: micado
+    state: restarted
+    enabled: yes
