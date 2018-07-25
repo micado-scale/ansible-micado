@@ -120,6 +120,16 @@ services:
       - "/var/log/micado/toscasubmitter/:/var/log/submitter/"
     user: "root"
 
+   credman:
+    image: micado/credential-manager:latest
+    container_name: credman
+    restart: always
+    environment:
+      PROVISION_FILE: /config/provisioning.csv
+      DATABASE_URL: sqlite:////config/credential.db
+    volumes:
+      - "/var/lib/micado/credman/config:/config"
+
    zorp:
     image: balasys/zorpgpl:latest
     container_name: zorp
