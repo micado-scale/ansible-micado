@@ -117,54 +117,6 @@ class MicadoCredmanAuthenticationBackend(AbstractAuthenticationBackend):
             return Z_AUTH_ACCEPT
 
 
-class HtpasswdAuthenticationBackend(AbstractAuthenticationBackend):
-    def __init__(self, filename):
-        from passlib.apache import HtpasswdFile
-
-        self.ht = HtpasswdFile(filename)
-        self.sessions = {}
-
-    def startSession(self, session_id, session):
-        pass
-
-    def stopSession(self, session_id):
-        del self.sessions[session_id]
-
-    def getMethods(self, session_id, entity):
-        user = None
-        for (headername, value) in entity:
-            if headername == "User":
-                user = value
-        if not user:
-            log(session_id, CORE_AUTH, 1, "Could not parse user, rejecting;")
-            return Z_AUTH_REJECT
-        else:
-            if user not in self.ht.users():
-                 log(session_id, CORE_AUTH, 1, "User not found in htpass file;")
-                 return Z_AUTH_REJECT
-            self.sessions[session_id] = user
-        return (2, [('Method', 'PASSWD.NONE:0:0:Password Authentication/htpasswd')])
-
-    def setMethod(self, session_id, method):
-        return (4, [])
-
-    def converse(self, session_id, credentials):
-        passwd = None
-        for (method, cred) in credentials:
-            if method == "Password":
-                passwd = cred
-        if not passwd:
-            log(session_id, CORE_AUTH, 1, "Could not parse password, rejecting;")
-            return Z_AUTH_REJECT
-        else:
-            user = self.sessions[session_id]
-            if self.ht.verify(user, passwd):
-                 log(session_id, CORE_AUTH, 1, "Accepted authentication; user='%s'", (user,))
-                 return Z_AUTH_ACCEPT
-            else:
-                 log(session_id, CORE_AUTH, 1, "Wrong password; user='%s'", (user,))
-                 return Z_AUTH_REJECT
-
 class PersistentTimedCache(TimedCache):
     def __init__(self, filename, timeout, update_stamp=TRUE, cleanup_threshold=100):
         super(PersistentTimedCache, self).__init__(filename, timeout, update_stamp, cleanup_threshold)
@@ -473,7 +425,7 @@ class MicadoMasterHttpProxy(SessionHttpProxy):
         return HttpProxy.setServerAddress(self, socket.gethostbyname("micado-dashboard"), 4000)
 
 def default() :
-    Service(name='interHTTPS', router=DirectedRouter(dest_addr=(SockAddrInet('127.0.0.1', 80)), overrideable=FALSE), chainer=ConnectChainer(), proxy_class=FormAuthHttpProxy, max_instances=0, max_sessions=0, keepalive=Z_KEEPALIVE_NONE, encryption_policy="https_clientonly_encryption_policy")
+    Service(name='interHTTPS', router=DirectedRouter(dest_addr=(SockAddrInet('127.0.0.1', 80)), overrideable=TRUE), chainer=ConnectChainer(), proxy_class=FormAuthHttpProxy, max_instances=0, max_sessions=0, keepalive=Z_KEEPALIVE_NONE, encryption_policy="https_clientonly_encryption_policy")
     Dispatcher(transparent=FALSE, bindto=DBIface(protocol=ZD_PROTO_TCP, port=443, iface="eth0", family=2), rule_port="443", service="interHTTPS")
     Service(name='interHTTP', router=DirectedRouter(dest_addr=(SockAddrInet('127.0.0.1', 80),)), chainer=ConnectChainer(), proxy_class=MicadoMasterHttpProxy, max_instances=0, max_sessions=0, keepalive=Z_KEEPALIVE_NONE)
     Dispatcher(transparent=FALSE, bindto=DBIface(protocol=ZD_PROTO_TCP, port=80, iface="eth0", family=2), rule_port="80", service="interHTTP")
