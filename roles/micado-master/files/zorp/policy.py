@@ -98,21 +98,21 @@ class MicadoCredmanAuthenticationBackend(AbstractAuthenticationBackend):
             try:
                 j_body = loads(''.join(resp.readlines()))
             except ValueError as e:
-                log(session_id, CORE_AUTH, 2, "Mailformed response on credman API; %s", (e,))
+                log(session_id, CORE_AUTH, 2, "Malformed response on credman API; %s", (e,))
                 return Z_AUTH_REJECT
             code = j_body.get('code', 400)
             if code == 423:
-                log(session_id, CORE_AUTH, 3, "Authentication failure, user account locked; code=%s, msg=%s",
-                    (code, j_body.get('result', ''), )
+                log(session_id, CORE_AUTH, 3, "Authentication failure, user account locked; username='%s', code=%s, msg=%s",
+                    (user, code, j_body.get('result', ''), )
                     )
                 return Z_AUTH_REJECT
             elif code != 200:
-                log(session_id, CORE_AUTH, 3, "Authentication failure; code=%s, msg=%s",
-                    (code, j_body.get('result', ''), )
+                log(session_id, CORE_AUTH, 3, "Authentication failure; username='%s', code=%s, msg=%s",
+                    (user, code, j_body.get('result', ''), )
                     )
                 return Z_AUTH_REJECT
-            log(session_id, CORE_AUTH, 3, "Authentication success; code=%s, msg=%s",
-                (code, j_body.get('result', ''), )
+            log(session_id, CORE_AUTH, 3, "Authentication success; username='%s', code=%s, msg=%s",
+                (user, code, j_body.get('result', ''), )
                 )
             return Z_AUTH_ACCEPT
 
@@ -222,7 +222,7 @@ class SessionHttpProxy(HttpProxy):
             self.http_session_data = self.session_cache.lookup(cookie[self.http_session_cookie_name].value)
             if self.http_session_data:
                 self.http_session_id = cookie[self.http_session_cookie_name].value
-            proxyLog(self, HTTP_POLICY, 1, "Session id; id='%s'", (self.http_session_id,))
+            proxyLog(self, HTTP_POLICY, 6, "Session id; id='%s'", (self.http_session_id,))
 
     def reqRedirect(self, method, url, version):
         import time
@@ -233,7 +233,7 @@ class SessionHttpProxy(HttpProxy):
         if self.http_session_id is None:
             self.createHttpSession()
         else:
-            proxyLog(self, HTTP_POLICY, 1, "Yeehaw, we have a session; session_id='%s'", (self.http_session_id,))
+            proxyLog(self, HTTP_POLICY, 6, "Found existing HTTP session; session_id='%s'", (self.http_session_id,))
         return HTTP_REQ_ACCEPT
 
     def respRedirect(self, method, url, version, response):
@@ -261,7 +261,7 @@ class FormAuthParseLoginProxy(AnyPyProxy):
         redirect_location = urllib.unquote(formdata["redirect_location"][0])
         username = urllib.unquote(formdata["username"][0])
         password = urllib.unquote(formdata["password"][0])
-        proxyLog(self, HTTP_POLICY, 1, "Redirect location; loc='%s'", (redirect_location,))
+        proxyLog(self, HTTP_POLICY, 6, "Redirect location; loc='%s'", (redirect_location,))
         return (username, password, redirect_location)
 
     def setUnauthorizedVerdict(self, redirect_location):
@@ -341,20 +341,19 @@ class FormAuthHttpProxy(SessionHttpProxy):
         if ancestor_verdict != HTTP_REQ_ACCEPT:
             return ancestor_verdict
 
-        proxyLog(self, HTTP_POLICY, 1, "Every request up to here")
-
         if not self.http_session_data.has_key("auth_username"):
-
-            proxyLog(self, HTTP_POLICY, 1, "No auth_username here; method='%s', url='%s', version='%s'", (method, url, version, ))
-
+            proxyLog(self, HTTP_POLICY, 1, "No cached authentication found; method='%s', url='%s', version='%s'", (method, url, version, ))
             if method == "POST":
                 self.request_stack["POST"] = (HTTP_STK_DATA, (Z_STACK_PROXY, FormAuthParseLoginProxy))
                 return HTTP_REQ_ACCEPT
             else:
                 return self.showAuthForm(url)
+        else:
+            self.session.auth_user = self.http_session_data["auth_username"]
+            self.session.auth_info = 'inband'
+            proxyLog(self, CORE_AUTH, 3, "User authentication successful; entity='%s', auth_info='%s'", (self.session.auth_user, self.session.auth_info))
 
-        proxyLog(self, HTTP_POLICY, 1, "Only authenticated requests should get here")
-
+        #proxyLog(self, HTTP_POLICY, 1, "Only authenticated requests should get here")
         if self.request_url_file.startswith("/logout"):
             proxyLog(self, HTTP_POLICY, 1, "Destroying session; id='%s'", (self.http_session_id,))
             self.session_cache.remove(self.http_session_id)
@@ -375,7 +374,7 @@ class FormAuthHttpProxy(SessionHttpProxy):
         else:
             return HTTP_RSP_REJECT
 
-class MicadoMasterHttpProxy(SessionHttpProxy):
+class MicadoMasterHttpProxy(FormAuthHttpProxy):
     def __pre_config__(self):
         self.urlmapping = {}
         return super(MicadoMasterHttpProxy, self).__pre_config__()
@@ -400,14 +399,6 @@ class MicadoMasterHttpProxy(SessionHttpProxy):
         self.urlmapping["/policykeeper"] = ("policykeeper", 12345, True)
         self.urlmapping["/toscasubmitter"] = ("toscasubmitter", 5050, True)
 
-    def reqRedirect(self, method, url, version):
-        proxyLog(self, HTTP_POLICY, 3, "Got URL %s", (url,))
-        if url.startswith("http://"):
-            self.error_status = 301
-            self.error_headers="Location: %s\n" % url.replace("http://", "https://")
-            return HTTP_REQ_REJECT
-        return HTTP_REQ_ACCEPT
-
     def setServerAddress(self, host, port):
         for path in self.urlmapping.keys():
             if self.request_url_file.startswith(path):
@@ -424,8 +415,24 @@ class MicadoMasterHttpProxy(SessionHttpProxy):
                 return HttpProxy.setServerAddress(self, socket.gethostbyname(container), port)
         return HttpProxy.setServerAddress(self, socket.gethostbyname("micado-dashboard"), 4000)
 
+class HttpToHttpsProxy(HttpProxy):
+
+    def config(self):
+        super(HttpToHttpsProxy, self).config()
+        self.max_keepalive_requests = 1
+        self.error_silent = TRUE
+        self.request["*"] = (HTTP_REQ_POLICY, self.reqRedirect)
+
+    def reqRedirect(self, method, url, version):
+        proxyLog(self, HTTP_POLICY, 3, "Got URL %s", (url,))
+        if url.startswith("http://"):
+            self.error_status = 301
+            self.error_headers="Location: %s\n" % url.replace("http://", "https://")
+            return HTTP_REQ_REJECT
+        return HTTP_REQ_ACCEPT
+
 def default() :
-    Service(name='interHTTPS', router=DirectedRouter(dest_addr=(SockAddrInet('127.0.0.1', 80)), overrideable=TRUE), chainer=ConnectChainer(), proxy_class=FormAuthHttpProxy, max_instances=0, max_sessions=0, keepalive=Z_KEEPALIVE_NONE, encryption_policy="https_clientonly_encryption_policy")
+    Service(name='interHTTPS', router=DirectedRouter(dest_addr=(SockAddrInet('127.0.0.1', 4000)), overrideable=TRUE), chainer=ConnectChainer(), proxy_class=MicadoMasterHttpProxy, max_instances=0, max_sessions=0, keepalive=Z_KEEPALIVE_NONE, encryption_policy="https_clientonly_encryption_policy")
     Dispatcher(transparent=FALSE, bindto=DBIface(protocol=ZD_PROTO_TCP, port=443, iface="eth0", family=2), rule_port="443", service="interHTTPS")
-    Service(name='interHTTP', router=DirectedRouter(dest_addr=(SockAddrInet('127.0.0.1', 80),)), chainer=ConnectChainer(), proxy_class=MicadoMasterHttpProxy, max_instances=0, max_sessions=0, keepalive=Z_KEEPALIVE_NONE)
+    Service(name='interHTTP', router=DirectedRouter(dest_addr=(SockAddrInet('127.0.0.1', 80),)), chainer=ConnectChainer(), proxy_class=HttpToHttpsProxy, max_instances=0, max_sessions=0, keepalive=Z_KEEPALIVE_NONE)
     Dispatcher(transparent=FALSE, bindto=DBIface(protocol=ZD_PROTO_TCP, port=80, iface="eth0", family=2), rule_port="80", service="interHTTP")
