@@ -44,7 +44,6 @@ EncryptionPolicy(
     )
 )
 
-
 class MicadoCredmanAuthenticationBackend(AbstractAuthenticationBackend):
     def __init__(self, url):
         self.url = url
@@ -111,11 +110,13 @@ class MicadoCredmanAuthenticationBackend(AbstractAuthenticationBackend):
                     (user, code, j_body.get('result', ''), )
                     )
                 return Z_AUTH_REJECT
-            log(session_id, CORE_AUTH, 3, "Authentication success; username='%s', code=%s, msg=%s",
-                (user, code, j_body.get('result', ''), )
+            groups = ["user",]
+            if j_body.get('role', '') != "user":
+                groups.append(j_body.get('role', ''))
+            log(session_id, CORE_AUTH, 3, "Authentication success; username='%s', groups='%s', code=%s, msg=%s",
+                (user, groups, code, j_body.get('result', ''), )
                 )
-            return Z_AUTH_ACCEPT
-
+            return (Z_AUTH_ACCEPT, groups)
 
 class PersistentTimedCache(TimedCache):
     def __init__(self, filename, timeout, update_stamp=TRUE, cleanup_threshold=100):
@@ -270,13 +271,15 @@ class FormAuthParseLoginProxy(AnyPyProxy):
         self.session.http.error_headers = "Location: %s\r\n" % redirect_location
         self.set_verdict(ZV_REJECT, "Invalid login data")
 
-    def setAuthorizedVerdict(self, username, redirect_location):
+    def setAuthorizedVerdict(self, username, groups, redirect_location):
         # replace with this once GPL userAuthenticated bug is resolved
         #self.session.proxy.userAuthenticated(username, 'inband')
         self.session.getMasterSession().auth_user = username
+        self.session.getMasterSession().auth_groups = groups
         self.session.auth_info = 'inband'
 
         self.session.http.http_session_data["auth_username"] = username
+        self.session.http.http_session_data["auth_groups"] = groups
         self.session.http.session_cache.store(self.session.http.http_session_id, self.session.http.http_session_data)
 
         self.session.http.error_status = 301
@@ -292,8 +295,9 @@ class FormAuthParseLoginProxy(AnyPyProxy):
                 (username, password, redirect_location) = self.parseAuthForm(line)
                 if self.auth.getMethods(self.session.session_id, [("User", username)]) != Z_AUTH_REJECT:
                     self.auth.setMethod(self.session.session_id, "PASSWD.NONE:0:0:Password Authentication/inband")
-                    if self.auth.converse(self.session.session_id, [("Password", password)]) != Z_AUTH_REJECT:
-                        return self.setAuthorizedVerdict(username, redirect_location)
+                    verdict = self.auth.converse(self.session.session_id, [("Password", password)]) 
+                    if verdict != Z_AUTH_REJECT:
+                        return self.setAuthorizedVerdict(username, verdict[1], redirect_location)
                     else:
                         return self.setUnauthorizedVerdict(redirect_location)
                 else:
@@ -336,6 +340,13 @@ class FormAuthHttpProxy(SessionHttpProxy):
         self.error_headers = "Content-Type: text/html\r\n"
         return HTTP_REQ_CUSTOM_RESPONSE
 
+    def userAuthenticated(self, entity, groups=None, auth_info=''):
+        proxyLog(self, CORE_AUTH, 3, "User authentication successful; entity='%s', auth_info='%s'", (entity, auth_info))
+        self.session.auth_user = self.http_session_data["auth_username"]
+        self.session.auth_groups = self.http_session_data["auth_groups"]
+        self.session.auth_info = 'inband'
+        return HTTP_REQ_ACCEPT
+
     def reqRedirect(self, method, url, version):
         ancestor_verdict = super(FormAuthHttpProxy, self).reqRedirect(method, url, version)
         if ancestor_verdict != HTTP_REQ_ACCEPT:
@@ -349,9 +360,9 @@ class FormAuthHttpProxy(SessionHttpProxy):
             else:
                 return self.showAuthForm(url)
         else:
-            self.session.auth_user = self.http_session_data["auth_username"]
-            self.session.auth_info = 'inband'
-            proxyLog(self, CORE_AUTH, 3, "User authentication successful; entity='%s', auth_info='%s'", (self.session.auth_user, self.session.auth_info))
+            verdict = self.userAuthenticated(self.http_session_data["auth_username"], self.http_session_data["auth_groups"], 'inband')
+            if verdict != HTTP_REQ_ACCEPT:
+                return verdict
 
         #proxyLog(self, HTTP_POLICY, 1, "Only authenticated requests should get here")
         if self.request_url_file.startswith("/logout"):
@@ -374,7 +385,32 @@ class FormAuthHttpProxy(SessionHttpProxy):
         else:
             return HTTP_RSP_REJECT
 
-class MicadoMasterHttpProxy(FormAuthHttpProxy):
+class AuthorizingFormAuthHttpProxy(FormAuthHttpProxy):
+
+    def __pre_config__(self):
+        self.auth_mapping = {}
+        return super(AuthorizingFormAuthHttpProxy, self).__pre_config__()
+
+    def config(self):
+        super(AuthorizingFormAuthHttpProxy, self).config()
+
+    def userAuthenticated(self, entity, groups, auth_info):
+        ancestor_verdict = super(AuthorizingFormAuthHttpProxy, self).userAuthenticated(entity, groups, auth_info)
+        if ancestor_verdict != HTTP_REQ_ACCEPT:
+            return ancestor_verdict
+        for auth_url in self.auth_mapping.keys():
+            proxyLog(self, CORE_AUTH, 6, "Checking authorization; user='%s', group='%s', url='%s', auth_url='%s'", (self.session.auth_user, self.session.auth_groups, self.request_url_file, auth_url))
+            if self.request_url_file.startswith(auth_url):
+                if self.auth_mapping[auth_url] in self.session.auth_groups:
+                    return HTTP_REQ_ACCEPT
+                break
+        #raise AAException, "User authorization failed; user='%s', group='%s', url='%s'" % (self.session.auth_user, self.session.auth_groups, self.request_url_file)
+        proxyLog(self, CORE_AUTH, 1, "User authorization failed; user='%s', group='%s', url='%s'" % (self.session.auth_user, self.session.auth_groups, self.request_url_file))
+        self.error_silent = FALSE
+        self.error_info = "User authorization failed"
+        return HTTP_REQ_REJECT
+
+class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
     def __pre_config__(self):
         self.urlmapping = {}
         return super(MicadoMasterHttpProxy, self).__pre_config__()
@@ -398,6 +434,16 @@ class MicadoMasterHttpProxy(FormAuthHttpProxy):
         self.urlmapping["/occopus"] = ("occopus", 5000, True)
         self.urlmapping["/policykeeper"] = ("policykeeper", 12345, True)
         self.urlmapping["/toscasubmitter"] = ("toscasubmitter", 5050, True)
+        self.auth_mapping["/"] = "user"
+        self.auth_mapping["/submitter"] = "admin"
+        self.auth_mapping["/prometheus"] = "user"
+        self.auth_mapping["/alertmanager"] = "admin"
+        self.auth_mapping["/docker-visualizer"] = "user"
+        self.auth_mapping["/grafana"] = "user"
+        self.auth_mapping["/dashboard"] = "user"
+        self.auth_mapping["/occopus"] = "admin"
+        self.auth_mapping["/policykeeper"] = "admin"
+        self.auth_mapping["/toscasubmitter"] = "admin"
 
     def setServerAddress(self, host, port):
         for path in self.urlmapping.keys():
