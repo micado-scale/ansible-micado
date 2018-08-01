@@ -364,7 +364,7 @@ topology_template:
 - **image_id** is the image id (e.g. ami-12345678) on your EC2 cloud. Select an image containing a base os installation with cloud-init support!
 - **instance_type** is the instance type (e.g. t1.small) of your VM to be instantiated.
 - **key_name** optionally specifies the keypair (e.g. my_ssh_keypair) to be deployed on your VM.
-- **security_groups_ids** optionally specify security settings (you can define multiple security groups in the form of a list, e.g. sg-93d46bf7) of your VM.
+- **security_group_ids** optionally specify security settings (you can define multiple security groups or just one, but this property must be formatted as a list, e.g. [sg-93d46bf7]) of your VM.
 - **subnet_id** optionally specifies subnet identifier (e.g. subnet-644e1e13) to be attached to the VM.
 
 #### Nova
