@@ -95,7 +95,7 @@ Edit the `hosts` file to set ansible variables for MiCADO master machine. Update
 ansible-playbook -i hosts micado-master.yml
 ```
 
-**For deployments to an OpenStack cloud only, do not use the above command**
+**NOTE: For deployments to an OpenStack cloud, do not use the above command**
 ##### For Openstack deployments use:
 
 ```
