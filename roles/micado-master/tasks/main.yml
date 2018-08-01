@@ -1,20 +1,10 @@
 ---
-- name: "Disable updates"
-  script: files/misc/disable-updates.sh
+- include: setup-master-node.yml
 
-- name: Ensure Google DNS server added
-  lineinfile:
-    path: /etc/resolv.conf
-    line: 'nameserver 8.8.8.8'
-
-- name: Change hostname
-  hostname:
-    name: "{{ micado_master_name }}"
-
-- name: Ensure that the hostfile contains the actual hostname
-  lineinfile:
-    path: /etc/hosts
-    line: "127.0.0.1\tlocalhost\t{{ micado_master_name }}"
+- name: Load the credentials and security settings from the playbook
+  include_vars:
+    file: "credentials.yml"
+    name: config
 
 - include: docker-install.yml
 
@@ -24,4 +14,16 @@
 
 - include: docker-pull-images.yml
 
-- include: start_micado.yml
+- include: docker-login.yml
+
+- name: Enable packet filtering
+  service:
+    name: iptables
+    state: restarted
+    enabled: yes
+
+- name: Enable and start MiCADO systemd service
+  service:
+    name: micado
+    state: restarted
+    enabled: yes

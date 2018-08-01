@@ -12,7 +12,7 @@
     dest: /var/lib/micado/consul/config/config.json
     mode: 0644
 
-- name: "Consul config: create checks.json"
+- name: "Consul config: Create checks.json"
   template:
     src: consul/checks.json.j2
     dest: /var/lib/micado/consul/config/checks.json
@@ -30,6 +30,15 @@
     src: prometheus/prometheus.yml
     dest: /var/lib/micado/prometheus/config/prometheus.yml
     mode: 0644
+
+- name: "Prometheus data: Create directory"
+  file:
+    path: /var/lib/micado/prometheus/data/
+    state: directory
+    owner: nobody
+    group: nogroup
+    mode: 0775
+    recurse: yes
 
 - name: "Alertmanager config: Create directory"
   file:
@@ -51,17 +60,28 @@
     mode: 0775
     recurse: yes
 
-- name: "Policy-keeper: Copy config file"
+- name: "Policy-keeper config: Copy file"
   template:
     src: policykeeper/policykeeper_config.yaml.j2
     dest: /var/lib/micado/policykeeper/config/policykeeper_config.yaml
 
-- name: "Policy-keeper: Copy prometheus file"
+- name: "Policy-keeper config: Copy prometheus config template"
   copy:
     src: policykeeper/prometheus_config_template.yaml
     dest: /var/lib/micado/policykeeper/config/prometheus_config_template.yaml
     mode: 0644
 
+- name: "Grafana config: Create config directory"
+  file:
+    path: /var/lib/micado/grafana/config/
+    state: directory
+    mode: 0775
+    recurse: yes
+- name: "Grafana config: Copy server config file"
+  copy:
+    src: grafana/grafana.ini
+    dest: /var/lib/micado/grafana/config/grafana.ini
+    mode: 0644
 - name: "Grafana config: Create dashboard directory"
   file:
     path: /var/lib/micado/grafana/data/dashboards
@@ -101,19 +121,46 @@
     dest: /var/lib/micado/grafana/provisioning/datasources/prometheus.yaml
     mode: 0644
 
-- name: "TOSCAsubmitter config: Create working directory"
+- name: "TOSCA Submitter config: Create working directory"
   file:
     path: /var/lib/micado/toscasubmitter/system
     state: directory
     mode: 0775
     recurse: yes
 
-- name: "TOSCAsubmitter config: Copy config file"
+- name: "TOSCA Submitter config: Copy config file"
   copy:
     src: toscasubmitter/key_config.yml
     dest: /var/lib/micado/toscasubmitter/system/key_config.yml
     mode: 0644
     
+- name: "Zorp config: Create directory"
+  file:
+    path: /var/lib/micado/zorp/config/
+    state: directory
+    mode: 0775
+    recurse: yes
+- name: "Zorp config: Copy file"
+  copy:
+    src: zorp/policy.py
+    dest: /var/lib/micado/zorp/config/policy.py
+    mode: 0644
+- name: "Zorp entrypoint: Create directory"
+  file:
+    path: /var/lib/micado/zorp/scripts/
+    state: directory
+    mode: 0775
+    recurse: yes
+- name: "Zorp entrypoint: Copy file"
+  copy:
+    src: zorp/zorp-entrypoint.sh
+    dest: /var/lib/micado/zorp/scripts/docker-entrypoint.sh
+    mode: 0755
+- name: Create user_data_zorp.env for Zorp
+  template:
+      src: user_data/user_data_zorp.env.j2
+      dest: "/var/lib/micado/zorp/config/user_data_zorp.env"
+
 - name: "Redis logging: Create log directory"
   file:
     path: /var/log/micado/redis/
@@ -128,7 +175,7 @@
     mode: 0775
     recurse: yes
 
-- name: "Consul logging: Check logs"
+- name: "Consul logging: Create log output info"
   copy:
     content: "Check the logs by the following command:\ndocker logs consul\n"
     dest: /var/log/micado/consul/README
@@ -141,7 +188,7 @@
     mode: 0775
     recurse: yes
 
-- name: "Prometheus logging: Check logs"
+- name: "Prometheus logging: Create log output info"
   copy:
     content: "Check the logs by the following command:\ndocker logs prometheus\n"
     dest: /var/log/micado/prometheus/README
@@ -154,7 +201,7 @@
     mode: 0775
     recurse: yes
 
-- name: "Alertmanager logging: Check logs"
+- name: "Alertmanager logging: Create log output info"
   copy:
     content: "Check the logs by the following command:\ndocker logs alertmanager\n"
     dest: /var/log/micado/alertmanager/README
@@ -167,7 +214,7 @@
     mode: 0775
     recurse: yes
 
-- name: "Dashboard logging: Check logs"
+- name: "Dashboard logging: Create log output info"
   copy:
     content: "Check the logs by the following command:\ndocker logs micado-dashboard\n"
     dest: /var/log/micado/dashboard/README
@@ -180,10 +227,23 @@
     mode: 0775
     recurse: yes
 
-- name: "Visualizer logging: Check logs"
+- name: "Visualizer logging: Create log output info"
   copy:
     content: "Check the logs by the following command:\ndocker logs dockervisualizer\n"
     dest: /var/log/micado/visualizer/README
+    mode: 0644
+
+- name: "Zorp logging: Create log directory"
+  file:
+    path: /var/log/micado/zorp/
+    state: directory
+    mode: 0775
+    recurse: yes
+
+- name: "Zorp logging: Create log output info"
+  copy:
+    content: "Check the logs by the following command:\ndocker logs zorp\n"
+    dest: /var/log/micado/zorp/README
     mode: 0644
 
 - name: "Docker-compose: Copy file"
@@ -191,3 +251,21 @@
     src: docker/docker-compose.yml.j2
     dest: /var/lib/micado/docker-compose.yml
     mode: 0644
+
+- name: "Iptables configuration: Copy file"
+  copy:
+    src: iptables/iptables.conf
+    dest: /etc/iptables.conf
+    mode: 0640
+- name: "Iptables systemd unit file: Copy file"
+  copy:
+    src: iptables/iptables.service
+    dest: /etc/systemd/system/iptables.service
+    mode: 0644
+
+- name: "MiCADO systemd unit file: Copy file"
+  copy:
+    src: micado/micado.service
+    dest: /etc/systemd/system/micado.service
+    mode: 0644
+

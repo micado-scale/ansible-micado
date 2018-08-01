@@ -28,6 +28,11 @@
     - python-setuptools
     - "{{ docker_package }}"
 
+- name: 'Docker: prevent package from being upgraded'
+  dpkg_selections:
+    name: docker-ce
+    selection: hold
+
 - name: 'Docker: Replace ExecStart for systemd'
   lineinfile:
     dest: /lib/systemd/system/docker.service 
@@ -42,12 +47,13 @@
     enabled: yes
     masked: no
 
-- name: 'Docker-compose: Installing packages'
+- name: 'Docker-compose: Installing python tools'
   action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=present"
   with_items:
     - python-setuptools
+    - python3-pip
 
-- name: 'Docker-compose: Install dependencies'
+- name: 'Docker-compose: Installing pip package manager'
   easy_install:
     name: "{{ docker_compose_pip_version }}"
 
@@ -57,10 +63,17 @@
     version: "{{ docker_compose_version if docker_compose_version else omit }}"
     state: present
 
+- name: 'Docker Swarm: check membership'
+  shell: docker node ls
+  register: swarmmember
+  changed_when: swarmmember.rc == 1
+  failed_when: swarmmember.rc not in [0,1]
+
 - name: 'Docker Swarm: Initialization'
   shell: docker swarm init
         --listen-addr {{ ansible_default_ipv4.address }}
         --advertise-addr {{ ansible_default_ipv4.address }}
+  when: swarmmember.rc == 1
 
 - name: 'Docker Swarm: Change manager availability to drain'
   shell: docker node update
