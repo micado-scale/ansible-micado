@@ -95,6 +95,13 @@ Edit the `hosts` file to set ansible variables for MiCADO master machine. Update
 ansible-playbook -i hosts micado-master.yml
 ```
 
+##### For deployments to an OpenStack cloud only, do not use the above command
+**Instead, use:**
+
+```
+ansible-playbook -i hosts micado-master.yml --tags "untagged, openstack"
+```
+
 ### Health checking
 
 At the end of the deployment, core MiCADO services will be running on the MiCADO master machine. Here are the commands to test the operation of some of the core MiCADO services:
