@@ -133,3 +133,9 @@ services:
       - "/var/lib/micado/toscasubmitter/system/:/var/lib/submitter/system"
       - "/var/log/micado/toscasubmitter/:/var/log/submitter/"
     user: "root"
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: {{ ansible_default_ipv4.mtu }}
