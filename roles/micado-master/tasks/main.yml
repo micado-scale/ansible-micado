@@ -12,3 +12,4 @@
 - include: start_micado.yml
 
 - include: docker-login.yml
+  when: docker_cred_path is defined
