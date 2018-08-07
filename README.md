@@ -57,6 +57,16 @@ Specify the provisioning method for the x509 keypair used for TLS encryption of 
  - The 'self-signed' option generates a new keypair with the specified hostname as subject (or 'micado-master' if omitted). 
  - The 'user-supplied' option lets the user add the keypair as plain multiline strings (in unencrypted format) in the ansible_user_data.yml file under the 'cert' and 'key' subkeys respectively.
 
+Optionally you can use the [Ansible Vault](https://docs.ansible.com/ansible/2.4/vault.html) mechanism to keep the credential data in an encrypted format. To achieve this, create the above file using Vault with the command
+```
+ansible-vault create credentials.yml
+```
+
+This will launch *vi* or the editor defined in the $EDITOR environment variable to make changes to the file. If you wish to make any changes to the previously encrypted file, you can use the command
+```
+ansible-vault edit credentials.yml
+```
+
 ### Step 3: Launch an empty cloud VM instance on which core MiCADO services will be installed
 
 Use any of aws, ec2, nova command-line tools or web interface of the target cloud. Make sure you can ssh to it (without password) and your user is a sudoer. Store its IP address which will be referred as `IP` in the following steps.
@@ -92,6 +102,11 @@ Edit the `hosts` file to set ansible variables for MiCADO master machine. Update
 
 ```
 ansible-playbook -i hosts micado-master.yml
+```
+
+If you have used Vault to encrypt your credentials, you have to add the path to your vault credentials to the command line as described in the [Ansible Vault documentation](https://docs.ansible.com/ansible/2.4/vault.html#providing-vault-passwords) or provide it via command line using the command
+```
+ansible-playbook -i hosts micado-master.yml --ask-vault-pass
 ```
 
 ### Health checking

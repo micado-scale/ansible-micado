@@ -134,6 +134,17 @@
     dest: /var/lib/micado/toscasubmitter/system/key_config.yml
     mode: 0644
     
+- name: "Credential Manager config: Create directory"
+  file:
+    path: /var/lib/micado/credman/config/
+    state: directory
+    mode: 0775
+    recurse: yes
+- name: "Credential Manager initial config: Copy file"
+  template:
+    src: user_data/auth_data_credential_manager.csv.j2
+    dest: /var/lib/micado/credman/config/provisioning.csv
+
 - name: "Zorp config: Create directory"
   file:
     path: /var/lib/micado/zorp/config/
@@ -144,6 +155,11 @@
   copy:
     src: zorp/policy.py
     dest: /var/lib/micado/zorp/config/policy.py
+    mode: 0644
+- name: "Zorp HTTP login form: Copy file"
+  copy:
+    src: zorp/authform.html
+    dest: /var/lib/micado/zorp/config/authform.html
     mode: 0644
 - name: "Zorp entrypoint: Create directory"
   file:
@@ -233,6 +249,19 @@
     dest: /var/log/micado/visualizer/README
     mode: 0644
 
+- name: "Credential Manager logging: Create log directory"
+  file:
+    path: /var/log/micado/credman/
+    state: directory
+    mode: 0775
+    recurse: yes
+
+- name: "Credential Manager logging: Create log output info"
+  copy:
+    content: "Check the logs by the following command:\ndocker logs credman\n"
+    dest: /var/log/micado/credman/README
+    mode: 0644
+
 - name: "Zorp logging: Create log directory"
   file:
     path: /var/log/micado/zorp/
@@ -269,3 +298,8 @@
     dest: /etc/systemd/system/micado.service
     mode: 0644
 
+- name: "mictl: copy file"
+  copy:
+    src: misc/mictl
+    dest: /usr/local/bin/mictl
+    mode: 0755

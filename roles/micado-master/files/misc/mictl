@@ -1,0 +1,116 @@
+#!/usr/bin/env python
+
+import click
+import requests
+from terminaltables import AsciiTable
+import re
+
+
+def call_api_endpoint(cmd, method='get', data=None):
+    r = session.request(method, API.format(cmd), data=data)
+    try:
+        r_body = r.json()
+    except ValueError:
+        r_body = dict()
+    return r.ok, r_body
+
+
+@click.group()
+def cli():
+    """mictl is used to manage MiCADO configuration"""
+    pass
+
+
+@cli.group()
+@click.option('--api', default='http://localhost:5001/v1.1/', help='Base URL for credman API')
+def users(api):
+    """Manage users"""
+    global API
+    API = api+'{}'
+    global session
+    session = requests.Session()
+
+
+@users.command('list')
+def user_list():
+    """List users"""
+    ok, result = call_api_endpoint('listusers')
+    if ok:
+        data = [['Username', 'E-mail', 'Role', 'Locked']]
+        data.extend([(entry.get('username', ''),
+                     entry.get('email', '-'),
+                     entry.get('role', '-'),
+                     entry.get('locked', 'unlocked'))
+                     for entry in result
+                     ])
+        table = AsciiTable(data)
+        click.echo(table.table)
+    else:
+        click.echo(result.get('user message', 'Failed'))
+
+
+@users.command('add', short_help='Add a new user')
+@click.argument('user')
+@click.argument('password', default='')
+@click.option('--email', default=None, help='E-mail address of the user')
+def user_add(user, password, email):
+    """
+    Add a new user.
+
+    If a password is not provided one will be generated.
+    """
+    payload = {'username': user, 'email': email}
+    if password:
+        payload['password'] = password
+    ok, result = call_api_endpoint('adduser', 'post', payload)
+    if ok:
+        if not password:
+            password = re.match('Password is auto-generated. Its value is: (\S+)$',
+                                result.get('developer message', '')
+                                ).group(1)
+        click.echo("Success!\nNew password: '{}'".format(password))
+    else:
+        click.echo(result.get('user message', 'Failed'))
+
+
+@users.command('chrole')
+@click.argument('user')
+@click.argument('role', type=click.Choice(['user', 'admin']))
+def user_chrole(user, role):
+    """Change users's role"""
+    payload = {'username': user, 'newrole': role}
+    ok, result = call_api_endpoint('changerole', 'put', payload)
+    if ok:
+        click.echo("Success!")
+    else:
+        click.echo(result.get('user message', 'Failed'))
+
+
+@users.command('resetpwd')
+@click.argument('user')
+def user_resetpwd(user):
+    """Reset user's password"""
+    payload = {'username': user}
+    ok, result = call_api_endpoint('resetpwd', 'put', payload)
+    if ok:
+        password = result.get('new password', '')
+        click.echo("Success!\nNew password: '{}'".format(password))
+        click.echo(result)
+    else:
+        click.echo(result.get('user message', 'Failed'))
+
+
+@users.command('del')
+@click.argument('user')
+def user_del(user):
+    """Delete a user"""
+    payload = {'username': user}
+    ok, result = call_api_endpoint('deleteuser', 'put', payload)
+    if ok:
+        click.echo("Success!")
+    else:
+        click.echo(result.get('user message', 'Failed'))
+
+
+if __name__ == '__main__':
+    cli()
