@@ -6,7 +6,7 @@ services:
      container_name: micado-dashboard
      restart: always
      environment:
-      MICADO_FRONTEND_IP: {{ ansible_default_ipv4.address }}
+      MICADO_FRONTEND_IP: {{ IP }}
      ports:
       - 4000:4000
 
