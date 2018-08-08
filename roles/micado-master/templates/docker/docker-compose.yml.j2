@@ -5,7 +5,7 @@ services:
      image: {{docker_images.dashboard}}
      container_name: micado-dashboard
      environment:
-      MICADO_FRONTEND_IP: {{ ansible_default_ipv4.address }}
+      MICADO_FRONTEND_IP: {{ ansible_host }}
      ports:
       - 4000:4000
 
