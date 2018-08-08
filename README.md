@@ -27,18 +27,19 @@ In the current release, the status of the system can be inspected through the fo
 As stated in the above section, to use MiCADO, you need to deploy the MiCADO services on a (separate) virtual machine, called MiCADO master. We recommend doing the installation remotely i.e. to download the Ansible playbook on your local machine and run the deployment on an empty virtual machine dedicated for this purpose on your preferred cloud.
 
 ### Prerequisites
- - A machine running Ubuntu 16.04, with Git & Ansible 2.2 or greater *(see below)*
- ##### The version of Ansible in the Ubuntu 16.04 APT repository is outdated and insufficient
+Git & Ansible 2.4 or greater are needed on your (local) machine to run the Ansible playbook.
 
-**For a compatible version, you can fetch from a PPA by following these steps:**
+##### The version of Ansible in the Ubuntu 16.04 APT repository is outdated and insufficient
 
- - Add the Ansible PPA
-````add-apt-repository ppa:ansible/ansible````
- - Update the package index
-````apt update````
- - Install Ansible
-```` apt install ansible````
-
+#### Install Ansible on Ubuntu 16.04
+```
+$ sudo apt-get update
+$ sudo apt-get install software-properties-common
+$ sudo apt-add-repository ppa:ansible/ansible
+$ sudo apt-get update
+$ sudo apt-get install ansible
+```
+To install Ansible on other operation system follow the [official installation guide](#https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).
 ### Installation
 
 Perform the following steps on your local machine.

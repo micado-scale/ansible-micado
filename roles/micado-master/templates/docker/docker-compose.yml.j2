@@ -4,6 +4,7 @@ services:
    dashboard:
      image: {{docker_images.dashboard}}
      container_name: micado-dashboard
+     restart: always
      environment:
       MICADO_FRONTEND_IP: {{ ansible_default_ipv4.address }}
      ports:
@@ -21,6 +22,7 @@ services:
    occopus:
     image: {{docker_images.occopus}}
     container_name: occopus
+    restart: always
     depends_on:
       - redis
     ports:
@@ -68,6 +70,7 @@ services:
    alertmanager:
     image: {{docker_images.alertmanager}}
     container_name: alertmanager
+    restart: always
     depends_on:
       - prometheus
     ports:
@@ -79,6 +82,7 @@ services:
    policykeeper:
     image: {{docker_images.policykeeper}}
     container_name: policykeeper
+    restart: always
     depends_on:
       - occopus
       - prometheus
@@ -94,6 +98,7 @@ services:
    dockervisualizer:
     image: {{docker_images.dockervisualizer}}
     container_name: dockervisualizer
+    restart: always
     ports:
       - 8080:8080
     volumes:
@@ -103,6 +108,7 @@ services:
    grafana:
     image: {{docker_images.grafana}}
     container_name: grafana
+    restart: always
     ports:
       - 3000:3000
     environment:
@@ -127,3 +133,9 @@ services:
       - "/var/lib/micado/toscasubmitter/system/:/var/lib/submitter/system"
       - "/var/log/micado/toscasubmitter/:/var/log/submitter/"
     user: "root"
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: {{ ansible_default_ipv4.mtu }}
