@@ -6,7 +6,7 @@ services:
      container_name: micado-dashboard
      restart: always
      environment:
-      MICADO_FRONTEND_IP: {{ IP }}
+      MICADO_FRONTEND_IP: {{ hostip }}
      ports:
       - 4000:4000
 
