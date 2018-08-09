@@ -124,9 +124,7 @@ runcmd:
 
   # Connect to Swarm
 
-  - wget --retry-connrefused -qO /tmp/swarm_join {{ ansible_default_ipv4.address }}:2375/v1.26/swarm
-  - export TOKEN=$(grep -Eo 'SWMTKN-[[:alnum:]]*-[[:alnum:]]*-[[:alnum:]]*' /tmp/swarm_join | head -1)
-  - docker swarm join --token $TOKEN {{ ansible_default_ipv4.address }}:2377
+  - docker swarm join --token {{ worker_token.stdout }} {{ ansible_default_ipv4.address }}:2377
 
   # Infra services start
 

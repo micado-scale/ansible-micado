@@ -32,7 +32,7 @@
   lineinfile:
     dest: /lib/systemd/system/docker.service
     regexp: '^ExecStart=/usr/bin/dockerd[.]?'
-    line: "ExecStart=/usr/bin/dockerd -H fd:// -H tcp://{{ ansible_default_ipv4.address }}:2375 --mtu={{ ansible_default_ipv4.mtu }}"
+    line: "ExecStart=/usr/bin/dockerd -H fd:// --mtu={{ ansible_default_ipv4.mtu }}"
 
 - name: 'Docker: Restart service'
   systemd:
@@ -62,7 +62,8 @@
   shell: docker swarm init
         --listen-addr {{ ansible_default_ipv4.address }}
         --advertise-addr {{ ansible_default_ipv4.address }}
+        --availability drain
 
-- name: 'Docker Swarm: Change manager availability to drain'
-  shell: docker node update
-        --availability drain {{ micado_master_name }}
+- name: 'Docker Swarm: Get worker token'
+  shell: docker swarm join-token -q worker
+  register: worker_token

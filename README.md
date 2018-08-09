@@ -77,7 +77,7 @@ To login to the default docker_hub, leave DOCKER_REPO as is (a blank string).
 
 This new VM will host the MiCADO master core services. Use any of aws, ec2, nova, etc command-line tools or web interface of your target cloud to launch a new VM. We recommend a VM with 2 cores, 4GB RAM, 20GB disk. Make sure you can ssh to it (password-free i.e. ssh public key is deployed) and your user is able to sudo (to install MiCADO as root). Store its IP address which will be referred as `IP` in the following steps. The following ports should be open on the virtual machine:
 ```
-TCP: 22,2375,2377,3000,4000,5000,5050,7946,8080,8300,8301,8302,8500,8600,9090,9093,12345
+TCP: 22,2377,3000,4000,5000,5050,7946,8080,8300,8301,8302,8500,8600,9090,9093,12345
 UDP: 4789,7946,8301,8302,8600
 ```
 
@@ -109,8 +109,6 @@ At the end of the deployment, core MiCADO services will be running on the MiCADO
 
 - Occopus:
 ```curl -s -X GET http://IP:5000/infrastructures/```
-- Swarm
-```curl -s http://IP:2375/swarm | jq '.JoinTokens'```
 - Prometheus
 ```curl -s http://IP:9090/api/v1/status/config | jq '.status'```
 
@@ -290,7 +288,7 @@ To define a Docker network (see **YOUR_DOCKER_NETWORK**) the following fields mu
 The network of Docker services specified in the previous section is executed under Docker Swarm. This section introduces how the parameters of the virtual machine can be configured which will be hosts the Docker worker node. During operation MiCADO will instantiate as many virtual machines with the parameters defined here as required during scaling. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. The following ports and protocols should be enabled on the virtual machine:
 ```
 ICMP
-TCP: 22,2375,2377,7946,8300,8301,8302,8500,8600,9100,9200
+TCP: 22,2377,7946,8300,8301,8302,8500,8600,9100,9200
 UDP: 4789,7946,8301,8302,8600
 ```
 The following subsections details how to configure them.
@@ -341,7 +339,7 @@ topology_template:
             deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
             instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
             key_pair_id: ADD_YOUR_ID_HERE (e.g. d865f75f-d32b-4444-9fbb-3332bcedeb75)
-            opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2375,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
+            opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
 ```
 
 - **deployment_id** is the id of a preregistered deployment in CloudBroker referring to a cloud, image, region, etc. Make sure the image contains a base OS (preferably Ubuntu) installation with cloud-init support! The id is the UUID of the deployment which can be seen in the address bar of your browser when inspecting the details of the deployment.
