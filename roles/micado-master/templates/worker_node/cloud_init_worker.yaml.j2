@@ -55,7 +55,7 @@ write_files:
     version: '3.3'
 
     services:
-       consul:
+      consul:
         image: {{ docker_images.consul }}
         container_name: consul
         ports:
@@ -71,13 +71,13 @@ write_files:
           - "/etc/consul/:/etc/consul/"
         command: agent -advertise=$IP -retry-join={{ ansible_default_ipv4.address }} -config-file=/etc/consul/config.json
 
-       node-exporter:
+      node-exporter:
         image: {{ docker_images.node_exporter }}
         container_name: node-exporter
         ports:
           - 9100:9100
 
-       cadvisor:
+      cadvisor:
         image: {{ docker_images.cadvisor }}
         container_name: cadvisor
         ports:
@@ -88,6 +88,11 @@ write_files:
           - "/sys:/sys/:ro"
           - "/var/lib/docker/:/var/lib/docker/:ro"
           - "/dev/disk/:/dev/disk/"
+    networks:
+      default:
+        driver: bridge
+        driver_opts:
+          com.docker.network.driver.mtu: {{ ansible_default_ipv4.mtu }}
 
 runcmd:
   - /tmp/wait-updates.sh
@@ -113,6 +118,9 @@ runcmd:
   - apt-get update
   - apt-get install -y {{ docker_package }}
   - systemctl enable docker
+  - sed -i -e "s/-H fd:\/\//-H fd:\/\/ --mtu={{ ansible_default_ipv4.mtu }}/g" /lib/systemd/system/docker.service
+  - systemctl daemon-reload
+  - systemctl restart docker.service
 
   # Install Docker Compose
 
@@ -121,9 +129,7 @@ runcmd:
 
   # Connect to Swarm
 
-  - wget --retry-connrefused -qO /tmp/swarm_join {{ ansible_default_ipv4.address }}:2375/v1.26/swarm
-  - export TOKEN=$(grep -Eo 'SWMTKN-[[:alnum:]]*-[[:alnum:]]*-[[:alnum:]]*' /tmp/swarm_join | head -1)
-  - docker swarm join --token $TOKEN {{ ansible_default_ipv4.address }}:2377
+  - docker swarm join --token {{ worker_token.stdout }} {{ ansible_default_ipv4.address }}:2377
 
   # Infra services start
 

@@ -24,12 +24,22 @@ In the current release, the status of the system can be inspected through the fo
 
 ## Deployment
 
-As stated in the above section, to use MiCADO, you need to deploy the MiCADO services on a (separate) virtual machine, called MiCADO master. We recommend to do the installation remotely i.e. to download the Ansible playbook on your local machine and run the deployment on an empty virtul machine dedicated for this purpose on your preferred cloud.
+As stated in the above section, to use MiCADO, you need to deploy the MiCADO services on a (separate) virtual machine, called MiCADO master. We recommend doing the installation remotely i.e. to download the Ansible playbook on your local machine and run the deployment on an empty virtual machine dedicated for this purpose on your preferred cloud.
 
 ### Prerequisites
+Git & Ansible 2.4 or greater are needed on your (local) machine to run the Ansible playbook.
 
- - Ansible and git is needed on your (local) machine to run the Ansible playbook
+##### The version of Ansible in the Ubuntu 16.04 APT repository is outdated and insufficient
 
+#### Install Ansible on Ubuntu 16.04
+```
+$ sudo apt-get update
+$ sudo apt-get install software-properties-common
+$ sudo apt-add-repository ppa:ansible/ansible
+$ sudo apt-get update
+$ sudo apt-get install ansible
+```
+To install Ansible on other operation system follow the [official installation guide](#https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).
 ### Installation
 
 Perform the following steps on your local machine.
@@ -41,12 +51,12 @@ Currently, MiCADO v5 version is available.
 ```
 git clone https://github.com/micado-scale/ansible-micado.git ansible-micado
 cd ansible-micado
-git checkout v0.5.0
+git checkout master
 ```
 
-#### Step 2: Specify credential for instantiating MiCADO workers. 
+#### Step 2: Specify credential for instantiating MiCADO workers.
 
-MiCADO master will use this credential to start/stop VM instances (MiCADO workers) to realize scaling. Credentials here should belong to the same cloud as where MiCADO master is running. We recommend to make a copy of our predefined template and edit it. The ansible playbook expects the credential in a file, called credentials.yml. Please, do not modify the structure of the template!
+MiCADO master will use this credential to start/stop VM instances (MiCADO workers) to realize scaling. Credentials here should belong to the same cloud as where MiCADO master is running. We recommend making a copy of our predefined template and edit it. The ansible playbook expects the credential in a file, called credentials.yml. Please, do not modify the structure of the template!
 ```
 cp sample-credentials.yml credentials.yml
 vi credentials.yml
@@ -55,7 +65,7 @@ Edit credentials.yml to add cloud credentials. You will find predefined sections
 
 ##### Step 3: (Optional) Specify details of your private Docker repository.
 
-Set the Docker login credentials of your private Docker registries in which your personal containers are stored. We recommend to make a copy of our predefined template and edit it. The ansible playbook expects the docker registry details in a file, called docker-cred.yml. Please, do not modify the structure of the template!
+Set the Docker login credentials of your private Docker registries in which your personal containers are stored. We recommend making a copy of our predefined template and edit it. The ansible playbook expects the docker registry details in a file, called docker-cred.yml. Please, do not modify the structure of the template!
 ```
 cp sample-docker-cred.yml docker-cred.yml
 vi docker-cred.yml
@@ -67,13 +77,13 @@ To login to the default docker_hub, leave DOCKER_REPO as is (a blank string).
 
 This new VM will host the MiCADO master core services. Use any of aws, ec2, nova, etc command-line tools or web interface of your target cloud to launch a new VM. We recommend a VM with 2 cores, 4GB RAM, 20GB disk. Make sure you can ssh to it (password-free i.e. ssh public key is deployed) and your user is able to sudo (to install MiCADO as root). Store its IP address which will be referred as `IP` in the following steps. The following ports should be open on the virtual machine:
 ```
-TCP: 22,2375,2377,3000,4000,5000,5050,7946,8080,8300,8301,8302,8500,8600,9090,9093,12345
+TCP: 22,2377,3000,4000,5000,5050,7946,8080,8300,8301,8302,8500,8600,9090,9093,12345
 UDP: 4789,7946,8301,8302,8600
 ```
 
 #### Step 5: Customize the inventory file for the MiCADO master.
 
-We recommend to make a copy of our predefined template and edit it. Use the template inventory file, called sample-hosts for customisation. 
+We recommend making a copy of our predefined template and edit it. Use the template inventory file, called sample-hosts for customisation.
 ```
 cp sample-hosts hosts
 vi hosts
@@ -86,24 +96,34 @@ Edit the `hosts` file to set ansible variables for MiCADO master machine. Update
 ansible-playbook -i hosts micado-master.yml
 ```
 
+**NOTE: For deployments to an OpenStack cloud, do not use the above command**
+##### For Openstack deployments use:
+
+```
+ansible-playbook -i hosts micado-master.yml --tags "untagged, openstack"
+```
+
 ### Health checking
 
 At the end of the deployment, core MiCADO services will be running on the MiCADO master machine. Here are the commands to test the operation of some of the core MiCADO services:
 
 - Occopus:
 ```curl -s -X GET http://IP:5000/infrastructures/```
-- Swarm
-```curl -s http://IP:2375/swarm | jq '.JoinTokens'```
 - Prometheus
 ```curl -s http://IP:9090/api/v1/status/config | jq '.status'```
-- Alternatively, you can ssh into MiCADO master and check the logs under ```/var/log/micado```. Scaling decisions can be inspected under policykeeper.
+
+### Check the logs
+
+Alternatively, you can SSH into MiCADO master and check the logs at any point after MiCADO is succesfully deployed.
+- All logs are kept under ```/var/log/micado``` and are organised by component.
+*Scaling decisions, for example, can be inspected under ```/var/log/micado/policykeeper```*
 
 ## Dashboard
 
 MiCADO has a simple dashboard that collects web-based user interfaces into a single view. To access the Dashboard, visit ```http://IP:4000```.
 
 The following webpages are currently exposed:
-- Docker visualizer: it graphically visualize the Swarm nodes and the containers running on them.
+- Docker visualizer: it graphically visualizes the Swarm nodes and the containers running on them.
 - Grafana: graphically visualize the resources (nodes, containers) in time.
 - Prometheus: monitoring subsystem. Recommended for developers, experts.
 
@@ -150,7 +170,7 @@ curl -X GET http://[IP]:5050/v1.0/app/[APPLICATION_ID]
 
 ## Application description
 
-MiCADO executes applications described by the Application Descriptions following the TOSCA format. This section details the structure of the application description. 
+MiCADO executes applications described by the Application Descriptions following the TOSCA format. This section details the structure of the application description.
 
 Application description has four main sections:
 - **tosca_definitions_version**: ```tosca_simple_yaml_1_0```.
@@ -217,7 +237,7 @@ topology_template:
       ...
 ```
 
-### Specification of Docker services 
+### Specification of Docker services
 
 Under the node_templates section you can define any number of interconnected Docker service (see **YOUR_DOCKER_SERVICE**) similarly as in a docker-compose file. Each docker service definition consists of three main parts: type, properties and artifacts. The value of the **type** keyword for a Docker service must always be ```tosca.nodes.MiCADO.Container.Application.Docker```. The **properties** section will contain most of the setting of the Docker service. Under the **artifacts** section the Docker image (see **YOUR_DOCKER_IMAGE**) must be defined. Optionally, Docker networks can be defined in the same way as in a docker-compose file (see **YOUR_DOCKER_NETWORK**).
 
@@ -241,7 +261,7 @@ topology_template:
 
 The fields under the **properties** section of the Docker service are derived from the docker-compose file. Therefore, you can additional information about the properties in the [docker compose documentation](https://docs.docker.com/compose/compose-file/#service-configuration-reference). The syntax of the property values is the same as in the docker-compose file.
 
-Under the **properties** section of a Docker service (see **YOUR_DOCKER_SERVICE**) you can specify the following keywords: 
+Under the **properties** section of a Docker service (see **YOUR_DOCKER_SERVICE**) you can specify the following keywords:
 - **command**: command line expression to be executed by the container.
 - **deploy**: Swarm specific deployment options.
 - **entrypoint**: override the default entrypoint of container.
@@ -268,13 +288,13 @@ To define a Docker network (see **YOUR_DOCKER_NETWORK**) the following fields mu
 The network of Docker services specified in the previous section is executed under Docker Swarm. This section introduces how the parameters of the virtual machine can be configured which will be hosts the Docker worker node. During operation MiCADO will instantiate as many virtual machines with the parameters defined here as required during scaling. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. The following ports and protocols should be enabled on the virtual machine:
 ```
 ICMP
-TCP: 22,2375,2377,7946,8300,8301,8302,8500,8600,9100,9200
+TCP: 22,2377,7946,8300,8301,8302,8500,8600,9100,9200
 UDP: 4789,7946,8301,8302,8600
 ```
 The following subsections details how to configure them.
 
 #### CloudSigma
-To instantiate MiCADO workers on CloudSigma, please use the template below. MiCADO **requires** num_cpus, mem_size, vnc_password, libdrive_id and public_key_id to instantiate VM on *CloudSigma*. 
+To instantiate MiCADO workers on CloudSigma, please use the template below. MiCADO **requires** num_cpus, mem_size, vnc_password, libdrive_id and public_key_id to instantiate VM on *CloudSigma*.
 ```
 topology_template:
   node_templates:
@@ -303,7 +323,7 @@ topology_template:
 - **firewall_policy** optionally specifies network policies (you can define multiple security groups in the form of a list, e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d) of your VM.
 
 #### CloudBroker
-To instantiate MiCADO workers on CloudBroker, please use the template below. MiCADO **requires** deployment_id and instance_type_id to instantiate a VM on *CloudBroker*. 
+To instantiate MiCADO workers on CloudBroker, please use the template below. MiCADO **requires** deployment_id and instance_type_id to instantiate a VM on *CloudBroker*.
 ```
 topology_template:
   node_templates:
@@ -319,7 +339,7 @@ topology_template:
             deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
             instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
             key_pair_id: ADD_YOUR_ID_HERE (e.g. d865f75f-d32b-4444-9fbb-3332bcedeb75)
-            opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2375,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
+            opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
 ```
 
 - **deployment_id** is the id of a preregistered deployment in CloudBroker referring to a cloud, image, region, etc. Make sure the image contains a base OS (preferably Ubuntu) installation with cloud-init support! The id is the UUID of the deployment which can be seen in the address bar of your browser when inspecting the details of the deployment.
@@ -328,7 +348,7 @@ topology_template:
 - **opened_port** is one or more ports to be opened to the world. This is a string containing numbers separated by a comma.
 
 #### EC2
-To instantiate MiCADO workers on a cloud through EC2 interface, please use the template below. MiCADO **requires** region_name, image_id and instance_type to instantiate a VM through *EC2*. 
+To instantiate MiCADO workers on a cloud through EC2 interface, please use the template below. MiCADO **requires** region_name, image_id and instance_type to instantiate a VM through *EC2*.
 ```
 topology_template:
   node_templates:
@@ -350,11 +370,11 @@ topology_template:
 - **image_id** is the image id (e.g. ami-12345678) on your EC2 cloud. Select an image containing a base os installation with cloud-init support!
 - **instance_type** is the instance type (e.g. t1.small) of your VM to be instantiated.
 - **key_name** optionally specifies the keypair (e.g. my_ssh_keypair) to be deployed on your VM.
-- **security_groups_ids** optionally specify security settings (you can define multiple security groups in the form of a list, e.g. sg-93d46bf7) of your VM.
+- **security_group_ids** optionally specify security settings (you can define multiple security groups or just one, but this property must be formatted as a list, e.g. [sg-93d46bf7]) of your VM.
 - **subnet_id** optionally specifies subnet identifier (e.g. subnet-644e1e13) to be attached to the VM.
 
 #### Nova
-To instantiate MiCADO workers on a cloud through Nova interface, please use the template below. MiCADO **requires** image_id flavor_name, project_id and network_id to instantiate a VM through *Nova*. 
+To instantiate MiCADO workers on a cloud through Nova interface, please use the template below. MiCADO **requires** image_id flavor_name, project_id and network_id to instantiate a VM through *Nova*.
 ```
 topology_template:
   node_templates:
@@ -386,7 +406,7 @@ topology_template:
 
 ### Description of the scaling policy
 
-To utilize the autocaling functionality of MiCADO, scaling policies can be defined on virtual machine and on docker service level. Scaling policies can be listed under the **policies** section. Each **scalability** subsection must have the **type** set to the value of ```tosca.policies.Scaling.MiCADO``` and must be linked to a node defined under **node_template**. The link can be implemented by specifying the name of the node under the **targets** subsection. The details of the scaling policy can be defined under the **properties** subsection. The structure of the **policies** section can be seen below. 
+To utilize the autoscaling functionality of MiCADO, scaling policies can be defined on virtual machine and on docker service level. Scaling policies can be listed under the **policies** section. Each **scalability** subsection must have the **type** set to the value of ```tosca.policies.Scaling.MiCADO``` and must be linked to a node defined under **node_template**. The link can be implemented by specifying the name of the node under the **targets** subsection. The details of the scaling policy can be defined under the **properties** subsection. The structure of the **policies** section can be seen below.
 
 ```
 topology_template:
@@ -420,7 +440,7 @@ topology_template:
       ...
 ```
 
-The scaling policies are evaluated periodically. In every turn, the virtual machine level scaling is evaluated, followed by the evaluation of each scaling policies belonging to Docker services. 
+The scaling policies are evaluated periodically. In every turn, the virtual machine level scaling is evaluated, followed by the evaluation of each scaling policies belonging to Docker services.
 
 The **properties** subsection defines the scaling policy itself. For monitoring purposes, MiCADO integrates the Prometheus monitoring tool with two built-in exporters on each worker node: Node exporter (to collect data on nodes) and CAdvisor (to collect data on containers). Based on Prometheus, any monitored information can be extracted using the Prometheus query language and the returned value can be associated to a user-defined variable. Once variables are updated, scaling rule is evaluated. It can be specified by a short Python code which can refer to the monitored information. The structure of the scaling policy can be seen below.
 
@@ -437,7 +457,7 @@ The **properties** subsection defines the scaling policy itself. For monitoring 
         queries:
           THELOAD: 'Prometheus query expression'
           MYEXPR: 'something refering to {{MYCONST}}'
-        alerts: 
+        alerts:
           - alert: myalert
             expr: 'Prometheus expression for an event important for scaling'
             for: 1m
@@ -453,25 +473,25 @@ The **properties** subsection defines the scaling policy itself. For monitoring 
 ```
 
 The subsections have the following roles:
-- **sources** supports the dynamic attachment of an external exporter by specifying a list endpoints of exporters (see example above). Each item found under this subsection is configured under Prometheus to start collecting the information provided/exported by the exporters. Once done, the values of the parameters provided by the exporters become available. 
+- **sources** supports the dynamic attachment of an external exporter by specifying a list endpoints of exporters (see example above). Each item found under this subsection is configured under Prometheus to start collecting the information provided/exported by the exporters. Once done, the values of the parameters provided by the exporters become available.
 - **constants** subsection is used to predefined fixed parameters. Values associated to the parameters can be referred by the scaling rule as variable (see ```LOWER_THRESHOLD``` above) or in any other sections referred as Jinja2 variable (see ```MYEXPR``` above).
 - **queries** contains the list of Prometheus query expressions to be executed and their variable name associated (see ```THELOAD``` above)
 - **alerts** subsection enables the utilisation of the alerting system of Prometheus. Each alert defined here is registered under Prometheus and fired alerts are represented with a variable of their name set to True during the evaluation of the scaling rule (see ```myalert``` above).
 - **min_instances** keyword specifies the lowest number of instances valid for the node.
 - **max_instances** keyword specifies the highest number of instances valid for the node.
-- **scaling_rule** specifies Python code to be evaluated periodically to decide on the number of instances. The Python expression must be formalized with the following conditions: 
+- **scaling_rule** specifies Python code to be evaluated periodically to decide on the number of instances. The Python expression must be formalized with the following conditions:
   - Each constant defined under the ‘constants’ section can be referred; its value is the one defined by the user.
-  - Each variable defined under the ‘queries’ section can be referred; its value is the result returned by Prometheus in response to the query string. 
+  - Each variable defined under the ‘queries’ section can be referred; its value is the result returned by Prometheus in response to the query string.
   - Each alert name defined under the ‘alerts’ section can be referred, its value is a logical True in case the alert is firing, False otherwise
   - Expression must follow the syntax of the Python language
   - Expression can be multiline
   - The following predefined variables can be referred; their values are defined and updated before the evaluation of the scaling rule
     - m_nodes: python list of nodes belonging to the docker swarm cluster
     - m_node_count: the target number of nodes
-    - m_container_count: the target number of containers for the service the evaluation belongs to 
-    - m_time_since_node_count_changed: time in seconds elapsed since the number of nodes changed 
-  - In a scaling rule belonging to the virtual machine, the name of the variable to be updated is ```m_node_count```; as an effect the number stored in this variable will be set as target instance number for the virtual machines. 
-  - In a scaling rule belonging to a docker service, the name of the variable to be set is ```m_container_count```; as an effect the number stored in this variable will be set as target instance number for the docker service. 
+    - m_container_count: the target number of containers for the service the evaluation belongs to
+    - m_time_since_node_count_changed: time in seconds elapsed since the number of nodes changed
+  - In a scaling rule belonging to the virtual machine, the name of the variable to be updated is ```m_node_count```; as an effect the number stored in this variable will be set as target instance number for the virtual machines.
+  - In a scaling rule belonging to a docker service, the name of the variable to be set is ```m_container_count```; as an effect the number stored in this variable will be set as target instance number for the docker service.
 
 For further examples, inspect the scaling policies of the demo examples detailed in the next section.
 
@@ -485,17 +505,17 @@ You can find test application(s) under the subdirectories of the 'testing' direc
   - Step1: add your ```public_key_id``` to both the ```stressng.yaml``` and ```stressng-update.yaml``` files. Without this CloudSigma does not execute the contextualisation on the MiCADO worker nodes. The ID must point to your public ssh key under your account in CloudSigma. You can find it on the CloudSigma Web UI under the "Access & Security/Keys Management" menu.
   - Step2: add a proper ```firewall_policy``` to both the ```stressng.yaml``` and ```stressng-update.yaml``` files. Without this MiCADO master will not reach MiCADO worker nodes. Firewall policy ID can be retrieved from a rule defined under the "Networking/Policies" menu. The following ports must be opened for MiCADO workers: all inbound connections from MiCADO master <to be defined in more detials>
   - Step3: set the MICADO_MASTER variable to contain the IP of the MiCADO master node with ```export MICADO_MASTER=a.b.c.d```
-  - Step4: run ```1-submit-tosca-stressng.sh``` to create the minimum number of MiCADO worker nodes and to deploy the docker stack including the stressng service defined in the ```stressng.yaml``` TOSCA description. Optionally, add as an argument a user-defined application id (ie. ```1-submit-tosca-stressng.sh stressng``` ). Observe the scaleup response
+  - Step4: run ```1-submit-tosca-stressng.sh``` to create the minimum number of MiCADO worker nodes and to deploy the docker stack including the stressng service defined in the ```stressng.yaml``` TOSCA description. Optionally, add as an argument a user-defined application id (ie. ```1-submit-tosca-stressng.sh stressng``` ). The system should respond by scaling up virtual machines and containers to the maximum specified.
   - Step4a: run ```2-list-apps.sh``` to see currently running applications and their IDs
-  - Step5: run ```3-update-tosca-stressng.sh stressng``` to update the service and reduce the CPU load. Observe the scaledown response.
-  - Step6: run ```4-undeploy-with-id.sh stressng``` to remove the stressng stack and all the MiCADO worker nodes
+  - Step5: run ```3-update-tosca-stressng.sh <ID>``` with the appropriate ID to update the service and reduce the CPU load. The system should respond by scaling down virtual machines and containers to the minimum specified.
+  - Step6: run ```4-undeploy-with-id.sh <ID>``` with the appropriate ID to remove the stressng stack and all the MiCADO worker nodes
 
 - cqueue
-  
+
   This application demonstrates a deadline policy using CQueue. CQueue provides a lightweight queueing service for executing containers. CQueue server (implemented by RabbitMQ, Redis and a web-based frontend) stores items where each represents a container execution. CQueue worker fetches an item and preform the execution of the container locally. The demonstration below shows that the items can be consumed by deadline using MiCADO for scaling the CQueue worker. The demonstration requires the deployment of a CQueue server separately, then the submission of the CQueue worker to MiCADO with the appropriate (predefined) scaling policy.
 
   - Step1: Launch a separate VM and deploy CQueue server using the compose file, called ```docker-compose-cqueue-server.yaml```. You need to install docker and docker-compose to use the compose file. This will be your cqueue server to store items representing container execution requests. Important: you have to open ports defined under the 'ports' section for each of the four services defined in the compose file.
-  - Step2: Update the parameter file, called ```_settings``` . You need the ip address for the MiCADO master and for the CQueue server. 
+  - Step2: Update the parameter file, called ```_settings``` . You need the ip address for the MiCADO master and for the CQueue server.
   - Step3: Run ```./1-submit-jobs.sh 50``` to generate and send 50 jobs to CQueue server. Each item will be a simple Hello World app (combined with some sleep) realized in a container. You can later override this with your own container.
   - Step4: Edit the TOSCA description file, called ```micado-cqworker.yaml```.
     - Replace each 'cqueue.server.ip.address' string with the real ip of CQueue server.
@@ -520,4 +540,3 @@ You can find test application(s) under the subdirectories of the 'testing' direc
  - Deployment with Ansible playbook
  - Support private docker registry
  - Improve persistence of MiCADO master services
-

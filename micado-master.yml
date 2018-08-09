@@ -41,7 +41,7 @@
         toscasubmitter: micado/toscasubmitter:0.1.1
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
     - github_versions:
-        policykeeper: v0.5.0
-        toscasubmitter: v0.5.0
+        policykeeper: master
+        toscasubmitter: master
     - grafana_admin_pwd: secret
     - micado_master_name: micado-master
