@@ -5,7 +5,7 @@ services:
      image: {{docker_images.dashboard}}
      container_name: micado-dashboard
      environment:
-      MICADO_FRONTEND_IP: {{ IP }}
+      MICADO_FRONTEND_IP: {{ hostip }}
      ports:
       - 4000:4000
 
