@@ -33,6 +33,7 @@
     dest: /lib/systemd/system/docker.service
     regexp: '^ExecStart=/usr/bin/dockerd[.]?'
     line: "ExecStart=/usr/bin/dockerd -H fd:// --mtu={{ ansible_default_ipv4.mtu }}"
+  register: docker_service
 
 - name: 'Docker: Restart service'
   systemd:
@@ -41,6 +42,7 @@
     state: restarted
     enabled: yes
     masked: no
+  when: docker_service.changed
 
 - name: 'Docker-compose: Installing python tools'
   action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=present"
