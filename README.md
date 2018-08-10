@@ -96,13 +96,6 @@ Edit the `hosts` file to set ansible variables for MiCADO master machine. Update
 ansible-playbook -i hosts micado-master.yml
 ```
 
-**NOTE: For deployments to an OpenStack cloud, do not use the above command**
-##### For Openstack deployments use:
-
-```
-ansible-playbook -i hosts micado-master.yml --tags "untagged, openstack"
-```
-
 ### Health checking
 
 At the end of the deployment, core MiCADO services will be running on the MiCADO master machine. Here are the commands to test the operation of some of the core MiCADO services:
@@ -149,11 +142,11 @@ curl -d input="[url to TOSCA description]" -d id=[ID] -X POST http://[IP]:5050/v
 ```
 - To update a running MiCADO application using a TOSCA description stored locally, use this command:
 ```
-curl -F file=@"[path to the TOSCA description]" -X PUT http://[IP]:5050/v1.0/app/udpate/file/[APPLICATION_ID]
+curl -F file=@"[path to the TOSCA description]" -X PUT http://[IP]:5050/v1.0/app/update/file/[APPLICATION_ID]
 ```
 - To update a running MiCADO application using a TOSCA description stored behind a url, use this command:
 ```
-curl -d input="[url to TOSCA description]" -X PUT http://[IP]:5050/v1.0/app/udpate/file/[APPLICATION_ID]
+curl -d input="[url to TOSCA description]" -X PUT http://[IP]:5050/v1.0/app/update/file/[APPLICATION_ID]
 ```
 - To undeploy a running MiCADO application, use this command:
 ```
