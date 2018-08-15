@@ -63,6 +63,24 @@ vi credentials.yml
 ```
 Edit credentials.yml to add cloud credentials. You will find predefined sections in the template for each cloud interface type MiCADO supports. Fill only the section belonging to your target cloud.
 
+Specify the provisioning method for the x509 keypair used for TLS encryption of the management interface.
+ - The 'self-signed' option generates a new keypair with the specified hostname as subject (or 'micado-master' if omitted). 
+ - The 'user-supplied' option lets the user add the keypair as plain multiline strings (in unencrypted format) in the ansible_user_data.yml file under the 'cert' and 'key' subkeys respectively.
+
+Optionally you can use the [Ansible Vault](https://docs.ansible.com/ansible/2.4/vault.html) mechanism to keep the credential data in an encrypted format. To achieve this, create the above file using Vault with the command
+```
+ansible-vault create credentials.yml
+```
+
+This will launch *vi* or the editor defined in the $EDITOR environment variable to make changes to the file. If you wish to make any changes to the previously encrypted file, you can use the command
+```
+ansible-vault edit credentials.yml
+```
+
+### Step 3: Launch an empty cloud VM instance on which core MiCADO services will be installed
+
+Use any of aws, ec2, nova command-line tools or web interface of the target cloud. Make sure you can ssh to it (without password) and your user is a sudoer. Store its IP address which will be referred as `IP` in the following steps.
+
 ##### Step 3: (Optional) Specify details of your private Docker repository.
 
 Set the Docker login credentials of your private Docker registries in which your personal containers are stored. We recommend making a copy of our predefined template and edit it. The ansible playbook expects the docker registry details in a file, called docker-cred.yml. Please, do not modify the structure of the template!
@@ -77,7 +95,7 @@ To login to the default docker_hub, leave DOCKER_REPO as is (a blank string).
 
 This new VM will host the MiCADO master core services. Use any of aws, ec2, nova, etc command-line tools or web interface of your target cloud to launch a new VM. We recommend a VM with 2 cores, 4GB RAM, 20GB disk. Make sure you can ssh to it (password-free i.e. ssh public key is deployed) and your user is able to sudo (to install MiCADO as root). Store its IP address which will be referred as `IP` in the following steps. The following ports should be open on the virtual machine:
 ```
-TCP: 22,2377,3000,4000,5000,5050,7946,8080,8300,8301,8302,8500,8600,9090,9093,12345
+TCP: 22,2377,7946,8300,8301,8302,8500,8600
 UDP: 4789,7946,8301,8302,8600
 ```
 
@@ -94,6 +112,11 @@ Edit the `hosts` file to set ansible variables for MiCADO master machine. Update
 
 ```
 ansible-playbook -i hosts micado-master.yml
+```
+
+If you have used Vault to encrypt your credentials, you have to add the path to your vault credentials to the command line as described in the [Ansible Vault documentation](https://docs.ansible.com/ansible/2.4/vault.html#providing-vault-passwords) or provide it via command line using the command
+```
+ansible-playbook -i hosts micado-master.yml --ask-vault-pass
 ```
 
 ### Health checking
@@ -126,39 +149,39 @@ MiCADO has a TOSCA compliant submitter to submit, update, list and remove MiCADO
 
 - To launch an application specified by a TOSCA description stored locally, use this command:
 ```
-curl -F file=@[path to the TOSCA description] -X POST http://[IP]:5050/v1.0/app/launch/file/
+curl -F file=@[path to the TOSCA description] -X POST http://[IP]/toscasubmitter/v1.0/app/launch/file/
 ```
 - To launch an application specified by a TOSCA description stored locally and specify an application id, use this command:
 ```
-curl -F file=@[path to the TOSCA description] -F id=[APPLICATION_ID]  -X POST http://[IP]:5050/v1.0/app/launch/file/
+curl -F file=@[path to the TOSCA description] -F id=[APPLICATION_ID]  -X POST http://[IP]/toscasubmitter/v1.0/app/launch/file/
 ```
 - To launch an application specified by a TOSCA description stored behind a url, use this command:
 ```
-curl -d input="[url to TOSCA description]" -X POST http://[IP]:5050/v1.0/app/launch/url/
+curl -d input="[url to TOSCA description]" -X POST http://[IP]/toscasubmitter/v1.0/app/launch/url/
 ```
 - To launch an application specified by a TOSCA description stored behind an url and specify an application id, use this command:
 ```
-curl -d input="[url to TOSCA description]" -d id=[ID] -X POST http://[IP]:5050/v1.0/app/launch/url/
+curl -d input="[url to TOSCA description]" -d id=[ID] -X POST http://[IP]/toscasubmitter/v1.0/app/launch/url/
 ```
 - To update a running MiCADO application using a TOSCA description stored locally, use this command:
 ```
-curl -F file=@"[path to the TOSCA description]" -X PUT http://[IP]:5050/v1.0/app/update/file/[APPLICATION_ID]
+curl -F file=@"[path to the TOSCA description]" -X PUT http://[IP]/toscasubmitter/v1.0/app/udpate/file/[APPLICATION_ID]
 ```
 - To update a running MiCADO application using a TOSCA description stored behind a url, use this command:
 ```
-curl -d input="[url to TOSCA description]" -X PUT http://[IP]:5050/v1.0/app/update/file/[APPLICATION_ID]
+curl -d input="[url to TOSCA description]" -X PUT http://[IP]/toscasubmitter/v1.0/app/udpate/file/[APPLICATION_ID]
 ```
 - To undeploy a running MiCADO application, use this command:
 ```
-curl -X DELETE http://[IP]:5050/v1.0/app/undeploy/[APPLICATION_ID]
+curl -X DELETE http://[IP]/toscasubmitter/v1.0/app/undeploy/[APPLICATION_ID]
 ```
 - To query all the running MiCADO applications, use this command:
 ```
-curl -X GET http://[IP]:5050/v1.0/list_app/
+curl -X GET http://[IP]/toscasubmitter/v1.0/list_app/
 ```
 - To query one running MiCADO application, use this command:
 ```
-curl -X GET http://[IP]:5050/v1.0/app/[APPLICATION_ID]
+curl -X GET http://[IP]/toscasubmitter/v1.0/app/[APPLICATION_ID]
 ```
 
 ## Application description

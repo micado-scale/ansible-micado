@@ -7,9 +7,9 @@
     recurse: yes
 
 - name: "Worker node: Deploying credential file for Occopus"
-  copy:
-      src: "{{ cred_path }}"
-      dest: "/var/lib/micado/occopus/data/auth_data.yaml"
+  template:
+    src: user_data/auth_data.yaml.j2
+    dest: "/var/lib/micado/occopus/data/auth_data.yaml"
 
 - name: "Worker node: Deploying cloud-config for workers"
   template:

@@ -1,6 +1,7 @@
 version: '3.3'
 
 services:
+
    dashboard:
      image: {{docker_images.dashboard}}
      container_name: micado-dashboard
@@ -25,8 +26,6 @@ services:
     restart: always
     depends_on:
       - redis
-    ports:
-      - 5000:5000
     volumes:
       - "/var/lib/micado/occopus/data/:/var/lib/micado/occopus/data/"
       - "/var/lib/micado/toscasubmitter/src/files/output_configs/:/var/lib/micado/occopus/submitter/"
@@ -60,12 +59,10 @@ services:
     restart: always
     depends_on:
       - consul
-    ports:
-      - 9090:9090
     volumes:
       - "/var/lib/micado/prometheus/config/:/etc/prometheus/"
       - "/var/lib/micado/prometheus/data/:/prometheus/"
-    command: '--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles --web.enable-lifecycle'
+    command: '--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles --web.enable-lifecycle --web.external-url="http://prometheus/prometheus/" --web.route-prefix="/prometheus"'
 
    alertmanager:
     image: {{docker_images.alertmanager}}
@@ -73,8 +70,6 @@ services:
     restart: always
     depends_on:
       - prometheus
-    ports:
-      - 9093:9093
     volumes:
       - "/var/lib/micado/alertmanager/config/:/etc/alertmanager/"
       - "/var/lib/micado/alertmanager/data/:/alertmanager/"
@@ -86,8 +81,6 @@ services:
     depends_on:
       - occopus
       - prometheus
-    ports:
-      - 12345:12345
     volumes:
       - "/var/lib/micado/policykeeper/src/:/policykeeper/"
       - "/var/lib/micado/policykeeper/config/:/config/policykeeper"
@@ -104,6 +97,8 @@ services:
       - 8080:8080
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - CTX_ROOT=/docker-visualizer
     command: npm start
 
    grafana:
@@ -115,7 +110,10 @@ services:
     environment:
       GF_SECURITY_ADMIN_PASSWORD: {{grafana_admin_pwd}}
       GF_LOG_MODE: "console file"
+    depends_on:
+      - prometheus
     volumes:
+      - "/var/lib/micado/grafana/config/grafana.ini:/etc/grafana/grafana.ini"
       - "/var/lib/micado/grafana/data:/var/lib/grafana"
       - "/var/lib/micado/grafana/provisioning:/etc/grafana/provisioning"
       - "/var/log/micado/grafana/:/var/log/grafana"
@@ -135,8 +133,41 @@ services:
       - "/var/log/micado/toscasubmitter/:/var/log/submitter/"
     user: "root"
 
+   credman:
+    image: micado/credential-manager:latest
+    container_name: credman
+    restart: always
+    environment:
+      PROVISION_FILE: /config/provisioning.csv
+      DATABASE_URL: sqlite:////config/credential.db
+    volumes:
+      - "/var/lib/micado/credman/config:/config"
+
+   zorp:
+    image: balasys/zorpgpl:latest
+    container_name: zorp
+    restart: always
+    depends_on:
+      - alertmanager
+      - prometheus
+      - grafana
+      - dockervisualizer
+      - consul
+      - occopus
+      - policykeeper
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - "/var/lib/micado/zorp/config/:/etc/zorp/"
+      - "/var/lib/micado/zorp/scripts/:/app/"
+
 networks:
   default:
     driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.31.0.0/16    
     driver_opts:
       com.docker.network.driver.mtu: {{ ansible_default_ipv4.mtu }}

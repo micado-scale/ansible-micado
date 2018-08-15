@@ -1,6 +1,33 @@
 ---
 - include: setup-master-node.yml
 
+- name: Load the credentials and security settings from the playbook
+  include_vars:
+    file: "credentials.yml"
+    name: config
+
+- name: 'Installing packages'
+  apt:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - apt-transport-https # TODO: Docker part will install this
+    - ca-certificates # TODO: Docker part will install this
+    - curl 
+    - software-properties-common 
+    - wget 
+    - unzip 
+    - jq 
+    - dnsmasq
+
+- name: 'Installing mictl dependencies'
+  pip:
+    name:
+      - requests
+      - click
+      - terminaltables
+    state: present
+
 - include: docker-install.yml
 
 - include: files.yml
@@ -9,7 +36,17 @@
 
 - include: docker-pull-images.yml
 
-- include: start_micado.yml
-
 - include: docker-login.yml
   when: docker_cred_path is defined
+
+- name: Enable packet filtering
+  service:
+    name: iptables
+    state: restarted
+    enabled: yes
+
+- name: Enable and start MiCADO systemd service
+  service:
+    name: micado
+    state: restarted
+    enabled: yes
