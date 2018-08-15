@@ -30,7 +30,8 @@
         alertmanager: prom/alertmanager:v0.12.0
         cadvisor: google/cadvisor:v0.28.3
         consul: consul:1.0.0
-        dashboard: micado/dashboard:0.1.0
+        credential_manager: micado/credential-manager:latest
+        dashboard: micado/dashboard:0.2.0
         dockervisualizer: micado/dockerviz:min-refresh
         grafana: grafana/grafana:5.1.0
         node_exporter: prom/node-exporter:v0.15.2
@@ -39,11 +40,11 @@
         prometheus: prom/prometheus:v2.1.0
         redis: redis:4.0
         toscasubmitter: micado/toscasubmitter:0.1.1
-        credential_manager: micado/credential-manager:latest
         zorp: balasys/zorpgpl:latest
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
     - github_versions:
         policykeeper: master
         toscasubmitter: master
     - grafana_admin_pwd: secret
-    - micado_master_name: micado-master
+    - master_hostname: micado-master
+    - worker_hostname: micado-worker

@@ -9,9 +9,9 @@
 
 - name: "Setting hostname"
   hostname:
-    name: "{{ micado_master_name }}"
+    name: "{{ master_hostname }}"
 
 - name: "Configuring hostfile"
   lineinfile:
     path: /etc/hosts
-    line: "127.0.0.1\tlocalhost\t{{ micado_master_name }}"
+    line: "127.0.0.1 localhost\t{{ master_hostname }}"

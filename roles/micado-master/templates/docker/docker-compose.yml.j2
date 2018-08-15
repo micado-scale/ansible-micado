@@ -8,8 +8,6 @@ services:
      restart: always
      environment:
       MICADO_FRONTEND_IP: {{ hostip }}
-     ports:
-      - 4000:4000
 
    redis:
     image: {{docker_images.redis}}
@@ -93,8 +91,6 @@ services:
     image: {{docker_images.dockervisualizer}}
     container_name: dockervisualizer
     restart: always
-    ports:
-      - 8080:8080
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     environment:
@@ -105,8 +101,6 @@ services:
     image: {{docker_images.grafana}}
     container_name: grafana
     restart: always
-    ports:
-      - 3000:3000
     environment:
       GF_SECURITY_ADMIN_PASSWORD: {{grafana_admin_pwd}}
       GF_LOG_MODE: "console file"

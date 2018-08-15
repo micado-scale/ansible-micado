@@ -1,0 +1,32 @@
+---
+- name: "Cloning policy keeper from git"
+  git:
+    repo: https://github.com/micado-scale/component-policy-keeper.git
+    dest: /var/lib/micado/policykeeper/src
+    version: "{{github_versions.policykeeper}}"
+
+- name: "Cloning tosca-submitter from git"
+  git:
+    repo: https://github.com/micado-scale/component_submitter.git
+    dest: /var/lib/micado/toscasubmitter/src
+    version: "{{github_versions.toscasubmitter}}"
+
+- name: 'Installing mictl dependencies'
+  pip:
+    name:
+      - requests
+      - click
+      - terminaltables
+    state: present
+
+- name: Enable packet filtering
+  service:
+    name: iptables
+    state: restarted
+    enabled: yes
+
+- name: Enable and start MiCADO systemd service
+  service:
+    name: micado
+    state: restarted
+    enabled: yes

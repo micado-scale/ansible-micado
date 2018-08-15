@@ -1,4 +1,14 @@
 ---
+- name: "Occopus Credentials: Load the credentials from the playbook"
+  include_vars:
+    file: "credentials.yml"
+    name: config
+
+- name: "Security Credentials: Load the credentials and security settings from the playbook"
+  include_vars:
+    file: "security-cred.yml"
+    name: security
+
 - name: "Consul config: Create directory"
   file:
     path: /var/lib/micado/consul/config/
@@ -77,11 +87,13 @@
     state: directory
     mode: 0775
     recurse: yes
+
 - name: "Grafana config: Copy server config file"
   copy:
     src: grafana/grafana.ini
     dest: /var/lib/micado/grafana/config/grafana.ini
     mode: 0644
+
 - name: "Grafana config: Create dashboard directory"
   file:
     path: /var/lib/micado/grafana/data/dashboards
@@ -140,6 +152,7 @@
     state: directory
     mode: 0775
     recurse: yes
+
 - name: "Credential Manager initial config: Copy file"
   template:
     src: user_data/auth_data_credential_manager.csv.j2
@@ -151,27 +164,32 @@
     state: directory
     mode: 0775
     recurse: yes
+
 - name: "Zorp config: Copy file"
   copy:
     src: zorp/policy.py
     dest: /var/lib/micado/zorp/config/policy.py
     mode: 0644
+
 - name: "Zorp HTTP login form: Copy file"
   copy:
     src: zorp/authform.html
     dest: /var/lib/micado/zorp/config/authform.html
     mode: 0644
+
 - name: "Zorp entrypoint: Create directory"
   file:
     path: /var/lib/micado/zorp/scripts/
     state: directory
     mode: 0775
     recurse: yes
+
 - name: "Zorp entrypoint: Copy file"
   copy:
     src: zorp/zorp-entrypoint.sh
     dest: /var/lib/micado/zorp/scripts/docker-entrypoint.sh
     mode: 0755
+
 - name: Create user_data_zorp.env for Zorp
   template:
       src: user_data/user_data_zorp.env.j2
@@ -258,6 +276,7 @@
   set_fact:
     hostip: "{{ ansible_default_ipv4.address }}"
   when: ansible_host == 'localhost'
+
 - name: "Credential Manager logging: Create log directory"
   file:
     path: /var/log/micado/credman/
@@ -295,6 +314,7 @@
     src: iptables/iptables.conf
     dest: /etc/iptables.conf
     mode: 0640
+
 - name: "Iptables systemd unit file: Copy file"
   copy:
     src: iptables/iptables.service
