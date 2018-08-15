@@ -9,9 +9,9 @@
 
 - name: "Setting hostname"
   hostname:
-    name: "{{ master_hostname }}"
+    name: "{{ master_hostname }}-{{ ansible_host | replace('.', '-') }}"
 
 - name: "Configuring hostfile"
   lineinfile:
     path: /etc/hosts
-    line: "127.0.0.1 localhost\t{{ master_hostname }}"
+    line: "127.0.0.1 localhost\t{{ master_hostname }}-{{ ansible_host | replace('.', '-') }}"
