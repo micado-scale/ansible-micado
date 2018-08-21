@@ -7,7 +7,7 @@ services:
      container_name: micado-dashboard
      restart: always
      environment:
-      MICADO_FRONTEND_IP: {{ hostip }}
+      MICADO_FRONTEND_IP: {{ ansible_host }}
 
    redis:
     image: {{docker_images.redis}}
