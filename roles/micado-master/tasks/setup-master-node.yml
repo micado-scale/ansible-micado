@@ -1,7 +1,4 @@
 ---
-- name: "Waiting for automatic security updates to finish"
-  script: files/misc/wait-updates.sh
-
 - name: "Adding Google DNS server"
   lineinfile:
     path: /etc/resolv.conf
@@ -15,3 +12,8 @@
   lineinfile:
     path: /etc/hosts
     line: "127.0.0.1 localhost\t{{ master_hostname }}-{{ ansible_host | replace('.', '-') }}"
+
+- name: "Waiting for automatic security updates to finish"
+  script: files/misc/wait-updates.sh
+  register: outputsh
+  changed_when: outputsh.stdout != ""
