@@ -16,8 +16,12 @@
     mode: 0775
     recurse: yes
 
+- name: "Consul config: Generate encrypton key"
+  shell: "tr -dc 'a-zA-Z0-9-!@#$%^&*()_+~' < /dev/urandom 2>/dev/null | head -c 16 | base64"
+  register: consul_key
+
 - name: "Consul config: Copy file"
-  copy:
+  template:
     src: consul/config.json
     dest: /var/lib/micado/consul/config/config.json
     mode: 0644

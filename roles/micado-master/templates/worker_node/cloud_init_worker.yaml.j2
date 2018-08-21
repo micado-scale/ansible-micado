@@ -13,7 +13,7 @@ write_files:
     "server": false,
     "datacenter": "application",
     "data_dir": "/var/consul",
-    "encrypt": "uohStneoKEoVYZIASGp6Nw==",
+    "encrypt": "{{ consul_key.stdout }}",
     "log_level": "INFO",
     "enable_syslog": false,
     "retry_join": ["{{ ansible_default_ipv4.address }}"],
