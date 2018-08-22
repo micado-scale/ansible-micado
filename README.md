@@ -106,7 +106,7 @@ We recommend making a copy of our predefined template and edit it. Use the templ
 cp sample-hosts hosts
 vi hosts
 ```
-Edit the `hosts` file to set ansible variables for MiCADO master machine. Update the following parameters: ansible_host=*IP*, ansible_connection=*ssh* and ansible_user=*YOUR SUDOER ACCOUNT*. Please, revise the other parameters as well, however in most cases the default values are correct.
+Edit the `hosts` file to set ansible variables for MiCADO master machine. Update the following parameters: ansible_host=*IP*, ansible_connection=*ssh* and ansible_user=*YOUR SUDOER ACCOUNT*. To specify the listening port of the MiCADO web interface, please edit the web_listening_port parameter, which defaults to the default HTTPS port (443/TCP). Please, revise the other parameters as well, however in most cases the default values are correct.
 
 #### Step 6: Start the installation of MiCADO master.
 
