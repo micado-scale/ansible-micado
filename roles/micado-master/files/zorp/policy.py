@@ -113,7 +113,7 @@ class MicadoCredmanAuthenticationBackend(AbstractAuthenticationBackend):
             groups = ["user",]
             if j_body.get('role', '') != "user":
                 groups.append(j_body.get('role', ''))
-            log(session_id, CORE_AUTH, 3, "Authentication success; username='%s', groups='%s', code=%s, msg=%s",
+            log(session_id, CORE_AUTH, 4, "Authentication success; username='%s', groups='%s', code=%s, msg=%s",
                 (user, groups, code, j_body.get('result', ''), )
                 )
             return (Z_AUTH_ACCEPT, groups)
@@ -247,7 +247,6 @@ class SessionHttpProxy(HttpProxy):
 class FormAuthParseLoginProxy(AnyPyProxy):
     def config(self):
         self.client_max_line_length=16384
-        self.auth = MicadoCredmanAuthenticationBackend('http://credman:5001/v1.1/verify')
 
     def __post_config__(self):
         super(FormAuthParseLoginProxy, self).__post_config__()
@@ -266,48 +265,31 @@ class FormAuthParseLoginProxy(AnyPyProxy):
         return (username, password, redirect_location)
 
     def setUnauthorizedVerdict(self, redirect_location):
-        self.session.http.error_status = 301
-        self.session.http.error_status = "Unauthorized, redirecting to login page"
-        self.session.http.error_headers = "Location: %s\r\n" % redirect_location
+        self.session.http.setUnathorizedVerdict(redirect_location)
         self.set_verdict(ZV_REJECT, "Invalid login data")
 
     def setAuthorizedVerdict(self, username, groups, redirect_location):
-        # replace with this once GPL userAuthenticated bug is resolved
-        #self.session.proxy.userAuthenticated(username, 'inband')
-        self.session.getMasterSession().auth_user = username
-        self.session.getMasterSession().auth_groups = groups
-        self.session.auth_info = 'inband'
-
-        self.session.http.http_session_data["auth_username"] = username
-        self.session.http.http_session_data["auth_groups"] = groups
-        self.session.http.session_cache.store(self.session.http.http_session_id, self.session.http.http_session_data)
-
-        self.session.http.error_status = 301
-        self.session.http.error_status = "You are now authenticated"
-        self.session.http.error_headers = "Location: %s\r\n" % redirect_location
-        self.session.http.error_headers += "Set-Cookie: %s=%s;  path=/; domain=%s\r\n" % (self.session.http.http_session_cookie_name, self.session.http.http_session_id, self.session.http.request_url_host, )
+        self.session.http.setAuthorizedVerdict(username, groups, redirect_location)
         self.set_verdict(ZV_REJECT, "User authenticated")
+
+    def authenticateUserPassForm(self, username, password, redirect_location):
+        verdict = self.session.http.authenticateUserPass(username, password)
+        if verdict != Z_AUTH_REJECT:
+            return self.setAuthorizedVerdict(username, verdict[1], redirect_location)
+        else:
+            return self.setUnauthorizedVerdict(redirect_location)
 
     def proxyThread(self):
         while 1:
             try:
                 line=self.client_stream.readline()
                 (username, password, redirect_location) = self.parseAuthForm(line)
-                if self.auth.getMethods(self.session.session_id, [("User", username)]) != Z_AUTH_REJECT:
-                    self.auth.setMethod(self.session.session_id, "PASSWD.NONE:0:0:Password Authentication/inband")
-                    verdict = self.auth.converse(self.session.session_id, [("Password", password)]) 
-                    if verdict != Z_AUTH_REJECT:
-                        return self.setAuthorizedVerdict(username, verdict[1], redirect_location)
-                    else:
-                        return self.setUnauthorizedVerdict(redirect_location)
-                else:
-                    return self.setUnauthorizedVerdict(redirect_location)
+                return self.authenticateUserPassForm(username, password, redirect_location)
             except StreamException, (code, line):
                 if code == G_IO_STATUS_EOF:
                     return
                 else:
                     raise
-
             self.set_verdict(ZV_REJECT, "Invalid state")
             return
 
@@ -321,9 +303,39 @@ class FormAuthHttpProxy(SessionHttpProxy):
         self.request["PUT"] = (HTTP_REQ_POLICY, self.reqRedirect)
         self.response["*", "*"] = (HTTP_RSP_POLICY, self.respRedirect)
         self.http_session_cookie_name = "ZorpSession"
+        self.authbackend = MicadoCredmanAuthenticationBackend('http://credman:5001/v1.1/verify')
 
     def __post_config__(self):
         super(FormAuthHttpProxy, self).__post_config__()
+
+    def authenticateUserPass(self, username, password):
+        if self.authbackend.getMethods(self.session.session_id, [("User", username)]) != Z_AUTH_REJECT:
+            self.authbackend.setMethod(self.session.session_id, "PASSWD.NONE:0:0:Password Authentication/inband")
+            verdict = self.authbackend.converse(self.session.session_id, [("Password", password)])
+            return verdict
+        else:
+            return Z_AUTH_REJECT
+
+    def setUnauthorizedVerdict(self, redirect_location):
+        self.error_status = 301
+        self.error_info = "Unauthorized, redirecting to login page"
+        self.error_headers = "Location: %s\r\n" % redirect_location
+
+    def setAuthorizedVerdict(self, username, groups, redirect_location):
+        # replace with this once GPL userAuthenticated bug is resolved
+        #self.session.proxy.userAuthenticated(username, 'inband')
+        self.session.getMasterSession().auth_user = username
+        self.session.getMasterSession().auth_groups = groups
+        self.session.auth_info = 'inband'
+
+        self.http_session_data["auth_username"] = username
+        self.http_session_data["auth_groups"] = groups
+        self.session_cache.store(self.http_session_id, self.http_session_data)
+
+        self.error_status = 301
+        self.error_info = "You are now authenticated"
+        self.error_headers = "Location: %s\r\n" % redirect_location
+        self.error_headers += "Set-Cookie: %s=%s;  path=/; domain=%s\r\n" % (self.http_session_cookie_name, self.http_session_id, self.request_url_host, )
 
     def getAuthForm(self, url):
         import urllib
@@ -334,6 +346,7 @@ class FormAuthHttpProxy(SessionHttpProxy):
         return authform
 
     def showAuthForm(self, url):
+        proxyLog(self, CORE_AUTH, 3, "Serving login page")
         self.custom_response_body = self.getAuthForm(url)
         self.error_status = 200
         self.error_msg = "OK"
@@ -342,10 +355,28 @@ class FormAuthHttpProxy(SessionHttpProxy):
 
     def userAuthenticated(self, entity, groups=None, auth_info=''):
         proxyLog(self, CORE_AUTH, 3, "User authentication successful; entity='%s', auth_info='%s'", (entity, auth_info))
-        self.session.auth_user = self.http_session_data["auth_username"]
-        self.session.auth_groups = self.http_session_data["auth_groups"]
+        self.session.auth_user = entity
+        self.session.auth_groups = groups
         self.session.auth_info = 'inband'
         return HTTP_REQ_ACCEPT
+
+    def handleBasicAuth(self, authorization_header):
+        if not authorization_header.startswith("Basic "):
+            proxyLog(self, HTTP_POLICY, 1, "Unsupported authorization method; method='%s'", (authorization_header.strip().split(" ")[0], ))
+            return HTTP_REQ_REJECT
+        else:
+            from base64 import b64decode
+            try:
+                userpasspart = authorization_header.strip().split(" ")[1]
+                base64str = b64decode(userpasspart)
+                username, password = base64str.split(":", 1)
+            except Exception, e:
+                raise AAException, "Unable to parse basic auth credentials: %s" % e
+            verdict = self.authenticateUserPass(username, password)
+            if verdict[0] == Z_AUTH_ACCEPT:
+                self.userAuthenticated(username, verdict[1], "inband")
+                return HTTP_REQ_ACCEPT
+            raise AAException, "Authentication failed"
 
     def reqRedirect(self, method, url, version):
         ancestor_verdict = super(FormAuthHttpProxy, self).reqRedirect(method, url, version)
@@ -354,11 +385,19 @@ class FormAuthHttpProxy(SessionHttpProxy):
 
         if not self.http_session_data.has_key("auth_username"):
             proxyLog(self, HTTP_POLICY, 1, "No cached authentication found; method='%s', url='%s', version='%s'", (method, url, version, ))
-            if method == "POST":
-                self.request_stack["POST"] = (HTTP_STK_DATA, (Z_STACK_PROXY, FormAuthParseLoginProxy))
-                return HTTP_REQ_ACCEPT
+            authorization_header = self.getRequestHeader("Authorization")
+            #basic auth first
+            if authorization_header:
+                proxyLog(self, HTTP_POLICY, 6, "Authorization header found, proceeding with basic authentication")
+                return self.handleBasicAuth(authorization_header)
+            #use form-based auth in any other case
             else:
-                return self.showAuthForm(url)
+                if method == "POST":
+                    proxyLog(self, HTTP_POLICY, 6, "Processing POST request for form-based authentication")
+                    self.request_stack["POST"] = (HTTP_STK_DATA, (Z_STACK_PROXY, FormAuthParseLoginProxy))
+                    return HTTP_REQ_ACCEPT
+                else:
+                    return self.showAuthForm(url)
         else:
             verdict = self.userAuthenticated(self.http_session_data["auth_username"], self.http_session_data["auth_groups"], 'inband')
             if verdict != HTTP_REQ_ACCEPT:
@@ -380,10 +419,9 @@ class FormAuthHttpProxy(SessionHttpProxy):
         ancestor_verdict = super(FormAuthHttpProxy, self).respRedirect(method, url, version, response)
         if ancestor_verdict != HTTP_RSP_ACCEPT:
             return ancestor_verdict
-        if self.http_session_data.has_key("auth_username") and not self.request_url_file.startswith("/logout"):
+        if (self.http_session_data.has_key("auth_username") or self.getRequestHeader("Authorization")) and not self.request_url_file.startswith("/logout"):
             return HTTP_RSP_ACCEPT
-        else:
-            return HTTP_RSP_REJECT
+        raise AAException, "Unathenticated request"
 
 class AuthorizingFormAuthHttpProxy(FormAuthHttpProxy):
 
@@ -402,13 +440,12 @@ class AuthorizingFormAuthHttpProxy(FormAuthHttpProxy):
             proxyLog(self, CORE_AUTH, 6, "Checking authorization; user='%s', group='%s', url='%s', auth_url='%s'", (self.session.auth_user, self.session.auth_groups, self.request_url_file, auth_url))
             if self.request_url_file.startswith(auth_url):
                 if self.auth_mapping[auth_url] in self.session.auth_groups:
+                    proxyLog(self, CORE_AUTH, 1, "User authorization successful; user='%s', group='%s', url='%s'" % (self.session.auth_user, self.session.auth_groups, self.request_url_file))
                     return HTTP_REQ_ACCEPT
                 break
         #raise AAException, "User authorization failed; user='%s', group='%s', url='%s'" % (self.session.auth_user, self.session.auth_groups, self.request_url_file)
         proxyLog(self, CORE_AUTH, 1, "User authorization failed; user='%s', group='%s', url='%s'" % (self.session.auth_user, self.session.auth_groups, self.request_url_file))
-        self.error_silent = FALSE
-        self.error_info = "User authorization failed"
-        return HTTP_REQ_REJECT
+        raise AAException, "URL not permitted for this user"
 
 class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
     def __pre_config__(self):
