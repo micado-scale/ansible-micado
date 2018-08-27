@@ -425,24 +425,16 @@ class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
         self.request["PUT"] = (HTTP_REQ_POLICY, self.reqRedirect)
         self.request["DELETE"] = (HTTP_REQ_POLICY, self.reqRedirect)
         self.response_header["Strict-Transport-Security"] = (HTTP_HDR_REPLACE, "max-age=63072000; includeSubdomains;")
-        self.urlmapping["/submitter"] = ("micado-submitter", 5000, True)
         self.urlmapping["/prometheus"] = ("prometheus", 9090, False)
-        self.urlmapping["/alertmanager"] = ("alertmanager", 9093, True)
         self.urlmapping["/docker-visualizer"] = ("dockervisualizer", 8080, False)
         self.urlmapping["/grafana"] = ("grafana", 3000, True)
         self.urlmapping["/dashboard"] = ("micado-dashboard", 4000, True)
-        self.urlmapping["/occopus"] = ("occopus", 5000, True)
-        self.urlmapping["/policykeeper"] = ("policykeeper", 12345, True)
         self.urlmapping["/toscasubmitter"] = ("toscasubmitter", 5050, True)
         self.auth_mapping["/"] = "user"
-        self.auth_mapping["/submitter"] = "admin"
         self.auth_mapping["/prometheus"] = "user"
-        self.auth_mapping["/alertmanager"] = "admin"
         self.auth_mapping["/docker-visualizer"] = "user"
         self.auth_mapping["/grafana"] = "user"
         self.auth_mapping["/dashboard"] = "user"
-        self.auth_mapping["/occopus"] = "admin"
-        self.auth_mapping["/policykeeper"] = "admin"
         self.auth_mapping["/toscasubmitter"] = "admin"
 
     def setServerAddress(self, host, port):
