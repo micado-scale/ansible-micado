@@ -1,1 +1,1 @@
-micado-master ansible_host=localhost ansible_connection=ssh ansible_user=ubuntu ansible_become=True ansible_become_method=sudo ansible_python_interpreter=/usr/bin/python3 docker_cred_path=./docker-cred.yml
+micado-master ansible_host=localhost ansible_connection=ssh ansible_user=ubuntu ansible_become=True ansible_become_method=sudo ansible_python_interpreter=/usr/bin/python3 docker_cred_path=./docker-cred.yml web_listening_port=443

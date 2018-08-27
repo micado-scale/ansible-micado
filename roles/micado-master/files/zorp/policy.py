@@ -490,29 +490,6 @@ class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
                 return HttpProxy.setServerAddress(self, socket.gethostbyname(container), port)
         return HttpProxy.setServerAddress(self, socket.gethostbyname("micado-dashboard"), 4000)
 
-class HttpToHttpsProxy(HttpProxy):
-
-    def config(self):
-        super(HttpToHttpsProxy, self).config()
-        self.max_keepalive_requests = 1
-        self.error_silent = TRUE
-        self.request["GET"] = (HTTP_REQ_POLICY, self.reqRedirect)
-        self.request["POST"] = (HTTP_REQ_POLICY, self.reqRedirect)
-        self.request["PUT"] = (HTTP_REQ_POLICY, self.reqRedirect)
-
-    def setServerAddress(self, host, port):
-        return HttpProxy.setServerAddress(self, socket.gethostbyname("micado-dashboard"), 4000)
-
-    def reqRedirect(self, method, url, version):
-        proxyLog(self, HTTP_POLICY, 3, "Got URL %s", (url,))
-        if url.startswith("http://"):
-            self.error_status = 301
-            self.error_headers="Location: %s\n" % url.replace("http://", "https://")
-            return HTTP_REQ_REJECT
-        return HTTP_REQ_ACCEPT
-
 def default() :
     Service(name='interHTTPS', router=DirectedRouter(dest_addr=(SockAddrInet('127.0.0.1', 4000)), overrideable=TRUE), chainer=ConnectChainer(), proxy_class=MicadoMasterHttpProxy, max_instances=0, max_sessions=0, keepalive=Z_KEEPALIVE_NONE, encryption_policy="https_clientonly_encryption_policy")
     Dispatcher(transparent=FALSE, bindto=DBIface(protocol=ZD_PROTO_TCP, port=443, iface="eth0", family=2), rule_port="443", service="interHTTPS")
-    Service(name='interHTTP', router=DirectedRouter(dest_addr=(SockAddrInet('127.0.0.1', 4000)), overrideable=TRUE), chainer=ConnectChainer(), proxy_class=HttpToHttpsProxy, max_instances=0, max_sessions=0, keepalive=Z_KEEPALIVE_NONE)
-    Dispatcher(transparent=FALSE, bindto=DBIface(protocol=ZD_PROTO_TCP, port=80, iface="eth0", family=2), rule_port="80", service="interHTTP")

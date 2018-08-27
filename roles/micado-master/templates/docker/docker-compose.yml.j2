@@ -150,8 +150,7 @@ services:
       - occopus
       - policykeeper
     ports:
-      - 80:80
-      - 443:443
+      - {{ web_listening_port | default('443') }}:443
     volumes:
       - "/var/lib/micado/zorp/config/:/etc/zorp/"
       - "/var/lib/micado/zorp/scripts/:/app/"
