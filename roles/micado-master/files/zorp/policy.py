@@ -168,7 +168,27 @@ class PersistentTimedCache(TimedCache):
         super(PersistentTimedCache, self).clear()
         self.persist_cache()
 
-class SessionHttpProxy(HttpProxy):
+class MethodFilterHttpProxy(HttpProxy):
+
+    def config(self):
+        super(MethodFilterHttpProxy, self).config()
+        self.request["GET"] = (HTTP_REQ_POLICY, self.reqRedirect)
+
+    def __pre_config__(self):
+        self.method_mapping = {}
+        return super(MethodFilterHttpProxy, self).__pre_config__()
+
+    def reqRedirect(self, method, url, version):
+        for method_url in self.method_mapping.keys():
+            proxyLog(self, CORE_AUTH, 6, "Checking method authorization; url='%s', method='%s', method_url='%s', permitted_methods='%s'", (self.request_url_file, method, method_url, self.method_mapping[method_url]))
+            if self.request_url_file.startswith(method_url):
+                if method in self.method_mapping[method_url]:
+                    return HTTP_REQ_ACCEPT
+                break
+        proxyLog(self, CORE_AUTH, 1, "Method authorization failed; url='%s', method='%s', method_url='%s', permitted_methods='%s'" % (self.request_url_file, method, method_url, self.method_mapping[method_url]))
+        raise AAException, "Method not permitted for this URL"
+
+class SessionHttpProxy(MethodFilterHttpProxy):
 
     session_cache = PersistentTimedCache("/var/lib/zorp/tmp/http_session_cache", 600, TRUE)
 
@@ -226,6 +246,10 @@ class SessionHttpProxy(HttpProxy):
             proxyLog(self, HTTP_POLICY, 6, "Session id; id='%s'", (self.http_session_id,))
 
     def reqRedirect(self, method, url, version):
+        ancestor_verdict = super(SessionHttpProxy, self).reqRedirect(method, url, version)
+        if ancestor_verdict != HTTP_REQ_ACCEPT:
+            return ancestor_verdict
+
         import time
         proxyLog(self, HTTP_POLICY, 6, "Cookie header; header='%s'", (self.getRequestHeader("Cookie"),))
         cookie_header = self.getRequestHeader("Cookie")
@@ -443,13 +467,12 @@ class AuthorizingFormAuthHttpProxy(FormAuthHttpProxy):
                     proxyLog(self, CORE_AUTH, 1, "User authorization successful; user='%s', group='%s', url='%s'" % (self.session.auth_user, self.session.auth_groups, self.request_url_file))
                     return HTTP_REQ_ACCEPT
                 break
-        #raise AAException, "User authorization failed; user='%s', group='%s', url='%s'" % (self.session.auth_user, self.session.auth_groups, self.request_url_file)
         proxyLog(self, CORE_AUTH, 1, "User authorization failed; user='%s', group='%s', url='%s'" % (self.session.auth_user, self.session.auth_groups, self.request_url_file))
         raise AAException, "URL not permitted for this user"
 
 class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
     def __pre_config__(self):
-        self.urlmapping = {}
+        self.url_mapping = {}
         return super(MicadoMasterHttpProxy, self).__pre_config__()
 
     def config(self):
@@ -461,23 +484,30 @@ class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
         self.request["POST"] = (HTTP_REQ_POLICY, self.reqRedirect)
         self.request["PUT"] = (HTTP_REQ_POLICY, self.reqRedirect)
         self.request["DELETE"] = (HTTP_REQ_POLICY, self.reqRedirect)
+        self.request["PATCH"] = (HTTP_REQ_POLICY, self.reqRedirect)
         self.response_header["Strict-Transport-Security"] = (HTTP_HDR_REPLACE, "max-age=63072000; includeSubdomains;")
-        self.urlmapping["/prometheus"] = ("prometheus", 9090, False)
-        self.urlmapping["/docker-visualizer"] = ("dockervisualizer", 8080, False)
-        self.urlmapping["/grafana"] = ("grafana", 3000, True)
-        self.urlmapping["/dashboard"] = ("micado-dashboard", 4000, True)
-        self.urlmapping["/toscasubmitter"] = ("toscasubmitter", 5050, True)
+        self.url_mapping["/prometheus"] = ("prometheus", 9090, False)
+        self.url_mapping["/docker-visualizer"] = ("dockervisualizer", 8080, False)
+        self.url_mapping["/grafana"] = ("grafana", 3000, True)
+        self.url_mapping["/dashboard"] = ("micado-dashboard", 4000, True)
+        self.url_mapping["/toscasubmitter"] = ("toscasubmitter", 5050, True)
         self.auth_mapping["/"] = "user"
         self.auth_mapping["/prometheus"] = "user"
         self.auth_mapping["/docker-visualizer"] = "user"
         self.auth_mapping["/grafana"] = "user"
         self.auth_mapping["/dashboard"] = "user"
         self.auth_mapping["/toscasubmitter"] = "admin"
+        self.method_mapping["/"] = ["GET", "POST"]
+        self.method_mapping["/prometheus"] = ["GET", "POST"]
+        self.method_mapping["/docker-visualizer"] = ["GET", "POST"]
+        self.method_mapping["/grafana"] = ["GET", "POST", "PUT", "DELETE", "PATCH"]
+        self.method_mapping["/dashboard"] = ["GET", "POST"]
+        self.method_mapping["/toscasubmitter"] = ["GET", "POST", "PUT", "DELETE"]
 
     def setServerAddress(self, host, port):
-        for path in self.urlmapping.keys():
+        for path in self.url_mapping.keys():
             if self.request_url_file.startswith(path):
-                (container, port, remove_prefix_on_server_side) = self.urlmapping[path]
+                (container, port, remove_prefix_on_server_side) = self.url_mapping[path]
                 proxyLog(self, HTTP_POLICY, 3, "Mapping url; path='%s', container='%s', port='%s'", (path, container, port))
                 self.setRequestHeader("Host", container+":"+str(port))
                 if remove_prefix_on_server_side:
