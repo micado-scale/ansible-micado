@@ -304,8 +304,8 @@
     mode: 0644
 
 - name: "Iptables configuration: Copy file"
-  copy:
-    src: iptables/iptables.conf
+  template:
+    src: iptables/iptables.conf.j2
     dest: /etc/iptables.conf
     mode: 0640
 
