@@ -321,8 +321,8 @@
     dest: /etc/systemd/system/micado.service
     mode: 0644
 
-- name: "mictl: copy file"
+- name: "micadoctl: copy file"
   copy:
-    src: misc/mictl
-    dest: /usr/local/bin/mictl
+    src: misc/micadoctl
+    dest: /usr/local/bin/micadoctl
     mode: 0755
