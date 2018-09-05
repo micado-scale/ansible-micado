@@ -14,5 +14,5 @@ if [ -z "$APP_ID" ]; then
   exit
 fi
 
-echo "Submitting stressng.yaml to MiCADO at $MICADO_MASTER with appid \"$APP_ID\"..."
-curl -F file=@"stressng.yaml" -F id=$APP_ID -X POST http://$MICADO_MASTER:5050/v1.0/app/launch/file/
+echo "Deleting app with id \"$APP_ID\" from MiCADO at $MICADO_MASTER..."
+curl -X DELETE http://$MICADO_MASTER:5050/v1.0/app/undeploy/$APP_ID

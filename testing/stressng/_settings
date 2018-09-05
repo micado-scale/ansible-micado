@@ -1,0 +1,6 @@
+MICADO_MASTER="123.456.78.90"
+APP_ID="stresstest"
+
+echo "Settings used:"
+echo "  MICADO_MASTER: $MICADO_MASTER"
+echo "  APP_ID: $APP_ID"

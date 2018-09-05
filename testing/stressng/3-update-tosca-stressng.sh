@@ -1,14 +1,18 @@
-if [ -z "$MICADO_MASTER" ]; then
-    if [[ $# -eq 0 ]] ; then
-        echo 'Please, specify the app_id AND ip address (or set MICADO_MASTER!)'
-        exit 1
-    fi
-    if [[ $# -gt 1 ]] ; then
-        echo 'Please, specify only one ip address!'
-        exit 1
-    fi
-    MICADO_MASTER=$2
-fi
-ID_APP=$1
+#!/bin/sh
 
-curl -F file=@"stressng-update.yaml" -X PUT http://$MICADO_MASTER:5050/v1.0/app/update/file/$ID_APP
+settings_file="./_settings"
+
+. $settings_file
+
+if [ -z "$MICADO_MASTER" ]; then
+  echo "Please, set MICADO_MASTER in file named \"$settings_file\"!"
+  exit
+fi
+
+if [ -z "$APP_ID" ]; then
+  echo "Please, set APP_ID in file named \"$settings_file\"!"
+  exit
+fi
+
+echo "Updating app with id \"$APP_ID\" using stressng-update.yaml on MiCADO at $MICADO_MASTER..."
+curl -F file=@"stressng-update.yaml" -X PUT http://$MICADO_MASTER:5050/v1.0/app/update/file/$APP_ID
