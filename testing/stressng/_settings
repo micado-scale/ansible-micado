@@ -1,6 +1,16 @@
 MICADO_MASTER="123.456.78.90"
 APP_ID="stresstest"
+SSL_USER=""
+SSL_PASS=""
 
 echo "Settings used:"
 echo "  MICADO_MASTER: $MICADO_MASTER"
 echo "  APP_ID: $APP_ID"
+
+if [ $SSL_USER ]; then
+  echo " INFO: SSL username is set"
+fi
+
+if [ $SSL_PASS ]; then
+  echo " INFO: SSL password is set"
+fi

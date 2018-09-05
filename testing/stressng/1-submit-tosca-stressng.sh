@@ -14,5 +14,13 @@ if [ -z "$APP_ID" ]; then
   exit
 fi
 
+if [ -z "$SSL_USER" ]; then
+  echo " Please, set SSL_USER in file named \"$settings_file\"!"
+fi
+
+if [ -z "$SSL_PASS" ]; then
+  echo " Please, set SSL_PASS in file named \"$settings_file\"!"
+fi
+
 echo "Submitting stressng.yaml to MiCADO at $MICADO_MASTER with appid \"$APP_ID\"..."
-curl -F file=@"stressng.yaml" -F id=$APP_ID -X POST http://$MICADO_MASTER:5050/v1.0/app/launch/file/
+curl --insecure -F file=@"stressng.yaml" -F id=$APP_ID -X POST https://$SSL_USER:$SSL_PASS@$MICADO_MASTER/toscasubmitter/v1.0/app/launch/file/

@@ -9,5 +9,13 @@ if [ -z "$MICADO_MASTER" ]; then
   exit
 fi
 
+if [ -z "$SSL_USER" ]; then
+  echo " Please, set SSL_USER in file named \"$settings_file\"!"
+fi
+
+if [ -z "$SSL_PASS" ]; then
+  echo " Please, set SSL_PASS in file named \"$settings_file\"!"
+fi
+
 echo "Retrieving list of running apps from MiCADO at $MICADO_MASTER..."
-curl -X GET http://$MICADO_MASTER:5050/v1.0/list_app
+curl --insecure -X GET https://$SSL_USER:$SSL_PASS@$MICADO_MASTER/toscasubmitter/v1.0/list_app
