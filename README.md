@@ -494,14 +494,14 @@ You can find test application(s) under the subdirectories of the 'testing' direc
 
 - stressng
 
-  This application contains a single service, performing a constant CPU load. The policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Helper scripts have been added to the directory to ease application handling.
-  - Step1: add your ``public_key_id`` to both the ``stressng.yaml`` and ``stressng-update.yaml`` files. Without this CloudSigma does not execute the contextualisation on the MiCADO worker nodes. The ID must point to your public ssh key under your account in CloudSigma. You can find it on the CloudSigma Web UI under the “Access & Security/Keys Management” menu as **Uuid**.
-  - Step2: add a proper ``firewall_policy`` to both the ``stressng.yaml`` and ``stressng-update.yaml`` files. Without this MiCADO master will not reach MiCADO worker nodes. Firewall policy ID can be retrieved from a rule defined under the “Networking/Policies” menu. The following ports must be opened for MiCADO workers: all inbound connections from MiCADO master
-  - Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the application by setting the APP_ID  ***the application ID can not contain any underscores ( _ )**
-  - Step4: run ``1-submit-tosca-stressng.sh`` to create the minimum number of MiCADO worker nodes and to deploy the docker stack including the stressng service defined in the ``stressng.yaml`` TOSCA description. A few minutes after successful deployment, the system should respond by scaling up virtual machines and containers to the maximum specified.
-  - Step4a: run ``2-list-apps.sh`` to see currently running applications and their IDs
-  - Step5: run ``3-update-tosca-stressng.sh`` to update the service and reduce the CPU load. After a few moments the system should respond by scaling down virtual machines and containers to the minimum specified.
-  - Step6: run ``4-undeploy-stressng.sh`` to remove the stressng stack and all the MiCADO worker nodes
+  This application contains a single service, performing constant load. Policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Helper scripts has been added to the directory to ease application handling.
+  - Step1: add your ```public_key_id``` to both the ```stressng.yaml``` and ```stressng-update.yaml``` files. Without this CloudSigma does not execute the contextualisation on the MiCADO worker nodes. The ID must point to your public ssh key under your account in CloudSigma. You can find it on the CloudSigma Web UI under the "Access & Security/Keys Management" menu.
+  - Step2: add a proper ```firewall_policy``` to both the ```stressng.yaml``` and ```stressng-update.yaml``` files. Without this MiCADO master will not reach MiCADO worker nodes. Firewall policy ID can be retrieved from a rule defined under the "Networking/Policies" menu. The following ports must be opened for MiCADO workers: all inbound connections from MiCADO master <to be defined in more detials>
+  - Step3: set the MICADO_MASTER variable to contain the IP of the MiCADO master node with ```export MICADO_MASTER=a.b.c.d```
+  - Step4: run ```1-submit-tosca-stressng.sh``` to create the minimum number of MiCADO worker nodes and to deploy the docker stack including the stressng service defined in the ```stressng.yaml``` TOSCA description. Optionally, add as an argument a user-defined application id (ie. ```1-submit-tosca-stressng.sh stressng``` ). The system should respond by scaling up virtual machines and containers to the maximum specified.
+  - Step4a: run ```2-list-apps.sh``` to see currently running applications and their IDs
+  - Step5: run ```3-update-tosca-stressng.sh <ID>``` with the appropriate ID to update the service and reduce the CPU load. The system should respond by scaling down virtual machines and containers to the minimum specified.
+  - Step6: run ```4-undeploy-with-id.sh <ID>``` with the appropriate ID to remove the stressng stack and all the MiCADO worker nodes
 
 - cqueue
 
