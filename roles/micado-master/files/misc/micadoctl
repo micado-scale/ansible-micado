@@ -138,6 +138,11 @@ def service_start():
     """Restart MiCADO services"""
     _handle_service("restart")
 
+@service.command('status')
+def service_status():
+    """Query the status of MiCADO services"""
+    _handle_service("status")
+
 
 if __name__ == '__main__':
     cli()
