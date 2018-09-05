@@ -96,6 +96,7 @@ write_files:
 
 runcmd:
   - /tmp/wait-updates.sh
+  - sed -i 's/APT::Periodic::Unattended-Upgrade "1";/APT::Periodic::Unattended-Upgrade "0";/g' /etc/apt/apt.conf.d/20auto-upgrades
   - /bin/consul-set-network.sh
   - IP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 's/\./-/g'`
   - hostname={{ worker_hostname }}-$IP
