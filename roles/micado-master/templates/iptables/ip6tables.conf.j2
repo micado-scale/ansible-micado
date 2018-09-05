@@ -22,7 +22,6 @@
 #management web interface
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport {{ web_listening_port }} -j ACCEPT
 #swarm
--A FILTERS -m state --state NEW -m tcp -p tcp --dport 2345 -j ACCEPT
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 2377 -j ACCEPT
 -A FILTERS -m state --state NEW -m udp -p udp --dport 4789 -j ACCEPT
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 7946 -j ACCEPT
