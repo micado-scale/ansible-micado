@@ -25,6 +25,12 @@
     state: restarted
     enabled: yes
 
+- name: Enable IPv6 packet filtering
+  service:
+    name: ip6tables
+    state: restarted
+    enabled: yes
+
 - name: Enable and start MiCADO systemd service
   service:
     name: micado

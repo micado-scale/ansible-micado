@@ -1,0 +1,11 @@
+[Unit]
+Description=Restore iptables firewall rules
+Before=network-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ip6tables-restore -n /etc/ip6tables.conf
+
+[Install]
+WantedBy=multi-user.target
+

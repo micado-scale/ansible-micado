@@ -515,7 +515,12 @@ class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
                     newpath = self.request_url_file[len(path)+1:]
                     if newpath == "":
                         newpath = "/"
-                    self.request_url = urlparse.urlunsplit((self.request_url_proto, self.request_url_host+":"+str(port), newpath, self.request_url_query, None))
+                    #IPv6 hostname
+                    if ":" in self.request_url_host:
+                        host = "[%s]" % self.request_url_host
+                    else:
+                        host = self.request_url_host
+                    self.request_url = urlparse.urlunsplit((self.request_url_proto, host+":"+str(port), newpath, self.request_url_query, None))
                     proxyLog(self, HTTP_POLICY, 3, "Mapping to new url; url='%s'", (self.request_url))
                 return HttpProxy.setServerAddress(self, socket.gethostbyname(container), port)
         return HttpProxy.setServerAddress(self, socket.gethostbyname("micado-dashboard"), 4000)

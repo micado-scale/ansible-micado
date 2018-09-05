@@ -10,7 +10,6 @@
 -F FILTERS
 
 -A INPUT -i lo -j ACCEPT
--A INPUT -p icmp --icmp-type any -j ACCEPT
 -A INPUT -j FILTERS
 
 -A DOCKER-USER -j FILTERS
@@ -18,7 +17,6 @@
 -A FILTERS -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 -A FILTERS -m state --state NEW -i lo -j ACCEPT
--A FILTERS -m state --state NEW -s 172.31.0.0/16  -j ACCEPT
 
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
 #management web interface
@@ -39,6 +37,6 @@
 -A FILTERS -m state --state NEW -m udp -p udp --dport 8600 -j ACCEPT
 
 -A FILTERS -j LOG --log-prefix="FILTERS DROP: "
--A FILTERS -j REJECT --reject-with icmp-host-prohibited
+-A FILTERS -j DROP
 
 COMMIT

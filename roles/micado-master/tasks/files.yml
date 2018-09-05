@@ -315,6 +315,18 @@
     dest: /etc/systemd/system/iptables.service
     mode: 0644
 
+- name: "Ip6tables configuration: Copy file"
+  template:
+    src: iptables/ip6tables.conf.j2
+    dest: /etc/ip6tables.conf
+    mode: 0640
+
+- name: "Ip6tables systemd unit file: Copy file"
+  copy:
+    src: iptables/ip6tables.service
+    dest: /etc/systemd/system/ip6tables.service
+    mode: 0644
+
 - name: "MiCADO systemd unit file: Copy file"
   copy:
     src: micado/micado.service
