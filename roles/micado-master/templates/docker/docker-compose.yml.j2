@@ -135,6 +135,8 @@ services:
     image: micado/credential-manager:latest
     container_name: credman
     restart: always
+    ports:
+      - 127.0.0.1:5001:5001
     environment:
       PROVISION_FILE: /config/provisioning.csv
       DATABASE_URL: sqlite:////config/credential.db

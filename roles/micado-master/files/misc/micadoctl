@@ -4,6 +4,7 @@ import click
 import requests
 from terminaltables import AsciiTable
 import re
+import subprocess
 
 
 def call_api_endpoint(cmd, method='get', data=None):
@@ -29,7 +30,6 @@ def users(api):
     API = api+'{}'
     global session
     session = requests.Session()
-
 
 @users.command('list')
 def user_list():
@@ -110,6 +110,38 @@ def user_del(user):
         click.echo("Success!")
     else:
         click.echo(result.get('user message', 'Failed'))
+
+@cli.group()
+def service():
+    """Manage MiCADO services"""
+    pass
+
+def _handle_service(command):
+    try:
+        subprocess.check_call("systemctl %s micado" % command, shell=True)
+    except subprocess.CalledProcessError as e:
+        print("Failed to %s MiCADO services; error='%s'" % (command, e))
+        exit(e.returncode)
+
+@service.command('start')
+def service_start():
+    """Start MiCADO services"""
+    _handle_service("start")
+
+@service.command('stop')
+def service_start():
+    """Stop MiCADO services"""
+    _handle_service("stop")
+
+@service.command('restart')
+def service_start():
+    """Restart MiCADO services"""
+    _handle_service("restart")
+
+@service.command('status')
+def service_status():
+    """Query the status of MiCADO services"""
+    _handle_service("status")
 
 
 if __name__ == '__main__':
