@@ -1,8 +1,8 @@
 MICADO_MASTER="123.456.78.90"
-MICADO_PORT=""
+MICADO_PORT="443"
 APP_ID="stresstest"
-SSL_USER=""
-SSL_PASS=""
+SSL_USER="admin"
+SSL_PASS="admin"
 ###########################################################################
 ############ CONFIGURE SETTINGS ABOVE FOR YOUR MiCADO INSTANCE ############
 ###########################################################################
