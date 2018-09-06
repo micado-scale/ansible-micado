@@ -1,9 +1,15 @@
-MICADO_MASTER="192.168.154.247"
-APP_ID="mycqueue"
+MICADO_MASTER="192.168.154.233"
+MICADO_PORT="443"
+SSL_USER="admin"
+SSL_PASS="admin"
 CQUEUE_SERVER_IP="192.168.154.116"
+APP_ID="mycqueue"
 
 echo "Settings used:"
 echo "  MICADO_MASTER: $MICADO_MASTER"
-echo "  APP_ID: $APP_ID"
+echo "  MICADO_PORT: $MICADO_PORT"
+echo "  SSL_USER: $SSL_USER"
+echo "  SSL_PASS: (hidden)"
 echo "  CQUEUE_SERVER_IP: $CQUEUE_SERVER_IP"
+echo "  APP_ID: $APP_ID"
 

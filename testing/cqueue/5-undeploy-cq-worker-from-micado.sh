@@ -2,10 +2,15 @@
 
 settings_file="./_settings"
 
-. $settings_file
+. $settings_file >&2
 
 if [ -z "$MICADO_MASTER" ]; then
   echo "Please, set MICADO_MASTER in file named \"$settings_file\"!"
+  exit
+fi
+
+if [ -z "$MICADO_PORT" ]; then
+  echo "Please, set MICADO_PORT in file named \"$settings_file\"!"
   exit
 fi
 
@@ -14,5 +19,14 @@ if [ -z "$APP_ID" ]; then
   exit
 fi
 
-echo "Deleting cqworker app in MiCADO at $MICADO_MASTER with appid \"$APP_ID\"..."
-curl -X DELETE http://$MICADO_MASTER:5050/v1.0/app/undeploy/$APP_ID
+if [ -z "$SSL_USER" ]; then
+  echo " Please, set SSL_USER in file named \"$settings_file\"!"
+fi
+
+if [ -z "$SSL_PASS" ]; then
+  echo " Please, set SSL_PASS in file named \"$settings_file\"!"
+fi
+
+echo "Deleting app with id \"$APP_ID\" from MiCADO at $MICADO_MASTER..." >&2
+curl --insecure -s -X DELETE https://$SSL_USER:$SSL_PASS@$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/undeploy/$APP_ID
+
