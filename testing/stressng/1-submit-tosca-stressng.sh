@@ -23,4 +23,4 @@ if [ -z "$SSL_PASS" ]; then
 fi
 
 echo "Submitting stressng.yaml to MiCADO at $MICADO_MASTER with appid \"$APP_ID\"..."
-curl --insecure -F file=@"stressng.yaml" -F id=$APP_ID -X POST https://$SSL_USER:$SSL_PASS@$MICADO_MASTER/toscasubmitter/v1.0/app/launch/file/
+curl --insecure -F file=@"stressng.yaml" -F id=$APP_ID -X POST https://$SSL_USER:$SSL_PASS@$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/launch/file/
