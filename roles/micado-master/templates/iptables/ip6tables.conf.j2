@@ -15,7 +15,11 @@
 -A DOCKER-USER -j FILTERS
 
 -A FILTERS -m state --state ESTABLISHED,RELATED -j ACCEPT
-
+-A FILTERS --protocol icmpv6 --icmpv6-type destination-unreachable --match state --state RELATED --jump ACCEPT
+-A FILTERS --protocol icmpv6 --icmpv6-type time-exceeded --match state --state RELATED --jump ACCEPT
+-A FILTERS --protocol icmpv6 --icmpv6-type parameter-problem --match state --state RELATED --jump ACCEPT
+-A FILTERS --protocol icmpv6 --icmpv6-type neighbour-solicitation --jump ACCEPT
+-A FILTERS --protocol icmpv6 --icmpv6-type neighbour-advertisement --jump ACCEPT
 -A FILTERS -m state --state NEW -i lo -j ACCEPT
 
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT

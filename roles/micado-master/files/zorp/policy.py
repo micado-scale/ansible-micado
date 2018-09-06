@@ -80,7 +80,7 @@ class MicadoCredmanAuthenticationBackend(AbstractAuthenticationBackend):
                 passwd = cred
         if not passwd:
             log(session_id, CORE_AUTH, 1, "Could not parse password, rejecting;")
-            return Z_AUTH_REJECT
+            return (Z_AUTH_REJECT, None)
         else:
             user = self.sessions[session_id]
             api_payload = urlencode({'username': user, 'password': passwd})
@@ -89,27 +89,27 @@ class MicadoCredmanAuthenticationBackend(AbstractAuthenticationBackend):
                 resp = urlopen(req)
             except URLError as e:
                 log(session_id, CORE_AUTH, 1, "Error accessing credman API; %s", (e, ))
-                return Z_AUTH_REJECT
+                return (Z_AUTH_REJECT, None)
             except HTTPError as e:
                 # This would happen if credman would use proper HTTP errors
                 log(session_id, CORE_AUTH, 3, "Authentication error; %s", (e, ))
-                return Z_AUTH_REJECT
+                return (Z_AUTH_REJECT, None)
             try:
                 j_body = loads(''.join(resp.readlines()))
             except ValueError as e:
                 log(session_id, CORE_AUTH, 2, "Malformed response on credman API; %s", (e,))
-                return Z_AUTH_REJECT
+                return (Z_AUTH_REJECT, None)
             code = j_body.get('code', 400)
             if code == 423:
                 log(session_id, CORE_AUTH, 3, "Authentication failure, user account locked; username='%s', code=%s, msg=%s",
                     (user, code, j_body.get('result', ''), )
                     )
-                return Z_AUTH_REJECT
+                return (Z_AUTH_REJECT, None)
             elif code != 200:
                 log(session_id, CORE_AUTH, 3, "Authentication failure; username='%s', code=%s, msg=%s",
                     (user, code, j_body.get('result', ''), )
                     )
-                return Z_AUTH_REJECT
+                return (Z_AUTH_REJECT, None)
             groups = ["user",]
             if j_body.get('role', '') != "user":
                 groups.append(j_body.get('role', ''))
@@ -489,7 +489,6 @@ class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
         self.url_mapping["/prometheus"] = ("prometheus", 9090, False)
         self.url_mapping["/docker-visualizer"] = ("dockervisualizer", 8080, False)
         self.url_mapping["/grafana"] = ("grafana", 3000, True)
-        self.url_mapping["/dashboard"] = ("micado-dashboard", 4000, True)
         self.url_mapping["/toscasubmitter"] = ("toscasubmitter", 5050, True)
         self.auth_mapping["/"] = "user"
         self.auth_mapping["/prometheus"] = "user"
