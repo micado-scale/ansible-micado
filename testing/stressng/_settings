@@ -1,16 +1,26 @@
 MICADO_MASTER="123.456.78.90"
+MICADO_PORT=""
 APP_ID="stresstest"
 SSL_USER=""
 SSL_PASS=""
-
+###########################################################################
+############ CONFIGURE SETTINGS ABOVE FOR YOUR MiCADO INSTANCE ############
+###########################################################################
 echo "Settings used:"
 echo "  MICADO_MASTER: $MICADO_MASTER"
+
+if [ -z $MICADO_PORT ]; then
+  MICADO_PORT="443"
+  PORT_MESSAGE="(none specified, using default)"
+fi
+
+echo "  MICADO_PORT: $MICADO_PORT $PORT_MESSAGE"
 echo "  APP_ID: $APP_ID"
 
 if [ $SSL_USER ]; then
-  echo " INFO: SSL username is set"
+  echo "  SSL_USER: (hidden)"
 fi
 
 if [ $SSL_PASS ]; then
-  echo " INFO: SSL password is set"
+  echo "  SSL_PASS: (hidden)"
 fi
