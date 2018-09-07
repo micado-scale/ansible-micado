@@ -31,7 +31,7 @@
         cadvisor: google/cadvisor:v0.28.3
         consul: consul:1.0.0
         credential_manager: micado/credential-manager:latest
-        dashboard: micado/dashboard:0.2.0
+        dashboard: micado/dashboard:0.2.1
         dockervisualizer: micado/dockerviz:min-refresh
         grafana: grafana/grafana:5.1.0
         node_exporter: prom/node-exporter:v0.15.2
