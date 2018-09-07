@@ -2,7 +2,7 @@
 
 settings_file="./_settings"
 
-. $settings_file >&2
+. $settings_file 
 
 if [ -z "$MICADO_MASTER" ]; then
   echo "Please, set MICADO_MASTER in file named \"$settings_file\"!"
@@ -27,5 +27,5 @@ if [ -z "$SSL_PASS" ]; then
   echo " Please, set SSL_PASS in file named \"$settings_file\"!"
 fi
 
-echo "Fetching nodes info for appid $APP_ID from MiCADO at $MICADO_MASTER..." >&2
-curl --insecure -s -X GET https://$SSL_USER:$SSL_PASS@$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/$APP_ID/nodes
+echo "Fetching nodes info for appid $APP_ID from MiCADO at $MICADO_MASTER..." 
+curl --insecure -s -X GET https://$SSL_USER:$SSL_PASS@$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/$APP_ID/nodes | jq
