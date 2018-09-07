@@ -18,7 +18,7 @@ echo "  MICADO_PORT: $MICADO_PORT $PORT_MESSAGE"
 echo "  APP_ID: $APP_ID"
 
 if [ $SSL_USER ]; then
-  echo "  SSL_USER: (hidden)"
+  echo "  SSL_USER: $SSL_USER"
 fi
 
 if [ $SSL_PASS ]; then
