@@ -18,12 +18,12 @@
 -A FILTERS -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 -A FILTERS -m state --state NEW -i lo -j ACCEPT
--A FILTERS -m state --state NEW -s 172.31.0.0/16  -j ACCEPT
+-A FILTERS -m state --state NEW -s 172.27.0.0/16  -j ACCEPT
 
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
 #management web interface
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport {{ web_listening_port }} -j ACCEPT
--A FILTERS -m state --state NEW -d 172.31.0.0/16 -p tcp --dport 443 -j ACCEPT
+-A FILTERS -m state --state NEW -d 172.27.0.0/16 -p tcp --dport 443 -j ACCEPT
 #swarm
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 2377 -j ACCEPT
 -A FILTERS -m state --state NEW -m udp -p udp --dport 4789 -j ACCEPT
