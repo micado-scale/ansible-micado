@@ -150,7 +150,9 @@ class PersistentTimedCache(TimedCache):
 
     def lookup(self, key):
         self.read_persistent_cache()
-        return super(PersistentTimedCache, self).lookup(key)
+        res = super(PersistentTimedCache, self).lookup(key)
+        self.persist_cache()
+        return res
 
     def store(self, key, value):
         self.read_persistent_cache()
@@ -285,7 +287,7 @@ class FormAuthParseLoginProxy(AnyPyProxy):
         return (username, password, redirect_location)
 
     def setUnauthorizedVerdict(self, redirect_location):
-        self.session.http.setUnathorizedVerdict(redirect_location)
+        self.session.http.setUnauthorizedVerdict(redirect_location)
         self.set_verdict(ZV_REJECT, "Invalid login data")
 
     def setAuthorizedVerdict(self, username, groups, redirect_location):
@@ -294,7 +296,7 @@ class FormAuthParseLoginProxy(AnyPyProxy):
 
     def authenticateUserPassForm(self, username, password, redirect_location):
         verdict = self.session.http.authenticateUserPass(username, password)
-        if verdict != Z_AUTH_REJECT:
+        if verdict[0] != Z_AUTH_REJECT:
             return self.setAuthorizedVerdict(username, verdict[1], redirect_location)
         else:
             return self.setUnauthorizedVerdict(redirect_location)
