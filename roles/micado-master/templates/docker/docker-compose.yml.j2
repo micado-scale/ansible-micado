@@ -132,7 +132,7 @@ services:
     user: "root"
 
    credman:
-    image: micado/credential-manager:latest
+    image: {{ docker_images.credential_manager }}
     container_name: credman
     restart: always
     ports:
@@ -144,7 +144,7 @@ services:
       - "/var/lib/micado/credman/config:/config"
 
    zorp:
-    image: balasys/zorpgpl:latest
+    image: {{ docker_images.zorp }}
     container_name: zorp
     restart: always
     depends_on:
