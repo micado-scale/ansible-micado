@@ -1,0 +1,12 @@
+tls:
+  provision_method: self-signed # or user-supplied
+  # these need to be set if user-supplied is chosen
+  # cert: |
+  # key: |
+authentication:
+  # username defaults to admin
+  username: admin
+  # e-mail address defaults to root@micado-master
+  email: root@micado-master
+  # password defaults to admin
+  password: admin

@@ -11,6 +11,28 @@
     dest: /var/lib/micado/toscasubmitter/src
     version: "{{github_versions.toscasubmitter}}"
 
-- name: "Start MiCADO services: Docker compose up"
-  docker_service:
-    project_src: /var/lib/micado/
+- name: 'Installing mictl dependencies'
+  pip:
+    name:
+      - requests
+      - click
+      - terminaltables
+    state: present
+
+- name: Enable packet filtering
+  service:
+    name: iptables
+    state: restarted
+    enabled: yes
+
+- name: Enable IPv6 packet filtering
+  service:
+    name: ip6tables
+    state: restarted
+    enabled: yes
+
+- name: Enable and start MiCADO systemd service
+  service:
+    name: micado
+    state: restarted
+    enabled: yes

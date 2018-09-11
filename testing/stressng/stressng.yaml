@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.5.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.6.0/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -34,7 +34,7 @@ topology_template:
             num_cpus: 2000
             mem_size: 1073741824
             vnc_password: secret
-            libdrive_id: 87ce928e-e0bc-4cab-9502-514e523783e3
+            libdrive_id: 6ec54277-a6b2-4e36-bab0-38f4d8c662c7
             public_key_id: ADD_YOUR_ID_HERE
             firewall_policy: ADD_YOUR_ID_HERE
 

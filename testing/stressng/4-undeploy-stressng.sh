@@ -9,8 +9,8 @@ if [ -z "$MICADO_MASTER" ]; then
   exit
 fi
 
-if [ -z "$MICADO_PORT" ]; then
-  echo "Please, set MICADO_PORT in file named \"$settings_file\"!"
+if [ -z "$APP_ID" ]; then
+  echo "Please, set APP_ID in file named \"$settings_file\"!"
   exit
 fi
 
@@ -22,6 +22,5 @@ if [ -z "$SSL_PASS" ]; then
   echo " Please, set SSL_PASS in file named \"$settings_file\"!"
 fi
 
-echo "Retrieving list of running apps from MiCADO at $MICADO_MASTER..." 
-curl --insecure -s -X GET https://$SSL_USER:$SSL_PASS@$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/list_app | jq
-
+echo "Deleting app with id \"$APP_ID\" from MiCADO at $MICADO_MASTER..."
+curl --insecure -s -X DELETE https://$SSL_USER:$SSL_PASS@$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/undeploy/$APP_ID | jq
