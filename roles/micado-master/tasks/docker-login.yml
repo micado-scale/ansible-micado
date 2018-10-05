@@ -15,9 +15,9 @@
   include_vars: "{{ docker_cred_path }}"
   when: f.stat.exists
 
-- name: "Wait for containers to launch..."
-  command: sleep 5
-  when: f.stat.exists
+- name: "Wait for TOSCAsubmitter to launch..."
+  wait_for:
+    port: 5050
 
 - name: "Perform Docker login"
   command: docker exec toscasubmitter sh -c "docker login {{ DOCKER_REPO }} -u {{ DOCKER_USER }} -p {{ DOCKER_PASS }}"
