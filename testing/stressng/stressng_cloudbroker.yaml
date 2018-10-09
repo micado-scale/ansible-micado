@@ -1,0 +1,59 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - https://raw.githubusercontent.com/micado-scale/tosca/beta/micado_types.yaml
+
+repositories:
+  docker_hub: https://hub.docker.com/
+
+topology_template:
+  node_templates:
+    stressng:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+         command: "--cpu 0 --cpu-method pi -l 20"
+         deploy:
+           resources:
+             reservations:
+               cpus: '1.0'
+      artifacts:
+       image:
+         type: tosca.artifacts.Deployment.Image.Container.Docker
+         file: lorel/docker-stress-ng
+         repository: docker_hub
+
+    worker_node:
+      type: tosca.nodes.MiCADO.Occopus.CloudBroker.Compute
+      properties:
+        cloud:
+          interface_cloud: cloudbroker
+          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://cola-prototype.cloudbroker.com )
+      capabilities:
+        host:
+          properties:
+            deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
+            instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
+            key_pair_id: ADD_YOUR_ID_HERE (e.g. d865f75f-d32b-4444-9fbb-3332bcedeb75)
+            opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
+
+  policies:
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO.VirtualMachine.CPU
+        targets: [ worker_node ]
+        properties:
+          constants:
+            NODE_TH_MAX: '60'
+            NODE_TH_MIN: '20'
+          min_instances: 1
+          max_instances: 3
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO.Container.CPU
+        targets: [ stressng ]
+        properties:
+          constants:
+            SERVICE_NAME: 'stressng'
+            SERVICE_FULL_NAME: '{{stack}}_stressng'
+            SERVICE_TH_MAX: '60'
+            SERVICE_TH_MIN: '20'
+          min_instances: 1
+          max_instances: 3
