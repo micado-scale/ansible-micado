@@ -16,7 +16,9 @@
   when: f.stat.exists
 
 - name: "Wait for the running state of ToscaSubmitter"
-  shell: "i=0 ; while [ `docker ps --filter status=running --filter name=toscasubmitter | wc -l` -eq 1 ] && [ $i -lt 20 ] ; do echo -e 'ToscaSubmitter is not running yet!' ;  sleep 1 ; ((i++)) ; done ; if [ $i -eq 20] ; then echo '20 seconds expired, unsuccessfully. An error occurred.' ; exit 1 ; fi"
+  shell: "i=0 ; while [ `docker ps --filter status=running --filter name=toscasubmitter | wc -l` -eq 1 ] && [ $i -lt 20 ] ; do echo -e 'ToscaSubmitter is not running yet!' ;  sleep 1 ; ((i++)) ; done ; if [ $i -eq 20 ] ; then exit 1 ; fi ; exit 0"
+  args:
+    executable: /bin/bash
   register: output
   changed_when: output.stdout != ""
   when: f.stat.exists
