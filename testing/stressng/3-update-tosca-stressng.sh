@@ -2,7 +2,7 @@
 
 settings_file="./_settings"
 
-. $settings_file 
+. $settings_file
 
 if [ -z "$MICADO_MASTER" ]; then
   echo "Please, set MICADO_MASTER in file named \"$settings_file\"!"
@@ -22,5 +22,5 @@ if [ -z "$APP_ID" ]; then
   exit
 fi
 
-echo "Updating app with id \"$APP_ID\" using stressng-update.yaml on MiCADO at $MICADO_MASTER..." 
-curl --insecure -s -F file=@"stressng-update.yaml" -X PUT https://$SSL_USER:$SSL_PASS@$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/update/file/$APP_ID | jq
+echo "Updating app with id \"$APP_ID\" using stressng-update.yaml on MiCADO at $MICADO_MASTER..."
+curl --insecure -s -F file=@"stressng-update.yaml" -X PUT -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/update/file/$APP_ID | jq
