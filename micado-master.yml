@@ -48,3 +48,4 @@
     - grafana_admin_pwd: secret
     - master_hostname: micado-master
     - worker_hostname: micado-worker
+    - disable_worker_updates: True
