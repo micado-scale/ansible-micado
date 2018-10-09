@@ -15,6 +15,12 @@
   include_vars: "{{ docker_cred_path }}"
   when: f.stat.exists
 
+- name: "Wait for the running state of ToscaSubmitter"
+  shell: "i=0 ; while [ `docker ps --filter status=running --filter name=toscasubmitter | wc -l` -eq 1 ] && [ $i -lt 20 ] ; do echo -e 'ToscaSubmitter is not running yet!' ;  sleep 1 ; ((i++)) ; done ; if [ $i -eq 20] ; then echo '20 seconds expired, unsuccessfully. An error occurred.' ; exit 1 ; fi"
+  register: output
+  changed_when: output.stdout != ""
+  when: f.stat.exists
+
 - name: "Perform Docker login"
   command: docker exec toscasubmitter sh -c "docker login {{ DOCKER_REPO }} -u {{ DOCKER_USER }} -p {{ DOCKER_PASS }}"
   when: f.stat.exists
