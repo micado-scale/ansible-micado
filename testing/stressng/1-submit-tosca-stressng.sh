@@ -16,10 +16,12 @@ fi
 
 if [ -z "$SSL_USER" ]; then
   echo " Please, set SSL_USER in file named \"$settings_file\"!"
+  exit
 fi
 
 if [ -z "$SSL_PASS" ]; then
   echo " Please, set SSL_PASS in file named \"$settings_file\"!"
+  exit
 fi
 
 echo "Submitting stressng.yaml to MiCADO at $MICADO_MASTER with appid \"$APP_ID\"..."
