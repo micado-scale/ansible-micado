@@ -1,7 +1,7 @@
 ---
 - name: "Cloning policy keeper from git"
   git:
-    repo: https://github.com/micado-scale/component-policy-keeper.git
+    repo: https://github.com/jaydesl/component-policy-keeper.git
     dest: /var/lib/micado/policykeeper/src
     version: "{{github_versions.policykeeper}}"
 

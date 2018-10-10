@@ -121,8 +121,6 @@ services:
     image: {{docker_images.toscasubmitter}}
     container_name: toscasubmitter
     restart: always
-    ports:
-      - 5050:5050
     command: "-h 0.0.0.0 -p 5050"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
@@ -155,6 +153,8 @@ services:
       - consul
       - occopus
       - policykeeper
+      - toscasubmitter
+      - credman
     ports:
       - {{ web_listening_port | default('443') }}:443
     volumes:
