@@ -50,3 +50,4 @@
     - master_hostname: micado-master
     - worker_hostname: micado-worker
     - disable_worker_updates: True
+    - container_orchestrator: k8s

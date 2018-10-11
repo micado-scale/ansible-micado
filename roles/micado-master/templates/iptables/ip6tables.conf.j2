@@ -25,6 +25,13 @@
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
 #management web interface
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport {{ web_listening_port }} -j ACCEPT
+#k8s
+-A FILTERS -m state --state NEW -m tcp -p tcp --dport 6443 -j ACCEPT
+-A FILTERS -m state --state NEW -m udp -p udp --dport 2379 -j ACCEPT
+-A FILTERS -m state --state NEW -m tcp -p tcp --dport 2380 -j ACCEPT
+-A FILTERS -m state --state NEW -m udp -p udp --dport 10250 -j ACCEPT
+-A FILTERS -m state --state NEW -m udp -p udp --dport 10251 -j ACCEPT
+-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10252 -j ACCEPT
 #swarm
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 2377 -j ACCEPT
 -A FILTERS -m state --state NEW -m udp -p udp --dport 4789 -j ACCEPT

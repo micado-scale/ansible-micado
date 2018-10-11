@@ -1,0 +1,33 @@
+---
+- name: 'Docker-compose: Installing python tools'
+  action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=present"
+  with_items:
+    - python-setuptools
+    - python3-pip
+
+- name: 'Docker-compose: Installing pip package manager'
+  easy_install:
+    name: "{{ docker_compose_pip_version }}"
+
+- name: 'Docker-compose: Install'
+  pip:
+    name: docker-compose
+    version: "{{ docker_compose_version if docker_compose_version else omit }}"
+    state: present
+
+- name: 'Docker Swarm: check membership'
+  shell: docker node ls
+  register: swarmmember
+  changed_when: swarmmember.rc == 1
+  failed_when: swarmmember.rc not in [0,1]
+
+- name: 'Docker Swarm: Initialization'
+  shell: docker swarm init
+        --listen-addr {{ ansible_default_ipv4.address }}
+        --advertise-addr {{ ansible_default_ipv4.address }}
+        --availability drain
+  when: swarmmember.rc == 1
+
+- name: 'Docker Swarm: Get worker token'
+  shell: docker swarm join-token -q worker
+  register: worker_token
