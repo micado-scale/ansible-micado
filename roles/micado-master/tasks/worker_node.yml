@@ -16,14 +16,14 @@
     src: worker_node/cloud_init_worker.yaml.j2
     dest: /var/lib/micado/toscasubmitter/system/cloud_init_worker.yaml
     mode: 0644
-  when: container_orchestrator == docker
+  when: container_orchestrator == 'docker'
 
 - name: "Worker node: Deploying cloud-config for workers"
   template:
     src: worker_node/cloud_init_worker_k8s.yaml.j2
     dest: /var/lib/micado/toscasubmitter/system/cloud_init_worker.yaml
     mode: 0644
-  when: container_orchestrator == k8s
+  when: container_orchestrator == 'k8s'
 
 - name: "Worker node: Disable Unattended Upgrades"
   lineinfile:

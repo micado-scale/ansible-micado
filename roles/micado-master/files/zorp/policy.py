@@ -485,7 +485,7 @@ class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
         self.request["PATCH"] = (HTTP_REQ_POLICY, self.reqRedirect)
         self.response_header["Strict-Transport-Security"] = (HTTP_HDR_REPLACE, "max-age=63072000; includeSubdomains;")
         self.url_mapping["/prometheus"] = ("prometheus", 9090, False)
-        self.url_mapping["/docker-visualizer"] = ("dockervisualizer", 8080, False)
+        #self.url_mapping["/docker-visualizer"] = ("dockervisualizer", 8080, False)
         self.url_mapping["/grafana"] = ("grafana", 3000, True)
         self.url_mapping["/toscasubmitter"] = ("toscasubmitter", 5050, True)
         self.auth_mapping["/"] = "user"

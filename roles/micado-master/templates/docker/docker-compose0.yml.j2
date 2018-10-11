@@ -91,6 +91,16 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
     command: /policykeeper/policy_keeper.py --srv --cfg /config/policykeeper/policykeeper_config.yaml --host 0.0.0.0 --port 12345
 
+   dockervisualizer:
+    image: {{docker_images.dockervisualizer}}
+    container_name: dockervisualizer
+    restart: always
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - CTX_ROOT=/docker-visualizer
+    command: npm start
+
    grafana:
     image: {{docker_images.grafana}}
     container_name: grafana
@@ -113,8 +123,7 @@ services:
     restart: always
     command: "-h 0.0.0.0 -p 5050"
     volumes:
-      - "/root/.kube:/root/.kube"
-      - "/usr/local/bin/kompose:/usr/local/bin/kompose"
+      - "/var/run/docker.sock:/var/run/docker.sock"
       - "/var/lib/micado/toscasubmitter/src:/var/lib/submitter"
       - "/var/lib/micado/toscasubmitter/system/:/var/lib/submitter/system"
       - "/var/log/micado/toscasubmitter/:/var/log/submitter/"
@@ -140,6 +149,7 @@ services:
       - alertmanager
       - prometheus
       - grafana
+      - dockervisualizer
       - consul
       - occopus
       - policykeeper

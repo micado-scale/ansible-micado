@@ -18,6 +18,7 @@
 - name: 'Downloading docker image: Docker Visualizer'
   docker_image:
       name: "{{docker_images.dockervisualizer}}"
+  when: container_orchestrator == 'docker'
 
 - name: 'Downloading docker image: Grafana'
   docker_image:

@@ -35,35 +35,32 @@
 - name: 'K8s: CNI plugin fix'
   shell: sysctl net.bridge.bridge-nf-call-iptables=1
 
+- name: 'K8s: check membership'
+  shell: kubeadm token list
+  register: k8smember
+  changed_when: k8smember.rc == 1
+  failed_when: k8smember.rc not in [0,1]
+
 - name: 'K8s: Initialization'
-  shell: docker swarm init
+  shell: kubeadm init
         --apiserver-advertise-address={{ ansible_default_ipv4.address }}
         --pod-network-cidr=10.244.0.0/16
+  when: k8smember.rc == 1
 
-- name: 'K8s: Create .kube dir'
-  become: yes
-  become_user: ubuntu
+- name: 'K8s: Create /root/.kube'
   file:
-    path: $HOME/.kube
     state: directory
-    mode: 0755
+    path: /root/.kube
 
-- name: 'K8s: cp admin.conf to .kube/config'
+- name: 'K8s: Copy admin.conf to .kube/'
   copy:
-    src: /etc/kubernetes/admin.conf
-    dest: /home/ubuntu/.kube/config
     remote_src: yes
-    owner: ubuntu
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
 
-- name: 'K8s: Get worker token'
+- name: 'K8s: Get join command'
   shell: kubeadm token create --print-join-command
-  register: worker_token_raw
-
-- name: 'K8s: Set join command'
-  set_fact:
-    worker_token: "{{ worker_token_raw.stdout_lines[0] }}"
+  register: join_command
 
 - name: 'K8s: Install Flannel pod network'
-  become: yes
-  become_user: ubuntu
   shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml

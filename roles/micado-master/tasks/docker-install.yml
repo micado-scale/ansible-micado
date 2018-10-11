@@ -48,3 +48,19 @@
     enabled: yes
     masked: no
   when: docker_service.changed
+
+- name: 'Docker-compose: Installing python tools'
+  action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=present"
+  with_items:
+    - python-setuptools
+    - python3-pip
+
+- name: 'Docker-compose: Installing pip package manager'
+  easy_install:
+    name: "{{ docker_compose_pip_version }}"
+
+- name: 'Docker-compose: Install'
+  pip:
+    name: docker-compose
+    version: "{{ docker_compose_version if docker_compose_version else omit }}"
+    state: present
