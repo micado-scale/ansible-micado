@@ -1,5 +1,5 @@
 hosts
 *.retry
-credentials.yml
-docker-cred.yml
-security-cred.yml
+credentials-cloud-api.yml
+credentials-docker-registry.yml
+credentials-micado.yml
