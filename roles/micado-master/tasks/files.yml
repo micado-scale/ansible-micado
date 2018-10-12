@@ -172,7 +172,7 @@
 - name: "Zorp config: Copy file"
   copy:
     src: zorp/policy.py
-    dest: /var/lib/micado/zorp/config/policy.py
+    dest: /var/lib/micado/zorp/config/policy-{{ container_orchestrator }}.py
     mode: 0644
 
 - name: "Zorp HTTP login form: Copy file"
@@ -264,12 +264,14 @@
     state: directory
     mode: 0775
     recurse: yes
+  when: container_orchestrator == 'swarm'
 
 - name: "Visualizer logging: Create log output info"
   copy:
     content: "Check the logs by the following command:\ndocker logs dockervisualizer\n"
     dest: /var/log/micado/visualizer/README
     mode: 0644
+  when: container_orchestrator == 'swarm'
 
 - name: "Credential Manager logging: Create log directory"
   file:
@@ -299,13 +301,13 @@
 
 - name: "Docker-compose: Copy file"
   template:
-    src: docker/docker-compose.yml.j2
+    src: docker/docker-compose-{{ container_orchestrator }}.yml.j2
     dest: /var/lib/micado/docker-compose.yml
     mode: 0644
 
 - name: "Iptables configuration: Copy file"
   template:
-    src: iptables/iptables.conf.j2
+    src: iptables/iptables-{{ container_orchestrator }}.conf.j2
     dest: /etc/iptables.conf
     mode: 0640
 
@@ -317,7 +319,7 @@
 
 - name: "Ip6tables configuration: Copy file"
   template:
-    src: iptables/ip6tables.conf.j2
+    src: iptables/ip6tables-{{ container_orchestrator }}.conf.j2
     dest: /etc/ip6tables.conf
     mode: 0640
 

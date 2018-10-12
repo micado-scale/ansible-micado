@@ -10,20 +10,21 @@
 -F FILTERS
 
 -A INPUT -i lo -j ACCEPT
--A INPUT -p icmp --icmp-type any -j ACCEPT
 -A INPUT -j FILTERS
 
 -A DOCKER-USER -j FILTERS
 
 -A FILTERS -m state --state ESTABLISHED,RELATED -j ACCEPT
-
+-A FILTERS --protocol icmpv6 --icmpv6-type destination-unreachable --match state --state RELATED --jump ACCEPT
+-A FILTERS --protocol icmpv6 --icmpv6-type time-exceeded --match state --state RELATED --jump ACCEPT
+-A FILTERS --protocol icmpv6 --icmpv6-type parameter-problem --match state --state RELATED --jump ACCEPT
+-A FILTERS --protocol icmpv6 --icmpv6-type neighbour-solicitation --jump ACCEPT
+-A FILTERS --protocol icmpv6 --icmpv6-type neighbour-advertisement --jump ACCEPT
 -A FILTERS -m state --state NEW -i lo -j ACCEPT
--A FILTERS -m state --state NEW -s 172.27.0.0/16  -j ACCEPT
 
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
 #management web interface
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport {{ web_listening_port }} -j ACCEPT
--A FILTERS -m state --state NEW -d 172.27.0.0/16 -p tcp --dport 443 -j ACCEPT
 #k8s
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 6443 -j ACCEPT
 -A FILTERS -m state --state NEW -m udp -p udp --dport 2379 -j ACCEPT
@@ -31,11 +32,6 @@
 -A FILTERS -m state --state NEW -m udp -p udp --dport 10250 -j ACCEPT
 -A FILTERS -m state --state NEW -m udp -p udp --dport 10251 -j ACCEPT
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 10252 -j ACCEPT
-#swarm
--A FILTERS -m state --state NEW -m tcp -p tcp --dport 2377 -j ACCEPT
--A FILTERS -m state --state NEW -m udp -p udp --dport 4789 -j ACCEPT
--A FILTERS -m state --state NEW -m tcp -p tcp --dport 7946 -j ACCEPT
--A FILTERS -m state --state NEW -m udp -p udp --dport 7946 -j ACCEPT
 #consul
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 8300 -j ACCEPT
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 8301 -j ACCEPT
@@ -47,6 +43,6 @@
 -A FILTERS -m state --state NEW -m udp -p udp --dport 8600 -j ACCEPT
 
 -A FILTERS -j LOG --log-prefix="FILTERS DROP: "
--A FILTERS -j REJECT --reject-with icmp-host-prohibited
+-A FILTERS -j DROP
 
 COMMIT
