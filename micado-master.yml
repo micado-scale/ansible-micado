@@ -45,7 +45,7 @@
     - docker_cred_path: ./docker-cred.yml
     - github_versions:
         policykeeper: devel
-        toscasubmitter: master
+        toscasubmitter: k8s
     - grafana_admin_pwd: secret
     - master_hostname: micado-master
     - worker_hostname: micado-worker

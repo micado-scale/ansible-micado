@@ -7,7 +7,7 @@
 
 - name: "Cloning tosca-submitter from git"
   git:
-    repo: https://github.com/micado-scale/component_submitter.git
+    repo: https://github.com/jaydesl/component_submitter.git
     dest: /var/lib/micado/toscasubmitter/src
     version: "{{github_versions.toscasubmitter}}"
 

@@ -146,7 +146,7 @@
 
 - name: "TOSCA Submitter config: Copy config file"
   copy:
-    src: toscasubmitter/key_config.yml
+    src: toscasubmitter/key_config-{{ container_orchestrator }}.yml
     dest: /var/lib/micado/toscasubmitter/system/key_config.yml
     mode: 0644
 
@@ -171,8 +171,8 @@
 
 - name: "Zorp config: Copy file"
   copy:
-    src: zorp/policy.py
-    dest: /var/lib/micado/zorp/config/policy-{{ container_orchestrator }}.py
+    src: zorp/policy-{{ container_orchestrator }}.py
+    dest: /var/lib/micado/zorp/config/policy.py
     mode: 0644
 
 - name: "Zorp HTTP login form: Copy file"
