@@ -107,7 +107,7 @@
 
 - name: "Grafana config: Copy dashboard file"
   copy:
-    src: grafana/data-dashboards-micado.json
+    src: grafana/data-dashboards-micado-{{ container_orchestrator }}.json
     dest: /var/lib/micado/grafana/data/dashboards/micado.json
     mode: 0644
 

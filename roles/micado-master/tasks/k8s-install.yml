@@ -23,7 +23,7 @@
     - kubeadm
     - kubectl
 
-- name: 'Docker: prevent package from being upgraded'
+- name: 'K8s: prevent package from being upgraded'
   dpkg_selections:
     name: "{{ item }}"
     selection: hold
@@ -34,6 +34,9 @@
 
 - name: 'K8s: CNI plugin fix'
   shell: sysctl net.bridge.bridge-nf-call-iptables=1
+
+- name: 'K8s: Pull config images'
+  shell: kubeadm config images pull
 
 - name: 'K8s: check membership'
   shell: kubeadm token list
