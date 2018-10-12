@@ -1,12 +1,12 @@
 ---
 - name: "Occopus Credentials: Load the credentials from the playbook"
   include_vars:
-    file: "credentials.yml"
+    file: "{{ cloud_cred_path }}"
     name: config
 
 - name: "Security Credentials: Load the credentials and security settings from the playbook"
   include_vars:
-    file: "security-cred.yml"
+    file: "{{ micado_cred_path  }}"
     name: security
 
 - name: "Consul config: Create directory"
