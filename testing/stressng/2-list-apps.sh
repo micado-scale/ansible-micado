@@ -11,11 +11,13 @@ fi
 
 if [ -z "$SSL_USER" ]; then
   echo " Please, set SSL_USER in file named \"$settings_file\"!"
+  exit
 fi
 
 if [ -z "$SSL_PASS" ]; then
   echo " Please, set SSL_PASS in file named \"$settings_file\"!"
+  exit
 fi
 
-echo "Retrieving list of running apps from MiCADO at $MICADO_MASTER..." 
-curl --insecure -s -X GET https://$SSL_USER:$SSL_PASS@$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/list_app | jq
+echo "Retrieving list of running apps from MiCADO at $MICADO_MASTER..."
+curl --insecure -s -X GET -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/list_app | jq

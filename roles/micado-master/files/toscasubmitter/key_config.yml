@@ -9,17 +9,17 @@ step:
     - OccopusAdaptor
     - PkAdaptor
   execute:
-    - DockerAdaptor
     - OccopusAdaptor
+    - DockerAdaptor
     - PkAdaptor
   update:
-    - DockerAdaptor
     - OccopusAdaptor
+    - DockerAdaptor
     - PkAdaptor
   undeploy:
+    - PkAdaptor
     - DockerAdaptor
     - OccopusAdaptor
-    - PkAdaptor
   cleanup:
     - DockerAdaptor
     - OccopusAdaptor
