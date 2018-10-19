@@ -61,6 +61,10 @@
     src: /etc/kubernetes/admin.conf
     dest: /root/.kube/config
 
+- name: 'K8s: Install Dashboard'
+  shell: kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+  when: k8smember.rc == 1
+
 - name: 'K8s: Get join command'
   shell: kubeadm token create --print-join-command
   register: join_command
@@ -73,3 +77,28 @@
     url: https://github.com/kubernetes/kompose/releases/download/v1.16.0/kompose-linux-amd64
     dest: /usr/local/bin/kompose
     mode: a+x
+
+- name: 'K8s: Copy dashboard admin file'
+  copy:
+    src: misc/kubedash-admin
+    dest: /etc/kubernetes/kubedashadm
+    mode: 0644
+  when: insecure_kube_dashboard
+
+- name: 'K8s: Grant dashboard admin rights'
+  shell: kubectl create -f /etc/kubernetes/kubedashadm
+  when: insecure_kube_dashboard and k8smember.rc == 1
+
+- name: 'K8s: Setup insecure host in APIServer'
+  lineinfile:
+    path: /etc/kubernetes/manifests/kube-apiserver.yaml
+    insertafter: '^    - kube-apiserver'
+    line: '    - --insecure-bind-address=0.0.0.0'
+  when: insecure_kube_dashboard
+
+- name: 'K8s: Setup insecure port in APIServer'
+  lineinfile:
+    path: /etc/kubernetes/manifests/kube-apiserver.yaml
+    regexp: '^    - --insecure-port=0'
+    line: '    - --insecure-port=8001'
+  when: insecure_kube_dashboard

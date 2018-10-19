@@ -51,3 +51,4 @@
     - worker_hostname: micado-worker
     - disable_worker_updates: True
     - container_orchestrator: k8s
+    - insecure_kube_dashboard: True
