@@ -44,7 +44,7 @@
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
     - docker_cred_path: ./docker-cred.yml
     - github_versions:
-        policykeeper: devel
+        policykeeper: k8s
         toscasubmitter: k8s
     - grafana_admin_pwd: secret
     - master_hostname: micado-master

@@ -40,7 +40,7 @@
     recurse: yes
 
 - name: "Prometheus config: Copy file"
-  copy:
+  copy:A
     src: prometheus/prometheus.yml
     dest: /var/lib/micado/prometheus/config/prometheus.yml
     mode: 0644

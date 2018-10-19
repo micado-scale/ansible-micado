@@ -7,18 +7,23 @@ step:
   translate:
     - K8sAdaptor
     - OccopusAdaptor
+    - PkAdaptor
   execute:
     - OccopusAdaptor
     - K8sAdaptor
+    - PkAdaptor
   update:
     - OccopusAdaptor
     - K8sAdaptor
+    - PkAdaptor
   undeploy:
+    - PkAdaptor
     - K8sAdaptor
     - OccopusAdaptor
   cleanup:
     - K8sAdaptor
     - OccopusAdaptor
+    - PkAdaptor
 
 adaptor_config:
  K8sAdaptor:
