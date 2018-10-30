@@ -15,7 +15,7 @@ topology_template:
          deploy:
            resources:
              reservations:
-               cpus: '1.0'
+               cpus: '0.9'
       artifacts:
        image:
          type: tosca.artifacts.Deployment.Image.Container.Docker
