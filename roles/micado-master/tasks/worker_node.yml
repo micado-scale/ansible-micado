@@ -13,7 +13,7 @@
 
 - name: "Worker node: Deploying cloud-config for workers"
   template:
-    src: worker_node/cloud_init_worker.yaml.j2
+    src: worker_node/cloud_init_worker-{{ container_orchestrator }}.yaml.j2
     dest: /var/lib/micado/toscasubmitter/system/cloud_init_worker.yaml
     mode: 0644
 

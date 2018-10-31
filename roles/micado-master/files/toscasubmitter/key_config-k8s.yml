@@ -1,0 +1,47 @@
+main_config:
+  dry_run: False
+  log_level: INFO
+  path_log: "/var/log/submitter/submitter.log"
+
+step:
+  translate:
+    - K8sAdaptor
+    - OccopusAdaptor
+    - PkAdaptor
+  execute:
+    - OccopusAdaptor
+    - K8sAdaptor
+    - PkAdaptor
+  update:
+    - OccopusAdaptor
+    - K8sAdaptor
+    - PkAdaptor
+  undeploy:
+    - PkAdaptor
+    - K8sAdaptor
+    - OccopusAdaptor
+  cleanup:
+    - K8sAdaptor
+    - OccopusAdaptor
+    - PkAdaptor
+
+adaptor_config:
+ K8sAdaptor:
+   types:
+     - "tosca.nodes.MiCADO.Container.Application.Docker"
+   endoint: "endpoint"
+   volume: "/var/lib/submitter/files/output_configs/"
+
+
+ OccopusAdaptor:
+   types:
+     - "tosca.nodes.MiCADO.Occopus.*"
+   endoint: "endpoint"
+   volume: "/var/lib/submitter/files/output_configs/"
+
+
+ PkAdaptor:
+   types:
+     - "tosca.policies.Scaling.MiCADO"
+   endpoint: "policykeeper:12345"
+   volume: "/var/lib/submitter/files/output_configs/"

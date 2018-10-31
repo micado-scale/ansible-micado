@@ -1,0 +1,145 @@
+#cloud-config
+apt_upgrade: false
+apt_update: false
+manage_etc_hosts: false
+package_update: false
+package_upgrade: false
+
+write_files:
+
+- path: /etc/consul/config.json
+  content: |
+    {
+    "server": false,
+    "datacenter": "application",
+    "data_dir": "/var/consul",
+    "encrypt": "{{ consul_key.stdout }}",
+    "log_level": "INFO",
+    "enable_syslog": false,
+    "retry_join": ["{{ ansible_default_ipv4.address }}"],
+    "rejoin_after_leave": true,
+    "services": [{"name":"worker_cluster","port":9100}, {"name":"app_docker_cluster","port":9200}]
+    }
+
+- path: /bin/consul-set-network.sh
+  permissions: '755'
+  content: |
+    #!/bin/bash
+    echo "Setup NETWORK starts."
+    myhost=`hostname`
+    ipaddress=`ifconfig | awk '/inet addr/{print substr($2,6)}' | grep -v 127.0.0.1 | head -n 1`
+    cp /etc/hosts /etc/hosts.old
+    grep -v "$myhost" /etc/hosts.old > /etc/hosts
+
+    echo "IPADDRESS: $ipaddress"
+    echo "$ipaddress $myhost" >> /etc/hosts
+
+    rm -rf /etc/resolvconf/*
+    echo "Setup NETWORK finished."
+
+- path: /tmp/wait-updates.sh
+  permissions: '755'
+  content: |
+    #!/bin/bash
+
+    while [[ `ps aufx | grep -v "grep" | grep "apt.systemd.daily" | wc -l` -gt 0 ]]; do
+      sleep 1
+    done
+
+- path: /etc/resolvconf/resolv.conf.d/base
+  content: |
+    nameserver 8.8.8.8
+
+- path: /etc/micado/docker-compose.yml
+  content: |
+    version: '3.3'
+
+    services:
+      consul:
+        image: {{ docker_images.consul }}
+        container_name: consul
+        ports:
+          - 8300:8300
+          - 8301:8301
+          - 8301:8301/udp
+          - 8302:8302
+          - 8302:8302/udp
+          - 8500:8500
+          - 8600:8600
+          - 8600:8600/udp
+        volumes:
+          - "/etc/consul/:/etc/consul/"
+        command: agent -advertise=$IP -retry-join={{ ansible_default_ipv4.address }} -config-file=/etc/consul/config.json
+
+      node-exporter:
+        image: {{ docker_images.node_exporter }}
+        container_name: node-exporter
+        ports:
+          - 9100:9100
+
+      cadvisor:
+        image: {{ docker_images.cadvisor }}
+        container_name: cadvisor
+        ports:
+          - 9200:8080
+        volumes:
+          - "/:/rootfs/:ro"
+          - "/var/run/:/var/run/:rw"
+          - "/sys:/sys/:ro"
+          - "/var/lib/docker/:/var/lib/docker/:ro"
+          - "/dev/disk/:/dev/disk/"
+    networks:
+      default:
+        driver: bridge
+        driver_opts:
+          com.docker.network.driver.mtu: {{ ansible_default_ipv4.mtu }}
+
+runcmd:
+  - /tmp/wait-updates.sh
+  - /bin/consul-set-network.sh
+  - IP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 's/\./-/g'`
+  - hostname={{ worker_hostname }}-$IP
+  - oldhostname=$(hostname -s)
+  - sed -i "s/$oldhostname//g" /etc/hosts
+  - sed -i "s/\b127.0.0.1 localhost/127.0.0.1 localhost\\t$hostname/g" /etc/hosts
+  - hostnamectl set-hostname $hostname
+  - dpkg-reconfigure openssh-server
+  - echo nameserver 8.8.8.8 >> /etc/resolv.conf
+  - resolvconf -u
+
+  # Docker
+
+  - apt-get update
+  - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common wget
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+  - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - apt-get update
+  - apt-get install -y {{ docker_package }}
+  - systemctl enable docker
+  - sed -i -e "s/-H fd:\/\//-H fd:\/\/ --mtu={{ ansible_default_ipv4.mtu }}/g" /lib/systemd/system/docker.service
+  - systemctl daemon-reload
+  - systemctl restart docker.service
+
+  # Install Docker Compose
+
+  - curl -L https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+  - chmod +x /usr/local/bin/docker-compose
+
+  # K8s
+
+  - swapoff -a
+  - curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+  - touch /etc/apt/sources.list.d/kubernetes.list
+  - bash -c 'echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list'
+  - apt-get update
+  - apt-get install -y kubelet kubeadm
+  - apt-mark hold kubelet kubeadm
+
+  # Connect to cluster
+
+  - {{ join_command.stdout }}
+
+  # Infra services start
+
+  - export IP=$(hostname -I | cut -d\  -f1)
+  - docker-compose -f /etc/micado/docker-compose.yml up -d
