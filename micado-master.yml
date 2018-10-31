@@ -24,6 +24,26 @@
     - micado-master
 
   vars:
+
+    ######################################################################
+    ##### If you want to change the configuration, please edit here. #####
+    ######################################################################
+
+    - cloud_cred_path: ./credentials-cloud-api.yml
+    - docker_cred_path: ./credentials-docker-registry.yml
+    - micado_cred_path: ./credentials-micado.yml
+
+    - disable_worker_updates: True
+    - grafana_admin_pwd: secret
+    - web_listening_port: 443
+
+    - master_hostname: micado-master
+    - worker_hostname: micado-worker
+
+    ##################################################################################
+    ##### Please do not edit under this line unless you know what you are doing. #####
+    ##################################################################################
+
     - docker_compose_pip_version: pip
     - docker_compose_version: 1.16.1
     - docker_images:
@@ -42,7 +62,6 @@
         toscasubmitter: micado/toscasubmitter:0.1.1
         zorp: micado/zorpgpl:6.0.11
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
-    - docker_cred_path: ./docker-cred.yml
     - github_versions:
         policykeeper: k8s
         toscasubmitter: k8s

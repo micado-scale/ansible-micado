@@ -169,7 +169,25 @@ class PersistentTimedCache(TimedCache):
         super(PersistentTimedCache, self).clear()
         self.persist_cache()
 
-class MethodFilterHttpProxy(HttpProxy):
+class URLFilterHttpProxy(HttpProxy):
+
+    def config(self):
+        super(URLFilterHttpProxy, self).config()
+        self.request["GET"] = (HTTP_REQ_POLICY, self.reqRedirect)
+
+    def __pre_config__(self):
+        self.url_filter_mapping = {}
+        return super(URLFilterHttpProxy, self).__pre_config__()
+
+    def reqRedirect(self, method, url, version):
+        for deny_prefix in self.url_deny_prefixes:
+            proxyLog(self, CORE_AUTH, 6, "Checking URL subtree deny filters; url='%s', deny_prefix='%s'", (self.request_url_file, deny_prefix))
+            if self.request_url_file.startswith(deny_prefix):
+	        proxyLog(self, CORE_AUTH, 1, "URL subtree access denied; url='%s', deny_prefix='%s'" % (self.request_url_file, deny_prefix))
+                raise AAException, "This URL subtree is prohibited"
+        return HTTP_REQ_ACCEPT
+
+class MethodFilterHttpProxy(URLFilterHttpProxy):
 
     def config(self):
         super(MethodFilterHttpProxy, self).config()
@@ -180,6 +198,10 @@ class MethodFilterHttpProxy(HttpProxy):
         return super(MethodFilterHttpProxy, self).__pre_config__()
 
     def reqRedirect(self, method, url, version):
+        ancestor_verdict = super(MethodFilterHttpProxy, self).reqRedirect(method, url, version)
+        if ancestor_verdict != HTTP_REQ_ACCEPT:
+            return ancestor_verdict
+
         for method_url in self.method_mapping.keys():
             proxyLog(self, CORE_AUTH, 6, "Checking method authorization; url='%s', method='%s', method_url='%s', permitted_methods='%s'", (self.request_url_file, method, method_url, self.method_mapping[method_url]))
             if self.request_url_file.startswith(method_url):
@@ -190,7 +212,6 @@ class MethodFilterHttpProxy(HttpProxy):
         raise AAException, "Method not permitted for this URL"
 
 class SessionHttpProxy(MethodFilterHttpProxy):
-
 
     def config(self):
         super(SessionHttpProxy, self).config()
@@ -500,6 +521,7 @@ class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
         self.method_mapping["/grafana"] = ["GET", "POST", "PUT", "DELETE", "PATCH"]
         self.method_mapping["/dashboard"] = ["GET", "POST"]
         self.method_mapping["/toscasubmitter"] = ["GET", "POST", "PUT", "DELETE"]
+        self.url_deny_prefixes = ["/prometheus/api/v1/admin",]
 
     def setServerAddress(self, host, port):
         for path in self.url_mapping.keys():
