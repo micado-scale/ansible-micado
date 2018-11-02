@@ -30,11 +30,10 @@ if [ -z "$CPU" ] || [ "$CPU" -le 0 ] || [ "$CPU" -gt 100 ]; then
   exit
 fi
 
-#cp stressng.yaml stressng.tmp.yaml
-#sed -i "s/pi -l [0-9]*/pi -l $CPU/" stressng.tmp.yaml
+cp stressng.yaml stressng.tmp.yaml
+sed -i "s/pi -l [0-9]*/pi -l $CPU/" stressng.tmp.yaml
 
-#echo "Stressing \"$APP_ID\" on MiCADO at $MICADO_MASTER... to a CPU load of $CPU"
-#curl --insecure -s -F file=@"stressng.tmp.yaml" -X PUT -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/update/file/$APP_ID | jq
+echo "Stressing \"$APP_ID\" on MiCADO at $MICADO_MASTER... to a CPU load of $CPU"
+curl --insecure -s -F file=@"stressng.tmp.yaml" -X PUT -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/update/file/$APP_ID | jq
 
-#rm stressng.tmp.yaml
-echo "Updates haven't been implemented just yet... You can do an update using the Kubernetes Dashboard if you decided to launch it."
+rm stressng.tmp.yaml

@@ -78,6 +78,17 @@
     dest: /usr/local/bin/kompose
     mode: a+x
 
+- name: 'K8s: Copy dashboard role file'
+  copy:
+    src: misc/kubedash-role
+    dest: /etc/kubernetes/kubedashrole
+    mode: 0644
+  when: insecure_kube_dashboard
+
+- name: 'K8s: Create ro-dashboard ClusterRole'
+  shell: kubectl create -f /etc/kubernetes/kubedashrole
+  when: insecure_kube_dashboard and k8smember.rc == 1
+
 - name: 'K8s: Copy dashboard admin file'
   copy:
     src: misc/kubedash-admin
