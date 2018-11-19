@@ -1,6 +1,12 @@
 ---
-- name: 'K8s: Turn off swap'
+- name: Turn off swap
   shell: swapoff -a
+
+- name: Disable swap permanently
+  replace:
+    path: /etc/fstab
+    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+    replace: '#\1\2\3swap\4'
 
 - name: 'K8s: Add APT key'
   apt_key:
