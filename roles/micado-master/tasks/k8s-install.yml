@@ -2,7 +2,7 @@
 - name: Disable swapoff
   shell: swapoff -a
 
-- name: Disable swapoff permanently
+- name: Disable swap permanently
   replace:
     path: /etc/fstab
     regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
