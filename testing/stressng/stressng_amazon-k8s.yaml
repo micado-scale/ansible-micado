@@ -37,7 +37,7 @@ topology_template:
             security_group_ids:
               - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
 
-  olicies:
+  policies:
     - scalability:
         type: tosca.policies.Scaling.MiCADO.VirtualMachine.CPU.stressng
         targets: [ worker_node ]
