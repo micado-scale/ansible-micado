@@ -1,6 +1,12 @@
 ---
-- name: 'K8s: Turn off swap'
-  shell: swapoff -a
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: swap
+    fstype: swap
+    state: absent
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
 
 - name: 'K8s: Add APT key'
   apt_key:
