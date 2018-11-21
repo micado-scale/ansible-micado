@@ -66,7 +66,7 @@
   when: k8smember.rc == 1
 
 - name: 'K8s: Get join command'
-  shell: kubeadm token create --print-join-command
+  shell: kubeadm token create --ttl 0 --print-join-command
   register: join_command
 
 - name: 'K8s: Install Flannel pod network'
