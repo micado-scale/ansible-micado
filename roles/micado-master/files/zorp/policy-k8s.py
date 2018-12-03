@@ -488,7 +488,7 @@ class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
         #self.url_mapping["/docker-visualizer"] = ("dockervisualizer", 8080, False)
         self.url_mapping["/grafana"] = ("grafana", 3000, True)
         self.url_mapping["/toscasubmitter"] = ("toscasubmitter", 5050, True)
-        self.url_mapping["/kubernetes"] = ("", 8001, True)
+        self.url_mapping["/kubernetes"] = ("172.17.0.1", 8001, True)
         self.auth_mapping["/"] = "user"
         self.auth_mapping["/prometheus"] = "user"
         #self.auth_mapping["/docker-visualizer"] = "user"
@@ -502,7 +502,7 @@ class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
         self.method_mapping["/grafana"] = ["GET", "POST", "PUT", "DELETE", "PATCH"]
         self.method_mapping["/dashboard"] = ["GET", "POST"]
         self.method_mapping["/toscasubmitter"] = ["GET", "POST", "PUT", "DELETE"]
-        self.method_mapping["/kbuernetes"] = ["GET"]
+        self.method_mapping["/kubernetes"] = ["GET"]
 
     def setServerAddress(self, host, port):
         for path in self.url_mapping.keys():
