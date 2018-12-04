@@ -485,20 +485,17 @@ class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
         self.request["PATCH"] = (HTTP_REQ_POLICY, self.reqRedirect)
         self.response_header["Strict-Transport-Security"] = (HTTP_HDR_REPLACE, "max-age=63072000; includeSubdomains;")
         self.url_mapping["/prometheus"] = ("prometheus", 9090, False)
-        #self.url_mapping["/docker-visualizer"] = ("dockervisualizer", 8080, False)
         self.url_mapping["/grafana"] = ("grafana", 3000, True)
         self.url_mapping["/toscasubmitter"] = ("toscasubmitter", 5050, True)
         self.url_mapping["/kubernetes"] = ("172.17.0.1", 8001, True)
         self.auth_mapping["/"] = "user"
         self.auth_mapping["/prometheus"] = "user"
-        #self.auth_mapping["/docker-visualizer"] = "user"
         self.auth_mapping["/grafana"] = "user"
         self.auth_mapping["/dashboard"] = "user"
         self.auth_mapping["/toscasubmitter"] = "admin"
         self.auth_mapping["/kubernetes"]  = "user"
         self.method_mapping["/"] = ["GET", "POST"]
         self.method_mapping["/prometheus"] =    ["GET", "POST"]
-        #self.method_mapping["/docker-visualizer"] = ["GET", "POST"]
         self.method_mapping["/grafana"] = ["GET", "POST", "PUT", "DELETE", "PATCH"]
         self.method_mapping["/dashboard"] = ["GET", "POST"]
         self.method_mapping["/toscasubmitter"] = ["GET", "POST", "PUT", "DELETE"]
