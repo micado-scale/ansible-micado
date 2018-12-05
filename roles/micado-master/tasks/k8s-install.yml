@@ -54,6 +54,7 @@
   shell: kubeadm init
         --apiserver-advertise-address={{ ansible_default_ipv4.address }}
         --pod-network-cidr=10.244.0.0/16
+        --ignore-preflight-errors=NumCPU
   when: k8smember.rc == 1
 
 - name: 'K8s: Create /root/.kube'
