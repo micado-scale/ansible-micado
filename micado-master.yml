@@ -67,7 +67,7 @@
         redis: redis:4.0
         toscasubmitter: micado/toscasubmitter:0.1.9
         zorp: micado/zorpgpl:6.0.11
-        vault: hashicorp/vault:1.0.0
+        vault: vault:1.0.0
         securitypolicymanager: micado/security-policy-manager:latest
         crypto_engine: micado/crypto-engine:1.0
         iivr: micado/iivr:1.0
