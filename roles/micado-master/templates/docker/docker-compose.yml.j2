@@ -155,6 +155,18 @@ services:
     volumes:
       - "/var/lib/micado/crypto_engine/config:/config"
 
+  vault:
+   image: {{ docker_images.vault }}
+   container_name: vault
+   restart: always
+   
+  security_policy_manager:
+   image: {{ docker_images.securitypolicymanager }}
+   container_name: security_policy_manager
+   restart: always
+   depends_on:
+     - vault
+
    zorp:
     image: {{ docker_images.zorp }}
     container_name: zorp
@@ -168,6 +180,8 @@ services:
       - policykeeper
       - toscasubmitter
       - credman
+      - vault
+      - spm
     ports:
       - {{ web_listening_port | default('443') }}:443
     volumes:
