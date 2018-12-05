@@ -89,33 +89,29 @@
     src: misc/kubedash-role
     dest: /etc/kubernetes/kubedashrole
     mode: 0644
-  when: insecure_kube_dashboard
 
 - name: 'K8s: Create ro-dashboard ClusterRole'
   shell: kubectl create -f /etc/kubernetes/kubedashrole
-  when: insecure_kube_dashboard and k8smember.rc == 1
+  when: k8smember.rc == 1
 
 - name: 'K8s: Copy dashboard admin file'
   copy:
     src: misc/kubedash-admin
     dest: /etc/kubernetes/kubedashadm
     mode: 0644
-  when: insecure_kube_dashboard
 
 - name: 'K8s: Grant dashboard admin rights'
   shell: kubectl create -f /etc/kubernetes/kubedashadm
-  when: insecure_kube_dashboard and k8smember.rc == 1
+  when: k8smember.rc == 1
 
 - name: 'K8s: Setup insecure host in APIServer'
   lineinfile:
     path: /etc/kubernetes/manifests/kube-apiserver.yaml
     insertafter: '^    - kube-apiserver'
     line: '    - --insecure-bind-address=0.0.0.0'
-  when: insecure_kube_dashboard
 
 - name: 'K8s: Setup insecure port in APIServer'
   lineinfile:
     path: /etc/kubernetes/manifests/kube-apiserver.yaml
     regexp: '^    - --insecure-port=0'
     line: '    - --insecure-port=8001'
-  when: insecure_kube_dashboard

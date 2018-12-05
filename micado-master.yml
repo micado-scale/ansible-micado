@@ -51,7 +51,7 @@
         cadvisor: google/cadvisor:v0.28.3
         consul: consul:1.0.0
         credential_manager: micado/credential-manager:0.2.0
-        dashboard: micado/dashboard:0.2.1
+        dashboard: micado/dashboard:k8s
         dockervisualizer: micado/dockerviz:min-refresh
         grafana: grafana/grafana:5.1.0
         node_exporter: prom/node-exporter:v0.15.2
@@ -66,4 +66,3 @@
         policykeeper: k8s
         toscasubmitter: k8s
     - container_orchestrator: k8s
-    - insecure_kube_dashboard: True
