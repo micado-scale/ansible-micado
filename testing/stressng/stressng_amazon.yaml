@@ -33,7 +33,7 @@ topology_template:
           properties:
             region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
             image_id: ADD_YOUR_IMAGE_ID_HERE (e.g. ami-061a2d878e5754b62)
-            instance_type: t2.micro
+            instance_type: t2.medium
             security_group_ids:
               - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
 
