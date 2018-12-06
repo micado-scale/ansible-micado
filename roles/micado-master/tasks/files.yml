@@ -162,6 +162,19 @@
     src: user_data/auth_data_credential_manager.csv.j2
     dest: /var/lib/micado/credman/config/provisioning.csv
 
+- name: "Vault configuration: Create config directory"
+  file:
+   path: /var/lib/micado/vault/
+   state: directory
+   mode: 0775
+   recurse: yes
+
+- name: "Vault configuration: Create config file"
+  copy:
+    src: vault/vault.json
+    dest: /var/lib/micado/vault/vault.json
+    mode: 0644
+
 - name: "Zorp config: Create directory"
   file:
     path: /var/lib/micado/zorp/config/
@@ -309,6 +322,13 @@
     content: "Check the logs by the following command:\ndocker logs zorp\n"
     dest: /var/log/micado/zorp/README
     mode: 0644
+
+- name: "Vault logging: Create log directory"
+  file:
+    path: /var/log/micado/vault/
+    state: directory
+    mode: 0775
+    recurse: yes
 
 - name: "Docker-compose: Copy file"
   template:
