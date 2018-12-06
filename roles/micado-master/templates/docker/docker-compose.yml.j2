@@ -165,6 +165,9 @@
     image: {{ docker_images.vault }}
     container_name: vault
     restart: always
+    volumes:
+      - "/var/lib/micado/vault:/vault/config"
+      - "/var/log/micado/vault:/vault/logs"
    
    security_policy_manager:
     image: {{ docker_images.securitypolicymanager }}
