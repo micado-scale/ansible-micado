@@ -171,8 +171,8 @@
 
 - name: "Vault configuration: Create config file"
   copy:
-    src: vault/vault.json
-    dest: /var/lib/micado/vault/vault.json
+    src: vault/vault.hcl
+    dest: /var/lib/micado/vault/vault.hcl
     mode: 0644
 
 - name: "Zorp config: Create directory"
