@@ -146,22 +146,19 @@
       volumes:
         - "/var/lib/micado/credman/config:/config"
 
-   iivr:
-    image: {{ docker_images.iivr }}
-    container_name: iivr
-    restart: always
-    volumes:
-      - "/var/lib/micado/iivr/config:/config"
+    iivr:
+      image: {{ docker_images.iivr }}
+      container_name: iivr
+      restart: always
+      volumes:
+        - "/var/lib/micado/iivr/config:/config"
 
-   crypto_engine:
-    image: {{ docker_images.crypto_engine }}
-    container_name: crypto_engine
-    restart: always
-    volumes:
-      - "/var/lib/micado/crypto_engine/config:/config"
-
-    #TODO: Kell neki adni Couldn't start vault with IPC_LOCK. Disabling IPC_LOCK, please use --privileged or --cap-add IPC_LOCK
-    #Error initializing listener of type tcp: listen tcp 127.0.0.1:8200: bind: address already in use
+    crypto_engine:
+      image: {{ docker_images.crypto_engine }}
+      container_name: crypto_engine
+      restart: always
+      volumes:
+        - "/var/lib/micado/crypto_engine/config:/config"
 
     vault:
       image: {{ docker_images.vault }}
@@ -172,12 +169,12 @@
         - "/var/log/micado/vault:/vault/logs"
       command: --cap-add=IPC_LOCK
 
-   security_policy_manager:
-    image: {{ docker_images.securitypolicymanager }}
-    container_name: security_policy_manager
-    restart: always
-    depends_on:
-      - vault
+    security_policy_manager:
+      image: {{ docker_images.securitypolicymanager }}
+      container_name: security_policy_manager
+      restart: always
+      depends_on:
+        - vault
 
     zorp:
       image: {{ docker_images.zorp }}
