@@ -155,9 +155,10 @@
       container_name: vault
       restart: always
       volumes:
-        - "/var/lib/micado/vault:/vault/config"
+        - "/var/lib/micado/vault/config:/vault/config"
+        - "/var/lib/micado/vault/storage:/vault/file"
         - "/var/log/micado/vault:/vault/logs"
-      command: --cap-add=IPC_LOCK
+      command: vault server -config /vault/config/vault.hcl
 
     security_policy_manager:
       image: {{ docker_images.securitypolicymanager }}
