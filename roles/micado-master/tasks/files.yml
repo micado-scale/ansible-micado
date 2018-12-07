@@ -164,7 +164,14 @@
 
 - name: "Vault configuration: Create config directory"
   file:
-   path: /var/lib/micado/vault/
+   path: /var/lib/micado/vault/config
+   state: directory
+   mode: 0775
+   recurse: yes
+
+- name: "Vault configuration: Create storage directory"
+  file:
+   path: /var/lib/micado/vault/storage
    state: directory
    mode: 0775
    recurse: yes
@@ -172,7 +179,7 @@
 - name: "Vault configuration: Create config file"
   copy:
     src: vault/vault.hcl
-    dest: /var/lib/micado/vault/vault.hcl
+    dest: /var/lib/micado/vault/config/vault.hcl
     mode: 0644
 
 - name: "Zorp config: Create directory"

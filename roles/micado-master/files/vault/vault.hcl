@@ -9,6 +9,11 @@ listener "tcp" {
     tils_key_file = ""
 }
 
+# Specify storage 
+storage "file" {
+    path = "/vault/file"
+}
+
 # Vault built-in web UI
 ui = false
 
