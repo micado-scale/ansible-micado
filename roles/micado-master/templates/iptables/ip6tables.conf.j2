@@ -25,11 +25,19 @@
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
 #management web interface
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport {{ web_listening_port }} -j ACCEPT
-#swarm
--A FILTERS -m state --state NEW -m tcp -p tcp --dport 2377 -j ACCEPT
--A FILTERS -m state --state NEW -m udp -p udp --dport 4789 -j ACCEPT
--A FILTERS -m state --state NEW -m tcp -p tcp --dport 7946 -j ACCEPT
--A FILTERS -m state --state NEW -m udp -p udp --dport 7946 -j ACCEPT
+#k8s
+-A FILTERS -m state --state NEW -m tcp -p tcp --dport 6443 -j ACCEPT
+-A FILTERS -m state --state NEW -m udp -p udp --dport 2379 -j ACCEPT
+-A FILTERS -m state --state NEW -m tcp -p tcp --dport 2380 -j ACCEPT
+-A FILTERS -m state --state NEW -m udp -p udp --dport 10250 -j ACCEPT
+-A FILTERS -m state --state NEW -m udp -p udp --dport 10251 -j ACCEPT
+-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10252 -j ACCEPT
+-A FILTERS -m state --state NEW -i cni0 -j ACCEPT
+-A FILTERS -m state --state NEW -o cni0 -j ACCEPT
+#vxlan
+-A FILTERS -m state --state NEW -m udp -p udp --dport 8472 -j ACCEPT 
+-A FILTERS -m state --state NEW -i flannel.1 -j ACCEPT
+-A FILTERS -o flannel.1 -j ACCEPT
 #consul
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 8300 -j ACCEPT
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 8301 -j ACCEPT

@@ -4,10 +4,6 @@
 - include: docker-install.yml
 
 - include: k8s-install.yml
-  when: container_orchestrator == 'k8s'
-
-- include: swarm-init.yml
-  when: container_orchestrator == 'swarm'
 
 - include: files.yml
 
@@ -18,4 +14,4 @@
 - include: start_micado.yml
 
 - include: docker-login.yml
-  when: container_orchestrator == 'swarm' and docker_cred_path is defined
+  when: docker_cred_path is defined

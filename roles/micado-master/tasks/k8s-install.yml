@@ -85,6 +85,19 @@
     dest: /usr/local/bin/kompose
     mode: a+x
 
+- name: 'K8s: Copy CoreDNS configmap'
+  copy:
+    src: misc/coredns-config
+    dest: /etc/kubernetes/coredns-config
+    mode: 0644
+
+- name: 'K8s: Apply CoreDNS config'
+  shell: kubectl apply -f /etc/kubernetes/coredns-config
+  when: k8smember.rc == 1
+
+- name: 'K8s: Restart CoreDNS pods'
+  shell: kubectl get pods -n kube-system -oname |grep coredns |xargs kubectl delete -n kube-system
+
 - name: 'K8s: Copy dashboard role file'
   copy:
     src: misc/kubedash-role

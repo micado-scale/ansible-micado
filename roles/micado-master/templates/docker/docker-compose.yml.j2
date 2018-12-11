@@ -62,7 +62,7 @@ services:
     volumes:
       - "/var/lib/micado/prometheus/config/:/etc/prometheus/"
       - "/var/lib/micado/prometheus/data/:/prometheus/"
-    command: '--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles --web.enable-lifecycle --web.external-url="http://prometheus/prometheus/" --web.route-prefix="/prometheus" --web.enable-admin-api'
+    command: '--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles --web.enable-lifecycle --web.external-url="http://prometheus/prometheus/" --web.route-prefix="/prometheus"'
 
    alertmanager:
     image: {{docker_images.alertmanager}}
@@ -89,17 +89,13 @@ services:
       - "/var/lib/micado/prometheus/config/:/config/prometheus"
       - "/var/log/micado/policykeeper/:/var/log/policykeeper/"
       - "/var/run/docker.sock:/var/run/docker.sock"
-    command: /policykeeper/policy_keeper.py --srv --cfg /config/policykeeper/policykeeper_config.yaml --host 0.0.0.0 --port 12345
-
-   dockervisualizer:
-    image: {{docker_images.dockervisualizer}}
-    container_name: dockervisualizer
-    restart: always
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-    environment:
-      - CTX_ROOT=/docker-visualizer
-    command: npm start
+      - "/root/.kube:/root/.kube"
+    command:
+      - '/bin/sh'
+      - '-c'
+      - |
+          pip install kubernetes
+          /policykeeper/policy_keeper.py --srv --cfg /config/policykeeper/policykeeper_config.yaml --host 0.0.0.0 --port 12345
 
    grafana:
     image: {{docker_images.grafana}}
@@ -124,6 +120,9 @@ services:
     command: "-h 0.0.0.0 -p 5050"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/root/.kube:/root/.kube"
+      - "/usr/local/bin/kompose:/usr/local/bin/kompose"
+      - "/usr/bin/kubectl:/usr/bin/kubectl"
       - "/var/lib/micado/toscasubmitter/src:/var/lib/submitter"
       - "/var/lib/micado/toscasubmitter/system/:/var/lib/submitter/system"
       - "/var/log/micado/toscasubmitter/:/var/log/submitter/"
@@ -149,7 +148,6 @@ services:
       - alertmanager
       - prometheus
       - grafana
-      - dockervisualizer
       - consul
       - occopus
       - policykeeper
