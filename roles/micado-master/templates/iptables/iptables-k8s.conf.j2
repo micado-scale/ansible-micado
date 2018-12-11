@@ -24,10 +24,6 @@
 #management web interface
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport {{ web_listening_port }} -j ACCEPT
 -A FILTERS -m state --state NEW -d 172.27.0.0/16 -p tcp --dport 443 -j ACCEPT
-{% if insecure_kube_dashboard %}
-#k8s API (for dashboard access)
--A FILTERS -m state --state NEW -m tcp -p tcp --dport 8001 -j ACCEPT
-{% endif %}
 #k8s
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 6443 -j ACCEPT
 -A FILTERS -m state --state NEW -m udp -p udp --dport 2379 -j ACCEPT
@@ -35,6 +31,10 @@
 -A FILTERS -m state --state NEW -m udp -p udp --dport 10250 -j ACCEPT
 -A FILTERS -m state --state NEW -m udp -p udp --dport 10251 -j ACCEPT
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 10252 -j ACCEPT
+#vxlan
+-A FILTERS -m state --state NEW -m udp -p udp --dport 8472 -j ACCEPT 
+-A FILTERS -m state --state NEW -i flannel.1 -j ACCEPT
+-A FILTERS -o flannel.1 -j ACCEPT
 #consul
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 8300 -j ACCEPT
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 8301 -j ACCEPT
