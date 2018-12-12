@@ -23,6 +23,10 @@
   changed_when: output.stdout != ""
   when: f.stat.exists
 
-- name: "Perform Docker login"
-  command: docker exec toscasubmitter sh -c "docker login {{ DOCKER_REPO }} -u {{ DOCKER_USER }} -p {{ DOCKER_PASS }}"
+- name: "Store Docker Registry Key"
+  command: "kubectl create secret docker-registry dockerloginkey --docker-server={{ DOCKER_REPO }} --docker-username={{ DOCKER_USER }} --docker-password={{ DOCKER_PASS }}"
+  when: f.stat.exists
+
+- name: "Update Service Account with Registry Key"
+  command: "kubectl patch serviceaccount default -p '{\"imagePullSecrets\": [{\"name\": \"dockerloginkey\"}]}'"
   when: f.stat.exists
