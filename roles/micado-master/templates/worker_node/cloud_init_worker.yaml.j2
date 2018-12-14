@@ -125,9 +125,19 @@ runcmd:
   - curl -L https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
   - chmod +x /usr/local/bin/docker-compose
 
-  # Connect to Swarm
+  # K8s
 
-  - docker swarm join --token {{ worker_token.stdout }} {{ ansible_default_ipv4.address }}:2377
+  - swapoff -a
+  - curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+  - touch /etc/apt/sources.list.d/kubernetes.list
+  - bash -c 'echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list'
+  - apt-get update
+  - apt-get install -y kubelet kubeadm
+  - apt-mark hold kubelet kubeadm
+
+  # Connect to cluster
+
+  - {{ join_command.stdout }}
 
   # Infra services start
 

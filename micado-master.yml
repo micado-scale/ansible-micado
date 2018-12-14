@@ -51,7 +51,7 @@
         cadvisor: google/cadvisor:v0.28.3
         consul: consul:1.0.0
         credential_manager: micado/credential-manager:0.2.0
-        dashboard: micado/dashboard:0.2.1
+        dashboard: micado/dashboard:k8s
         dockervisualizer: micado/dockerviz:min-refresh
         grafana: grafana/grafana:5.1.0
         node_exporter: prom/node-exporter:v0.15.2
@@ -59,9 +59,9 @@
         policykeeper: micado/policykeeper:0.1-dev-frame
         prometheus: prom/prometheus:v2.1.0
         redis: redis:4.0
-        toscasubmitter: micado/toscasubmitter:0.1.1
+        toscasubmitter: micado/toscasubmitter:0.1.8
         zorp: micado/zorpgpl:6.0.11
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
     - github_versions:
-        policykeeper: v0.5.0
-        toscasubmitter: v0.6.1
+        policykeeper: k8s
+        toscasubmitter: k8s
