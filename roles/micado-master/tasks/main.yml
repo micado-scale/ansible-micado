@@ -3,6 +3,8 @@
 
 - include: docker-install.yml
 
+- include: k8s-install.yml
+
 - include: files.yml
 
 - include: worker_node.yml

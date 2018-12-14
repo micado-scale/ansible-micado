@@ -15,10 +15,6 @@
   docker_image:
       name: "{{docker_images.alertmanager}}"
 
-- name: 'Downloading docker image: Docker Visualizer'
-  docker_image:
-      name: "{{docker_images.dockervisualizer}}"
-
 - name: 'Downloading docker image: Grafana'
   docker_image:
       name: "{{docker_images.grafana}}"

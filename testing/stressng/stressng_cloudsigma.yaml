@@ -15,7 +15,7 @@ topology_template:
          deploy:
            resources:
              reservations:
-               cpus: '1.0'
+               cpus: '0.9'
       artifacts:
        image:
          type: tosca.artifacts.Deployment.Image.Container.Docker
@@ -32,7 +32,7 @@ topology_template:
         host:
           properties:
             num_cpus: 2000
-            mem_size: 1073741824
+            mem_size: 2147483648
             vnc_password: secret
             libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 837e9690-d1ae-4ad7-a7fb-895fabe88ec5)
             public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
@@ -45,7 +45,7 @@ topology_template:
         properties:
           constants:
             NODE_TH_MAX: '60'
-            NODE_TH_MIN: '20'
+            NODE_TH_MIN: '25'
           min_instances: 1
           max_instances: 3
     - scalability:
@@ -54,9 +54,9 @@ topology_template:
         properties:
           constants:
             SERVICE_NAME: 'stressng'
-            SERVICE_FULL_NAME: '{{stack}}_stressng'
+            SERVICE_FULL_NAME: 'stressng'
             SERVICE_TH_MAX: '60'
-            SERVICE_TH_MIN: '20'
+            SERVICE_TH_MIN: '25'
           min_instances: 1
           max_instances: 3
 
@@ -70,10 +70,10 @@ policy_types:
         description: pre-define alerts for container CPU
         default:
         - alert: service_overloaded
-          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name="{{SERVICE_FULL_NAME}}"}[30s]))*100 > {{SERVICE_TH_MAX}}'
+          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[30s]))*100 > {{SERVICE_TH_MAX}}'
           for: 30s
         - alert: service_underloaded
-          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name="{{SERVICE_FULL_NAME}}"}[30s]))*100 < {{SERVICE_TH_MIN}}'
+          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[30s]))*100 < {{SERVICE_TH_MIN}}'
           for: 30s
         required: true
       scaling_rule:

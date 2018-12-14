@@ -258,19 +258,6 @@
     dest: /var/log/micado/dashboard/README
     mode: 0644
 
-- name: "Visualizer logging: Create log directory"
-  file:
-    path: /var/log/micado/visualizer/
-    state: directory
-    mode: 0775
-    recurse: yes
-
-- name: "Visualizer logging: Create log output info"
-  copy:
-    content: "Check the logs by the following command:\ndocker logs dockervisualizer\n"
-    dest: /var/log/micado/visualizer/README
-    mode: 0644
-
 - name: "Credential Manager logging: Create log directory"
   file:
     path: /var/log/micado/credman/

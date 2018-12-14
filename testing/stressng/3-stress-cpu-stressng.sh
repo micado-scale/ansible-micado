@@ -30,6 +30,7 @@ if [ -z "$CPU" ] || [ "$CPU" -le 0 ] || [ "$CPU" -gt 100 ]; then
   exit
 fi
 
+cp stressng.yaml stressng.tmp.yaml
 sed "s/pi -l [0-9]*/pi -l $CPU/" stressng.yaml > stressng.tmp.yaml
 
 echo "Stressing \"$APP_ID\" on MiCADO at $MICADO_MASTER... to a CPU load of $CPU"

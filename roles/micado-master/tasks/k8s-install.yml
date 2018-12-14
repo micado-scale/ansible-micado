@@ -1,0 +1,131 @@
+---
+- name: 'K8s: Turn off swap'
+  shell: swapoff -a
+
+- name: 'K8s: Disable swap permanently'
+  replace:
+    path: /etc/fstab
+    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+    replace: '#\1\2\3swap\4'
+
+- name: 'K8s: Add APT key'
+  apt_key:
+    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+    state: present
+
+- name: 'K8s: Add APT repository'
+  apt_repository:
+    repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+    state: present
+    filename: 'kubernetes'
+
+- name: 'K8s: Install APT packages'
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - kubelet
+    - kubeadm
+    - kubectl
+
+- name: 'K8s: prevent package from being upgraded'
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  with_items:
+    - kubelet
+    - kubeadm
+    - kubectl
+
+- name: 'K8s: CNI plugin fix'
+  shell: sysctl net.bridge.bridge-nf-call-iptables=1
+
+- name: 'K8s: Pull config images'
+  shell: kubeadm config images pull
+
+- name: 'K8s: check membership'
+  shell: kubeadm token list
+  register: k8smember
+  changed_when: k8smember.rc == 1
+  failed_when: k8smember.rc not in [0,1]
+
+- name: 'K8s: Initialization'
+  shell: kubeadm init
+        --apiserver-advertise-address={{ ansible_default_ipv4.address }}
+        --pod-network-cidr=10.244.0.0/16
+        --ignore-preflight-errors=NumCPU
+  when: k8smember.rc == 1
+
+- name: 'K8s: Create /root/.kube'
+  file:
+    state: directory
+    path: /root/.kube
+
+- name: 'K8s: Copy admin.conf to .kube/'
+  copy:
+    remote_src: yes
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+
+- name: 'K8s: Install Dashboard'
+  shell: kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+  when: k8smember.rc == 1
+
+- name: 'K8s: Get join command'
+  shell: kubeadm token create --ttl 0 --print-join-command
+  register: join_command
+
+- name: 'K8s: Install Flannel pod network'
+  shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
+
+- name: 'K8s: Install Kompose'
+  get_url:
+    url: https://github.com/kubernetes/kompose/releases/download/v1.16.0/kompose-linux-amd64
+    dest: /usr/local/bin/kompose
+    mode: a+x
+
+- name: 'K8s: Copy CoreDNS configmap'
+  copy:
+    src: misc/coredns-config
+    dest: /etc/kubernetes/coredns-config
+    mode: 0644
+
+- name: 'K8s: Apply CoreDNS config'
+  shell: kubectl apply -f /etc/kubernetes/coredns-config
+  when: k8smember.rc == 1
+
+- name: 'K8s: Restart CoreDNS pods'
+  shell: kubectl get pods -n kube-system -oname |grep coredns |xargs kubectl delete -n kube-system
+
+- name: 'K8s: Copy dashboard role file'
+  copy:
+    src: misc/kubedash-role
+    dest: /etc/kubernetes/kubedashrole
+    mode: 0644
+
+- name: 'K8s: Create ro-dashboard ClusterRole'
+  shell: kubectl create -f /etc/kubernetes/kubedashrole
+  when: k8smember.rc == 1
+
+- name: 'K8s: Copy dashboard admin file'
+  copy:
+    src: misc/kubedash-admin
+    dest: /etc/kubernetes/kubedashadm
+    mode: 0644
+
+- name: 'K8s: Grant dashboard admin rights'
+  shell: kubectl create -f /etc/kubernetes/kubedashadm
+  when: k8smember.rc == 1
+
+- name: 'K8s: Setup insecure host in APIServer'
+  lineinfile:
+    path: /etc/kubernetes/manifests/kube-apiserver.yaml
+    insertafter: '^    - kube-apiserver'
+    line: '    - --insecure-bind-address=0.0.0.0'
+
+- name: 'K8s: Setup insecure port in APIServer'
+  lineinfile:
+    path: /etc/kubernetes/manifests/kube-apiserver.yaml
+    regexp: '^    - --insecure-port=0'
+    line: '    - --insecure-port=8001'
