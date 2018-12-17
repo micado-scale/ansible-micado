@@ -1149,32 +1149,23 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(topk($topk,sum(rate(container_network_receive_bytes_total{container_label_io_kubernetes_container_name=~\"$service_name\",container_label_io_kubernetes_pod_uid=~\"$node\"}[$interval])) by (name, container_label_io_kubernetes_pod_name)), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
+          "expr": "label_replace(topk($topk, rate(container_network_receive_bytes_total{container_label_io_kompose_service=~\"$service_name\",container_label_io_kubernetes_pod_uid=~\"$node\"}[2m])*100), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{task_name}}",
           "refId": "A",
           "step": 240
-        },
-        {
-          "expr": "- rate(container_network_transmit_bytes_total{name=~\".+\"}[$interval])",
-          "format": "time_series",
-          "hide": true,
-          "intervalFactor": 2,
-          "legendFormat": "{{name}}",
-          "refId": "B",
-          "step": 10
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Received Network Traffic per Container (stacked)",
+      "title": "Received Network Traffic per Container (Stacked)",
       "tooltip": {
         "msResolution": true,
         "shared": true,
         "sort": 2,
-        "value_type": "cumulative"
+        "value_type": "individual"
       },
       "transparent": false,
       "type": "graph",
