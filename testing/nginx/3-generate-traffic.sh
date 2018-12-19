@@ -21,11 +21,5 @@ fi
 
 HTTP_PORT=$(curl --insecure -X GET -s -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/list_app | jq ".data[0].outputs.K8sAdaptor.$APP_NAME[0].node_port")
 
-echo -n "Generating 50 requests/minute for 10 minutes at $MICADO_MASTER:$HTTP_PORT... CTRL-C to stop"
-i=0
-while [ $i -lt 500 ]; do
-  curl -s $MICADO_MASTER:$HTTP_PORT > /dev/null
-  echo -n "."
-  sleep 1
-  i=$(($i+1)) 
-done
+echo -n "Holding 40 active connections for 8minutes at $MICADO_MASTER:$HTTP_PORT... CTRL-C to stop"
+wrk -t6 -c40 -d8m http://$MICADO_MASTER:$HTTP_PORT

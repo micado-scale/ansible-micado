@@ -8,6 +8,7 @@
     - ca-certificates
     - curl
     - software-properties-common
+    - wrk
 
 - name: 'Docker: Adding APT key'
   apt_key:
