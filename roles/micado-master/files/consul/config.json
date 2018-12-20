@@ -1,8 +1,0 @@
-{
-    "server": true,
-    "datacenter": "application",
-    "encrypt": "uohStneoKEoVYZIASGp6Nw==",
-    "log_level": "INFO",
-    "enable_syslog": false,
-    "services": [{"name":"prometheus"}, {"name":"alertmanager"}, {"name":"consul"}]
-}

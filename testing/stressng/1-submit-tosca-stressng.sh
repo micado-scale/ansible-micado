@@ -1,18 +1,28 @@
+#!/bin/sh
+
+settings_file="./_settings"
+
+. $settings_file
+
 if [ -z "$MICADO_MASTER" ]; then
-    if [[ $# -eq 0 ]] ; then
-        echo 'Please, specify the ip address or set MICADO_MASTER!'
-        exit 1
-    fi
-    if [[ $# -gt 1 ]] ; then
-        echo 'Please, specify only one ip address!'
-        exit 1
-    fi
-    MICADO_MASTER=$1
+  echo "Please, set MICADO_MASTER in file named \"$settings_file\"!"
+  exit
 fi
-APP_ID=$1
 
 if [ -z "$APP_ID" ]; then
-    curl -F file=@"stressng.yaml" -X POST http://$MICADO_MASTER:5050/v1.0/app/launch/file/
-else
-    curl -F file=@"stressng.yaml" -F id=$APP_ID -X POST http://$MICADO_MASTER:5050/v1.0/app/launch/file/
+  echo "Please, set APP_ID in file named \"$settings_file\"!"
+  exit
 fi
+
+if [ -z "$SSL_USER" ]; then
+  echo " Please, set SSL_USER in file named \"$settings_file\"!"
+  exit
+fi
+
+if [ -z "$SSL_PASS" ]; then
+  echo " Please, set SSL_PASS in file named \"$settings_file\"!"
+  exit
+fi
+
+echo "Submitting stressng.yaml to MiCADO at $MICADO_MASTER with appid \"$APP_ID\"..."
+curl --insecure -s -F file=@"stressng.yaml" -F id=$APP_ID -X POST -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/launch/file/ | jq

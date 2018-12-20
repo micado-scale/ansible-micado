@@ -1,13 +1,13 @@
 version: '3.3'
 
 services:
+
    dashboard:
      image: {{docker_images.dashboard}}
      container_name: micado-dashboard
+     restart: always
      environment:
-      MICADO_FRONTEND_IP: {{ ansible_default_ipv4.address }}
-     ports:
-      - 4000:4000
+      MICADO_FRONTEND_IP: {{ ansible_host }}
 
    redis:
     image: {{docker_images.redis}}
@@ -21,10 +21,9 @@ services:
    occopus:
     image: {{docker_images.occopus}}
     container_name: occopus
+    restart: always
     depends_on:
       - redis
-    ports:
-      - 5000:5000
     volumes:
       - "/var/lib/micado/occopus/data/:/var/lib/micado/occopus/data/"
       - "/var/lib/micado/toscasubmitter/src/files/output_configs/:/var/lib/micado/occopus/submitter/"
@@ -62,12 +61,13 @@ services:
       - 9090:9090
     volumes:
       - "/var/lib/micado/prometheus/config/:/etc/prometheus/"
-      #- "/var/lib/micado/prometheus/data/:/prometheus/"
-    command: '--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles --web.enable-lifecycle'
+      - "/var/lib/micado/prometheus/data/:/prometheus/"
+    command: '--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles --web.enable-lifecycle --web.external-url="http://prometheus/prometheus/" --web.route-prefix="/prometheus" --web.enable-admin-api'
 
    alertmanager:
     image: {{docker_images.alertmanager}}
     container_name: alertmanager
+    restart: always
     depends_on:
       - prometheus
     ports:
@@ -79,36 +79,39 @@ services:
    policykeeper:
     image: {{docker_images.policykeeper}}
     container_name: policykeeper
+    restart: always
     depends_on:
       - occopus
       - prometheus
-    ports:
-      - 12345:12345
     volumes:
       - "/var/lib/micado/policykeeper/src/:/policykeeper/"
       - "/var/lib/micado/policykeeper/config/:/config/policykeeper"
       - "/var/lib/micado/prometheus/config/:/config/prometheus"
       - "/var/log/micado/policykeeper/:/var/log/policykeeper/"
+      - "/var/run/docker.sock:/var/run/docker.sock"
     command: /policykeeper/policy_keeper.py --srv --cfg /config/policykeeper/policykeeper_config.yaml --host 0.0.0.0 --port 12345
 
    dockervisualizer:
     image: {{docker_images.dockervisualizer}}
     container_name: dockervisualizer
-    ports:
-      - 8080:8080
+    restart: always
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - CTX_ROOT=/docker-visualizer
     command: npm start
 
    grafana:
     image: {{docker_images.grafana}}
     container_name: grafana
-    ports:
-      - 3000:3000
+    restart: always
     environment:
       GF_SECURITY_ADMIN_PASSWORD: {{grafana_admin_pwd}}
       GF_LOG_MODE: "console file"
+    depends_on:
+      - prometheus
     volumes:
+      - "/var/lib/micado/grafana/config/grafana.ini:/etc/grafana/grafana.ini"
       - "/var/lib/micado/grafana/data:/var/lib/grafana"
       - "/var/lib/micado/grafana/provisioning:/etc/grafana/provisioning"
       - "/var/log/micado/grafana/:/var/log/grafana"
@@ -117,8 +120,7 @@ services:
    toscasubmitter:
     image: {{docker_images.toscasubmitter}}
     container_name: toscasubmitter
-    ports:
-      - 5050:5050
+    restart: always
     command: "-h 0.0.0.0 -p 5050"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
@@ -126,3 +128,72 @@ services:
       - "/var/lib/micado/toscasubmitter/system/:/var/lib/submitter/system"
       - "/var/log/micado/toscasubmitter/:/var/log/submitter/"
     user: "root"
+
+   credman:
+    image: {{ docker_images.credential_manager }}
+    container_name: credman
+    restart: always
+    ports:
+      - 127.0.0.1:5001:5001
+    environment:
+      PROVISION_FILE: /config/provisioning.csv
+      DATABASE_URL: sqlite:////config/credential.db
+    volumes:
+      - "/var/lib/micado/credman/config:/config"
+
+   zorp:
+    image: {{ docker_images.zorp }}
+    container_name: zorp
+    restart: always
+    depends_on:
+      - alertmanager
+      - prometheus
+      - grafana
+      - dockervisualizer
+      - consul
+      - occopus
+      - policykeeper
+      - toscasubmitter
+      - credman
+    ports:
+      - {{ web_listening_port | default('443') }}:443
+    volumes:
+      - "/var/lib/micado/zorp/config/:/etc/zorp/"
+      - "/var/lib/micado/zorp/scripts/:/app/"
+
+   credstore:
+    image: {{docker_images.credstore}}
+    container_name: credstore
+    ports: 
+      - "127.0.0.1:8200:8200"
+    expose:
+      - 8200
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - "/var/lib/micado/credstore/config:/config"
+    environment:
+      VAULT_ADDR: 'http://127.0.0.1:8200'
+    entrypoint: vault server -config=/config/config.hcl
+
+   spm:
+    depends_on:
+      - credman
+    image: {{docker_images.spm}}
+    container_name: spm
+    ports:
+      - 5003:5003
+    links:
+      - credstore
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.27.0.0/16
+    driver_opts:
+      com.docker.network.driver.mtu: {{ ansible_default_ipv4.mtu }}

@@ -1,24 +1,31 @@
 ---
-- name: "Worker node: Occopus: Create directory"
+- name: "Worker node: Creating Occopus data directory"
   file:
     path: /var/lib/micado/occopus/data/
     state: directory
     mode: 0775
     recurse: yes
 
-- name: "Worker node: Create auth_data.yaml for Occopus"
-  copy:
-      src: "{{ cred_path }}"
-      dest: "/var/lib/micado/occopus/data/auth_data.yaml"
+- name: "Worker node: Deploying credential file for Occopus"
+  template:
+    src: user_data/auth_data.yaml.j2
+    dest: "/var/lib/micado/occopus/data/auth_data.yaml"
 
-- name: "Worker node: Occopus nodes: Copy cloud-config"
-  copy:
-    src: worker_node/cloud_init_worker.yaml
+- name: "Worker node: Deploying cloud-config for workers"
+  template:
+    src: worker_node/cloud_init_worker.yaml.j2
     dest: /var/lib/micado/toscasubmitter/system/cloud_init_worker.yaml
     mode: 0644
 
-- name: "Worker node: Generate Occopus infrastructure descriptor"
+- name: "Worker node: Disable Unattended Upgrades"
+  lineinfile:
+    path: /var/lib/micado/toscasubmitter/system/cloud_init_worker.yaml
+    insertafter: '^runcmd:'
+    line: '  - sed -i ''s/APT::Periodic::Unattended-Upgrade "1";/APT::Periodic::Unattended-Upgrade "0";/g'' /etc/apt/apt.conf.d/20auto-upgrades'
+  when: disable_worker_updates is defined and disable_worker_updates
+
+- name: "Worker node: Deploying Occopus infrastructure descriptor"
   template:
-    src: user_data/temp_infrastructure_descriptor.yaml.j2
+    src: worker_node/temp_infrastructure_descriptor.yaml.j2
     dest: /var/lib/micado/toscasubmitter/system/infrastructure_descriptor.yaml
     mode: 0644

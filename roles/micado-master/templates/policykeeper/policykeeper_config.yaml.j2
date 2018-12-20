@@ -1,9 +1,9 @@
-prometheus_endpoint: 'http://prometheus:9090'
+prometheus_endpoint: 'http://prometheus:9090/prometheus'
 prometheus_config_template: '/config/policykeeper/prometheus_config_template.yaml'
 prometheus_config_target: '/config/prometheus/prometheus.yml'
 prometheus_rules_directory: '/config/prometheus'
 
-swarm_endpoint: '{{ ansible_default_ipv4.address }}:2375'
+swarm_endpoint: 'unix:///var/run/docker.sock'
 occopus_endpoint: 'http://occopus:5000'
 occopus_infra_name: 'micado_worker_infra'
 occopus_worker_name: 'worker'

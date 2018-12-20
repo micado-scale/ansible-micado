@@ -38,3 +38,20 @@
 - name: 'Downloading docker image: ToscaSubmitter'
   docker_image:
       name: "{{docker_images.toscasubmitter}}"
+
+- name: 'Downloading docker image: Credential Manager'
+  docker_image:
+      name: "{{docker_images.credential_manager}}"
+
+- name: 'Downloading docker image: Zorp'
+  docker_image:
+      name: "{{docker_images.zorp}}"
+
+- name: 'Downloading docker image: credstore'
+  docker_image:
+      name: "{{docker_images.credstore}}"
+
+- name: 'Downloading docker image: spm'
+  docker_image:
+      name: "{{docker_images.spm}}"
+

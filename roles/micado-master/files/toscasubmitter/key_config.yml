@@ -1,6 +1,6 @@
 main_config:
   dry_run: False
-  log_level: DEBUG
+  log_level: INFO
   path_log: "/var/log/submitter/submitter.log"
 
 step:
@@ -9,17 +9,17 @@ step:
     - OccopusAdaptor
     - PkAdaptor
   execute:
-    - DockerAdaptor
     - OccopusAdaptor
+    - DockerAdaptor
     - PkAdaptor
   update:
-    - DockerAdaptor
     - OccopusAdaptor
+    - DockerAdaptor
     - PkAdaptor
   undeploy:
+    - PkAdaptor
     - DockerAdaptor
     - OccopusAdaptor
-    - PkAdaptor
   cleanup:
     - DockerAdaptor
     - OccopusAdaptor
