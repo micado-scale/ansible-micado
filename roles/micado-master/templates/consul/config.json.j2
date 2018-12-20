@@ -1,0 +1,8 @@
+{
+    "server": true,
+    "datacenter": "application",
+    "encrypt": "{{ consul_key.stdout }}",
+    "log_level": "INFO",
+    "enable_syslog": false,
+    "services": [{"name":"prometheus"}, {"name":"alertmanager"}, {"name":"consul"}]
+}
