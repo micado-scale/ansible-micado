@@ -68,8 +68,14 @@
     src: /etc/kubernetes/admin.conf
     dest: /root/.kube/config
 
+- name: 'K8s: Copy KubeDashboard deployment'
+  copy:
+    src: kubernetes/kubedash.yaml
+    dest: /etc/kubernetes/kubedash.yaml
+    mode: 0644
+
 - name: 'K8s: Install Dashboard'
-  shell: kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+  shell: kubectl create -f /etc/kubernetes/kubedash.yaml
   when: k8smember.rc == 1
 
 - name: 'K8s: Get join command'
@@ -87,12 +93,12 @@
 
 - name: 'K8s: Copy CoreDNS configmap'
   copy:
-    src: misc/coredns-config
-    dest: /etc/kubernetes/coredns-config
+    src: kubernetes/coredns-config.yaml
+    dest: /etc/kubernetes/coredns-config.yaml
     mode: 0644
 
 - name: 'K8s: Apply CoreDNS config'
-  shell: kubectl apply -f /etc/kubernetes/coredns-config
+  shell: kubectl apply -f /etc/kubernetes/coredns-config.yaml
   when: k8smember.rc == 1
 
 - name: 'K8s: Restart CoreDNS pods'
@@ -100,22 +106,22 @@
 
 - name: 'K8s: Copy dashboard role file'
   copy:
-    src: misc/kubedash-role
-    dest: /etc/kubernetes/kubedashrole
+    src: kubernetes/kubedash-role.yaml
+    dest: /etc/kubernetes/kubedash-role.yaml
     mode: 0644
 
 - name: 'K8s: Create ro-dashboard ClusterRole'
-  shell: kubectl create -f /etc/kubernetes/kubedashrole
+  shell: kubectl create -f /etc/kubernetes/kubedash-role.yaml
   when: k8smember.rc == 1
 
-- name: 'K8s: Copy dashboard admin file'
+- name: 'K8s: Copy dashboard role binding file'
   copy:
-    src: misc/kubedash-admin
-    dest: /etc/kubernetes/kubedashadm
+    src: kubernetes/kubedash-binding.yaml
+    dest: /etc/kubernetes/kubedash-binding.yaml
     mode: 0644
 
 - name: 'K8s: Grant dashboard admin rights'
-  shell: kubectl create -f /etc/kubernetes/kubedashadm
+  shell: kubectl create -f /etc/kubernetes/kubedash-binding.yaml
   when: k8smember.rc == 1
 
 - name: 'K8s: Setup insecure host in APIServer'
