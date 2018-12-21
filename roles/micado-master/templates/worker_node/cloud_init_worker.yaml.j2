@@ -147,7 +147,9 @@ runcmd:
   - apt-mark hold kubelet kubeadm kubectl
 
   # Get IPSec Cert
-  - echo {{cmd(' docker exec -ti spm /bin/bash -c 'curl -X POST http://security_policy_manager:5003/v1.0/nodecerts' ')}} > /etc/ipsec.d/private/node.pem
+  - echo {{cmd(' docker exec -ti spm /bin/bash -c 'curl -X POST http://security_policy_manager:5003/v1.0/nodecerts' ')}} > /etc/ipsec.d/private/node.key
+  - openssl x509 -in /etc/ipsec.d/private/node.key -out /etc/ipsec.d/certs/node.crt
+  - echo ": RSA 'node.crt'" >> /etc/ipsec.secrets
 
   # Connect to cluster
 
