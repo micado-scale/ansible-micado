@@ -135,6 +135,20 @@ services:
     volumes:
       - "/var/lib/micado/credman/config:/config"
 
+   iivr:
+    image: {{ docker_images.iivr }}
+    container_name: iivr
+    restart: always
+    volumes:
+      - "/var/lib/micado/iivr/config:/config"
+
+   crypto_engine:
+    image: {{ docker_images.crypto_engine }}
+    container_name: crypto_engine
+    restart: always
+    volumes:
+      - "/var/lib/micado/crypto_engine/config:/config"
+
    zorp:
     image: {{ docker_images.zorp }}
     container_name: zorp
