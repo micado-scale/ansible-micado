@@ -49,6 +49,17 @@ write_files:
 - path: /etc/resolvconf/resolv.conf.d/base
   content: |
     nameserver 8.8.8.8
+  
+- path: /etc/ipsec.conf
+  content: |
+    conn iptunnel
+    type=transport
+    compress=no
+    keyexchange=ikev2
+    left=local
+    right={{ ansible_default_ipv4.address }}
+    authby=psk
+    auto=start
 
 - path: /etc/micado/docker-compose.yml
   content: |
@@ -138,6 +149,16 @@ runcmd:
   # Connect to cluster
 
   - {{ join_command.stdout }}
+
+  # install strongSwan
+  - apt-get install strongswan
+  - systemctl enable strongswan
+  - ipsec start
+  - ipsec 
+
+  # Request certs for IPSec
+
+#  - {{cmd('curl -X GET http://127.0.0.1:5300')}} 
 
   # Infra services start
 

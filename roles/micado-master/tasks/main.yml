@@ -7,6 +7,8 @@
 
 - include: files.yml
 
+- include: ipsec-install.yml
+
 - include: worker_node.yml
 
 - include: docker-pull-images.yml

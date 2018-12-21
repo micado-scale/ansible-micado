@@ -1,0 +1,33 @@
+---
+# install strongSwan
+- name: 'Install strongSwan'
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: 'True'
+  with_items:
+    - strongswan
+
+# start and enable strongSwan
+- name: 'Enable/Start strongSwan'
+  service:
+    name: strongSwan
+    state: started
+    enabled: yes
+
+# create configuration
+- name: "Create ipsec configuration"
+  copy:
+    content: |
+        conn iptunnel
+        type=transport
+        compress=no
+        keyexchange=ikev2
+        left={{ ansible_default_ipv4.address }}
+        right=%any
+        authby=psk
+        auto=start
+    dest: /etc/ipsec.conf
+
+- name: Turn up the ipsec tunnel
+  shell: /usr/sbin/ipsec up iptunnel
