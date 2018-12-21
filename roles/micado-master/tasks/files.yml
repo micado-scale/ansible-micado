@@ -271,6 +271,32 @@
     dest: /var/log/micado/credman/README
     mode: 0644
 
+- name: "IIVR logging: Create log directory"
+  file:
+    path: /var/log/micado/iivr/
+    state: directory
+    mode: 0775
+    recurse: yes
+
+- name: "IIVR logging: Create log output info"
+  copy:
+    content: "Check the logs by the following command:\ndocker logs iivr\n"
+    dest: /var/log/micado/iivr/README
+    mode: 0644
+
+- name: "Crypto Engine logging: Create log directory"
+  file:
+    path: /var/log/micado/crypto_engine/
+    state: directory
+    mode: 0775
+    recurse: yes
+
+- name: "Crypto Engine logging: Create log output info"
+  copy:
+    content: "Check the logs by the following command:\ndocker logs crypto_engine\n"
+    dest: /var/log/micado/crypto_engine/README
+    mode: 0644
+
 - name: "Zorp logging: Create log directory"
   file:
     path: /var/log/micado/zorp/
