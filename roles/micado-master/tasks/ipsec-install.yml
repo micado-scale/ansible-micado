@@ -29,12 +29,5 @@
         auto=start
     dest: /etc/ipsec.conf
 
-# create secret file
-- name: "Create ipsec secret"
-  copy:
-    content: |
-        : PSK "hWekB7R2zBLJWddj"
-    dest: /etc/ipsec.secrets
-
 - name: Turn up the ipsec tunnel
   shell: /usr/sbin/ipsec up iptunnel
