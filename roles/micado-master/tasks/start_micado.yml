@@ -40,6 +40,6 @@
 - name: Get ipsec cert for master node
   command: |
      docker exec -ti spm /bin/bash -c 'curl -X GET GET http://security_policy_manager:5003/v1.0/nodecerts/ca' > /etc/ipsec.d/cacerts/master.pem
-     docker exec -ti spm /bin/bash -c 'curl -X POST http://security_policy_manager:5003/v1.0/nodecerts' > /etc/ipsec.d/private/master.pem
-     openssl x509 -in /etc/ipsec.d/private/master.pem -out /etc/ipsec.d/certs/master.pem
-     echo ": RSA 'master.pem'" >> /etc/ipsec.secrets
+     docker exec -ti spm /bin/bash -c 'curl -X POST http://security_policy_manager:5003/v1.0/nodecerts' > /etc/ipsec.d/private/master.key
+     openssl x509 -in /etc/ipsec.d/private/master.key -out /etc/ipsec.d/certs/master.crt
+     echo ": RSA 'master.crt'" >> /etc/ipsec.secrets
