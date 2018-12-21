@@ -33,7 +33,7 @@
 - name: "Create ipsec secret"
   copy:
     content: |
-        : PSK "tesztkulcs"
+        : PSK "hWekB7R2zBLJWddj"
     dest: /etc/ipsec.secrets
 
 - name: Turn up the ipsec tunnel
