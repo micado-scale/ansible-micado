@@ -161,6 +161,19 @@ services:
       - "/var/lib/micado/zorp/config/:/etc/zorp/"
       - "/var/lib/micado/zorp/scripts/:/app/"
 
+   spm:
+    depends_on:
+      - credman
+    image: {{docker_images.spm}}
+    container_name: spm
+    ports:
+      - 5003:5003
+    links:
+      - credstore
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+
 networks:
   default:
     driver: bridge

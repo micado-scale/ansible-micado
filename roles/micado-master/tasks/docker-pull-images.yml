@@ -46,3 +46,11 @@
 - name: 'Downloading docker image: Zorp'
   docker_image:
       name: "{{docker_images.zorp}}"
+
+- name: 'Downloading docker image: Spm'
+  docker_image:
+      name: "{{docker_images.spm}}"
+
+- name: 'Downloading docker image: credstore'
+  docker_image:
+      name: "{{docker_images.credstore}}"

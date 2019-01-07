@@ -338,3 +338,16 @@
     src: misc/micadoctl
     dest: /usr/local/bin/micadoctl
     mode: 0755
+
+- name: "Credstore config: Create working directory"
+  file:
+    path: /var/lib/micado/credstore/config/
+    state: directory
+    mode: 0775
+    recurse: yes
+
+- name: "Vault config file: Copy file"
+  copy:
+    src: credstore/config.hcl
+    dest: /var/lib/micado/credstore/config/config.hcl
+    mode: 0644
