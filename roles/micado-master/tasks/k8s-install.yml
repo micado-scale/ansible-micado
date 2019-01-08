@@ -25,9 +25,9 @@
     state: present
     update_cache: yes
   with_items:
-    - kubelet
-    - kubeadm
-    - kubectl
+    - kubelet=1.13.1
+    - kubeadm=1.13.1
+    - kubectl=1.13.1
 
 - name: 'K8s: prevent package from being upgraded'
   dpkg_selections:
@@ -75,8 +75,7 @@
     mode: 0644
 
 - name: 'K8s: Install Dashboard'
-  shell: kubectl create -f /etc/kubernetes/kubedash.yaml
-  when: k8smember.rc == 1
+  shell: kubectl apply -f /etc/kubernetes/kubedash.yaml
 
 - name: 'K8s: Get join command'
   shell: kubeadm token create --ttl 0 --print-join-command
@@ -99,7 +98,6 @@
 
 - name: 'K8s: Apply CoreDNS config'
   shell: kubectl apply -f /etc/kubernetes/coredns-config.yaml
-  when: k8smember.rc == 1
 
 - name: 'K8s: Restart CoreDNS pods'
   shell: kubectl get pods -n kube-system -oname |grep coredns |xargs kubectl delete -n kube-system
@@ -111,8 +109,7 @@
     mode: 0644
 
 - name: 'K8s: Create ro-dashboard ClusterRole'
-  shell: kubectl create -f /etc/kubernetes/kubedash-role.yaml
-  when: k8smember.rc == 1
+  shell: kubectl apply -f /etc/kubernetes/kubedash-role.yaml
 
 - name: 'K8s: Copy dashboard role binding file'
   copy:
@@ -121,8 +118,7 @@
     mode: 0644
 
 - name: 'K8s: Grant dashboard admin rights'
-  shell: kubectl create -f /etc/kubernetes/kubedash-binding.yaml
-  when: k8smember.rc == 1
+  shell: kubectl apply -f /etc/kubernetes/kubedash-binding.yaml
 
 - name: 'K8s: Setup insecure host in APIServer'
   lineinfile:
@@ -133,5 +129,5 @@
 - name: 'K8s: Setup insecure port in APIServer'
   lineinfile:
     path: /etc/kubernetes/manifests/kube-apiserver.yaml
-    regexp: '^    - --insecure-port=0'
+    regexp: '^    - --insecure-port=\d*'
     line: '    - --insecure-port=8001'
