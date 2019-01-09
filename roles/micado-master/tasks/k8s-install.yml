@@ -81,8 +81,14 @@
   shell: kubeadm token create --ttl 0 --print-join-command
   register: join_command
 
+- name: 'K8s: Copy kube-flannel deployment'
+  copy:
+    src: kubernetes/kube-flannel.yaml
+    dest: /etc/kubernetes/kube-flannel.yaml
+    mode: 0644
+
 - name: 'K8s: Install Flannel pod network'
-  shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
+  shell: kubectl apply -f /etc/kubernetes/kube-flannel.yaml
 
 - name: 'K8s: Install Kompose'
   get_url:
