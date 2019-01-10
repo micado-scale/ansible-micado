@@ -16,9 +16,6 @@ scrape_configs:
     regex: (.*)
     target_label: group
     replacement: $1
-- static_configs:
-  - targets: []
-  job_name: micado
 - job_name: kube-services
   scheme: http
   kubernetes_sd_configs:
