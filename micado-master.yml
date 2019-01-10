@@ -16,7 +16,7 @@
       assert:
         that:
           - "ansible_os_family == 'Debian'"
-          - "ansible_distribution_version is version('16.04', '==')"
+          - "ansible_distribution_version == '16.04'"
         msg: >
           "The required OS is Ubuntu 16.04"
 
