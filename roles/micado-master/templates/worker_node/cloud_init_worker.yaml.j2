@@ -97,7 +97,7 @@ write_files:
 runcmd:
   - /tmp/wait-updates.sh
   - /bin/consul-set-network.sh
-  - IP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 's/\./-/g'`
+  - while [ -z $IP ]; do IP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 's/\./-/g'`; done
   - hostname={{ worker_hostname }}-$IP
   - oldhostname=$(hostname -s)
   - sed -i "s/$oldhostname//g" /etc/hosts

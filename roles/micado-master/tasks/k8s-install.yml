@@ -25,9 +25,9 @@
     state: present
     update_cache: yes
   with_items:
-    - kubelet
-    - kubeadm
-    - kubectl
+    - kubelet=1.13.1*
+    - kubeadm=1.13.1*
+    - kubectl=1.13.1*
 
 - name: 'K8s: prevent package from being upgraded'
   dpkg_selections:
@@ -68,16 +68,27 @@
     src: /etc/kubernetes/admin.conf
     dest: /root/.kube/config
 
+- name: 'K8s: Copy KubeDashboard deployment'
+  copy:
+    src: kubernetes/kubedash.yaml
+    dest: /etc/kubernetes/kubedash.yaml
+    mode: 0644
+
 - name: 'K8s: Install Dashboard'
-  shell: kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
-  when: k8smember.rc == 1
+  shell: kubectl apply -f /etc/kubernetes/kubedash.yaml
 
 - name: 'K8s: Get join command'
   shell: kubeadm token create --ttl 0 --print-join-command
   register: join_command
 
+- name: 'K8s: Copy kube-flannel deployment'
+  copy:
+    src: kubernetes/kube-flannel.yaml
+    dest: /etc/kubernetes/kube-flannel.yaml
+    mode: 0644
+
 - name: 'K8s: Install Flannel pod network'
-  shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
+  shell: kubectl apply -f /etc/kubernetes/kube-flannel.yaml
 
 - name: 'K8s: Install Kompose'
   get_url:
@@ -87,36 +98,33 @@
 
 - name: 'K8s: Copy CoreDNS configmap'
   copy:
-    src: misc/coredns-config
-    dest: /etc/kubernetes/coredns-config
+    src: kubernetes/coredns-config.yaml
+    dest: /etc/kubernetes/coredns-config.yaml
     mode: 0644
 
 - name: 'K8s: Apply CoreDNS config'
-  shell: kubectl apply -f /etc/kubernetes/coredns-config
-  when: k8smember.rc == 1
+  shell: kubectl apply -f /etc/kubernetes/coredns-config.yaml
 
 - name: 'K8s: Restart CoreDNS pods'
   shell: kubectl get pods -n kube-system -oname |grep coredns |xargs kubectl delete -n kube-system
 
 - name: 'K8s: Copy dashboard role file'
   copy:
-    src: misc/kubedash-role
-    dest: /etc/kubernetes/kubedashrole
+    src: kubernetes/kubedash-role.yaml
+    dest: /etc/kubernetes/kubedash-role.yaml
     mode: 0644
 
 - name: 'K8s: Create ro-dashboard ClusterRole'
-  shell: kubectl create -f /etc/kubernetes/kubedashrole
-  when: k8smember.rc == 1
+  shell: kubectl apply -f /etc/kubernetes/kubedash-role.yaml
 
-- name: 'K8s: Copy dashboard admin file'
+- name: 'K8s: Copy dashboard role binding file'
   copy:
-    src: misc/kubedash-admin
-    dest: /etc/kubernetes/kubedashadm
+    src: kubernetes/kubedash-binding.yaml
+    dest: /etc/kubernetes/kubedash-binding.yaml
     mode: 0644
 
 - name: 'K8s: Grant dashboard admin rights'
-  shell: kubectl create -f /etc/kubernetes/kubedashadm
-  when: k8smember.rc == 1
+  shell: kubectl apply -f /etc/kubernetes/kubedash-binding.yaml
 
 - name: 'K8s: Setup insecure host in APIServer'
   lineinfile:
@@ -127,5 +135,5 @@
 - name: 'K8s: Setup insecure port in APIServer'
   lineinfile:
     path: /etc/kubernetes/manifests/kube-apiserver.yaml
-    regexp: '^    - --insecure-port=0'
+    regexp: '^    - --insecure-port=\d*'
     line: '    - --insecure-port=8001'
