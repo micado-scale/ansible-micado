@@ -1,0 +1,44 @@
+rule_files:
+- '*.rules'
+scrape_configs:
+- job_name: cluster_monitoring
+  scrape_interval: 10s
+  consul_sd_configs:
+  - server: consul:8500
+    datacenter: application
+    services: [lb_cluster, worker_cluster, app_docker_cluster]
+  relabel_configs:
+  - source_labels: [__meta_consul_service]
+    regex: (.*)
+    target_label: job
+    replacement: $1
+  - source_labels: [__meta_consul_service]
+    regex: (.*)
+    target_label: group
+    replacement: $1
+- job_name: kube-services
+  scheme: http
+  kubernetes_sd_configs:
+    - role: endpoints
+      api_server: https://{{ ansible_default_ipv4.address }}/kubernetes
+      tls_config:
+        insecure_skip_verify: true
+      basic_auth:
+        username: {{ security.authentication.username | default('admin') }}
+        password: {{ security.authentication.password | default('admin') }}
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_namespace]
+    action: drop
+    regex: kube-system
+  - source_labels: [__meta_kubernetes_service_label_component]
+    action: drop
+    regex: apiserver
+  - source_labels: [__address__]
+    target_label: instance
+
+alerting:
+  alertmanagers:
+  - scheme: http
+    static_configs:
+    - targets:
+      - alertmanager:9093

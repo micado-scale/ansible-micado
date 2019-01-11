@@ -1,0 +1,95 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.6.0/micado_types.yaml
+
+repositories:
+  docker_hub: https://hub.docker.com/
+
+topology_template:
+  node_templates:
+    nginxapp:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+         ports:
+           - "8080:8080"
+           - "9300:9300"
+         deploy:
+           resources:
+             reservations:
+               cpus: '0.2'
+         labels:
+           kompose.service.type: 'nodeport'
+      artifacts:
+       image:
+         type: tosca.artifacts.Deployment.Image.Container.Docker
+         file: jaydes/nginxapp:1.2
+         repository: docker_hub
+
+    worker_node:
+      type: tosca.nodes.MiCADO.Occopus.Nova.Compute
+      properties:
+        cloud:
+          interface_cloud: nova
+          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
+      capabilities:
+        host:
+          properties:
+            image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
+            flavor_name: ADD_YOUR_FLAVOUR_ID_HERE (e.g. 3)
+            project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
+            network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
+            key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
+            security_groups:
+              - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
+
+  outputs:
+    ports:
+      value: { get_attribute: [ nginxapp, port ]}
+
+  policies:
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO
+        targets: [ worker_node ]
+        properties:
+          sources:
+            - "nginxapp"
+          constants:
+            MAXNODES: 2
+            MAXCONTAINERS: 8
+          queries:
+            REQUESTS: 'sum(nginx_connections_active)'
+          min_instances: 1
+          max_instances: '{{MAXNODES}}'
+          scaling_rule: |
+            reqnodes=0
+            REQUESTS = ceil(REQUESTS/5)
+            if REQUESTS>0:
+              reqconts = min(REQUESTS, MAXCONTAINERS)
+              reqnodes = reqconts/4
+              if reqnodes<m_node_count:
+                m_node_count-=1
+              if reqnodes>m_node_count:
+                m_node_count+=1
+            else:
+              m_node_count = 0
+            print "Number of required nodes:",reqnodes
+            print "Number of requested nodes:",m_node_count
+
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO
+        targets: [ nginxapp ]
+        properties:
+          min_instances: 1
+          max_instances: '{{MAXCONTAINERS}}'
+          scaling_rule: |
+            print "Number of active connections:",REQUESTS
+            required_count = 0
+            REQUESTS = ceil(REQUESTS/5)
+            if REQUESTS>0:
+              required_count = min(REQUESTS, MAXCONTAINERS)
+              m_container_count = min(required_count, len(m_nodes) * 4)
+            else:
+              m_container_count = 0
+            print "Number of required containers:",required_count
+            print "Number of requested containers:",m_container_count

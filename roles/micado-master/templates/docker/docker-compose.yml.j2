@@ -120,6 +120,7 @@ services:
     command: "-h 0.0.0.0 -p 5050"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/usr/bin/docker:/usr/bin/docker"
       - "/root/.kube:/root/.kube"
       - "/usr/local/bin/kompose:/usr/local/bin/kompose"
       - "/usr/bin/kubectl:/usr/bin/kubectl"
