@@ -16,15 +16,14 @@ topology_template:
          file: lorel/docker-stress-ng
          repository: docker_hub
       interfaces:
-        Swarm:
+        Kubernetes:
           create:
             implementation: image
             inputs:
-              command: "--cpu 0 --cpu-method pi -l 20"
-              deploy:
-                resources:
-                  reservations:
-                    cpus: '1.0'
+              args: "--cpu 0 --cpu-method pi -l 20"
+              resources:
+                requests:
+                  cpu: "1000m"
 
     worker_node:
       type: tosca.nodes.MiCADO.Nova.Compute
@@ -46,7 +45,7 @@ topology_template:
         host:
           properties:
             num_cpus: 2
-            mem_size: 1 GB
+            mem_size: 2 GB
 
   policies:
     - scalability:
