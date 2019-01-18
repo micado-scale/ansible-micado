@@ -117,13 +117,7 @@
       image: {{docker_images.toscasubmitter}}
       container_name: toscasubmitter
       restart: always
-      entrypoint:
-        - '/bin/sh'
-        - '-c'
-        - |
-            mkdir /lib64
-            ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
-            flask run -h 0.0.0.0 -p 5050
+      command: "-h 0.0.0.0 -p 5050"
       volumes:
         - "/var/run/docker.sock:/var/run/docker.sock"
         - "/root/.kube:/root/.kube"
@@ -168,12 +162,16 @@
         - "/var/lib/micado/vault/config:/vault/config"
         - "/var/lib/micado/vault/storage:/vault/file"
         - "/var/log/micado/vault:/vault/logs"
+      cap_add:
+        - IPC_LOCK
       command: vault server -config /vault/config/vault.hcl
 
     security_policy_manager:
       image: {{ docker_images.securitypolicymanager }}
       container_name: security_policy_manager
       restart: always
+      volumes:
+        - "/root/.kube/config:/root/.kube/config"
       depends_on:
         - vault
 
@@ -191,7 +189,7 @@
         - toscasubmitter
         - credman
         - vault
-        - spm
+        - security_policy_manager
       ports:
         - {{ web_listening_port | default('443') }}:443
       volumes:
