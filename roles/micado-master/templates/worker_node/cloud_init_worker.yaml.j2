@@ -5,6 +5,15 @@ manage_etc_hosts: false
 package_update: false
 package_upgrade: false
 
+output:
+    init:
+        output: "> /var/log/cloud-init.out"
+        error: "> /var/log/cloud-init.err"
+    config: "tee -a /var/log/cloud-config.log"
+    final:
+        - ">> /var/log/cloud-final.out"
+        - "/var/log/cloud-final.err"
+
 write_files:
 
 - path: /etc/consul/config.json
@@ -53,13 +62,25 @@ write_files:
 - path: /etc/ipsec.conf
   content: |
     conn iptunnel
-    type=transport
-    compress=no
-    keyexchange=ikev2
-    left=local
-    right={{ ansible_default_ipv4.address }}
-    authby=psk
-    auto=start
+       type=transport
+       compress=no
+       keyexchange=ikev2
+       authby=pubkey
+       leftcert=node.crt
+       left=local
+       right={{ ansible_default_ipv4.address }}
+       rightid="CN=workernode.micado"
+       auto=start
+
+- path: /etc/ipsec.secrets
+  content: | {% raw %}
+    : RSA 'node.key'
+    {% endraw %}
+
+- path: /tmp/tmp_certs$
+  content: | {% raw %}
+      {{cmd('curl -X POST http://security_policy_manager:5003/v1.0/nodecerts')}}
+    {% endraw %}
 
 - path: /etc/micado/docker-compose.yml
   content: |
@@ -105,6 +126,7 @@ write_files:
         driver_opts:
           com.docker.network.driver.mtu: {{ ansible_default_ipv4.mtu }}
 
+
 runcmd:
   - /tmp/wait-updates.sh
   - /bin/consul-set-network.sh
@@ -146,26 +168,27 @@ runcmd:
   - apt-get install -y kubelet kubeadm
   - apt-mark hold kubelet kubeadm
 
-  # Get IPSec Cert
-  - echo {{cmd(' docker exec -ti spm /bin/bash -c 'curl -X POST http://security_policy_manager:5003/v1.0/nodecerts' ')}} > /etc/ipsec.d/private/node.key
-  - openssl x509 -in /etc/ipsec.d/private/node.key -out /etc/ipsec.d/certs/node.crt
-  - echo ": RSA 'node.crt'" >> /etc/ipsec.secrets
-
   # Connect to cluster
 
   - {{ join_command.stdout }}
 
-  # install strongSwan
-  - apt-get install strongswan
+   # install strongSwan
+  - apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y strongswan
   - systemctl enable strongswan
-  - ipsec start
-  - ipsec 
 
-  # Request certs for IPSec
+  - cp /tmp/tmp_certs /etc/ipsec.d/private/node.key
+  - rm /tmp/tmp_certs
+  - openssl x509 -in /etc/ipsec.d/private/node.key -out /etc/ipsec.d/certs/node.crt
+  - openssl rsa -in /etc/ipsec.d/private/node.key -outform DER -out /etc/ipsec.d/private/node.der
+  - rm /etc/ipsec.d/private/node.key
+  - mv /etc/ipsec.d/private/node.der /etc/ipsec.d/private/node.key
 
-#  - {{cmd('curl -X GET http://127.0.0.1:5300')}} 
+# Bring up the iptunnel
+  - ipsec restart
+  - ipsec up iptunnel
 
   # Infra services start
 
   - export IP=$(hostname -I | cut -d\  -f1)
   - docker-compose -f /etc/micado/docker-compose.yml up -d
+
