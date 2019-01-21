@@ -37,9 +37,20 @@
     state: restarted
     enabled: yes
 
-- name: Get ipsec cert for master node
-  command: |
-     docker exec -ti spm /bin/bash -c 'curl -X GET GET http://security_policy_manager:5003/v1.0/nodecerts/ca' > /etc/ipsec.d/cacerts/master.pem
-     docker exec -ti spm /bin/bash -c 'curl -X POST http://security_policy_manager:5003/v1.0/nodecerts' > /etc/ipsec.d/private/master.key
-     openssl x509 -in /etc/ipsec.d/private/master.key -out /etc/ipsec.d/certs/master.crt
-     echo ": RSA 'master.crt'" >> /etc/ipsec.secrets
+- name: sleep for a specified interval
+  command: sleep '20'
+
+- name: Get CA for IPSEC (master) (shell)
+  shell: /usr/bin/docker exec -ti security_policy_manager /bin/bash -c 'curl -X GET http://127.0.0.1:5003/v1.0/nodecerts/ca' > /etc/ipsec.d/cacerts/master.pem
+
+- name: Get CRT and KEY for IPSEC (master) (shell)
+  shell: /usr/bin/docker exec -ti security_policy_manager /bin/bash -c 'curl -X POST http://127.0.0.1:5003/v1.0/nodecerts' > /etc/ipsec.d/private/master.key
+
+- name: Split PEM IPSEC (master)
+  command: /usr/bin/openssl x509 -in /etc/ipsec.d/private/master.key -out /etc/ipsec.d/certs/master.crt
+
+- name: Put crt into secrets
+  shell: "echo \": RSA 'master.key'\" >> /etc/ipsec.secrets"
+
+- name: Restart IPSec
+  command: ipsec restart
