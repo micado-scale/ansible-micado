@@ -64,7 +64,7 @@ topology_template:
         properties:
           constants:
             SERVICE_NAME: 'stressng'
-            SERVICE_FULL_NAME: 'stressng'
+            SERVICE_FULL_NAME: 'stressng-deployment'
             SERVICE_TH_MAX: '60'
             SERVICE_TH_MIN: '25'
           min_instances: 1
