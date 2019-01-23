@@ -22,7 +22,7 @@ topology_template:
       interfaces:
         Kubernetes:
           create:
-            implementation: image
+            implementation: Deployment
             inputs:
               resources:
                 requests:

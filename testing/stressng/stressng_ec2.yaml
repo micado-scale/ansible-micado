@@ -18,12 +18,12 @@ topology_template:
       interfaces:
         Kubernetes:
           create:
-            implementation: image
+            implementation: Deployment
             inputs:
-              args: "--cpu 0 --cpu-method pi -l 20"
+              args: ["--cpu", "0", "--cpu-method", "pi", "-l", "20"]
               resources:
                 requests:
-                  cpu: "1000m"
+                  cpu: "900m"
 
     worker_node:
       type: tosca.nodes.MiCADO.EC2.Compute
