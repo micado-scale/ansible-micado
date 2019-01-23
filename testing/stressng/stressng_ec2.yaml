@@ -20,7 +20,9 @@ topology_template:
           create:
             implementation: Deployment
             inputs:
-              args: ["--cpu", "0", "--cpu-method", "pi", "-l", "20"]
+              args: ['--cpu', '0', '--cpu-method', 'pi', '-l', '20']
+              strategy: 
+                type: Recreate
               resources:
                 requests:
                   cpu: "900m"
