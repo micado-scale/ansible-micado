@@ -13,6 +13,7 @@ topology_template:
       properties:
          ports:
            - target: "8080"
+             type: NodePort
            - target: "9300"
       artifacts:
        image:
