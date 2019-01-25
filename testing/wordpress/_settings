@@ -1,6 +1,6 @@
 MICADO_MASTER="123.45.67.89"
 MICADO_PORT="443"
-APP_NAME="wordpress"
+FRONTEND_NAME="wordpress"
 APP_ID="wpapp"
 SSL_USER="admin"
 SSL_PASS="admin"
