@@ -29,7 +29,6 @@ topology_template:
               name: nfs-server-container
               metadata:
                 labels:
-                  app: wordpress
                   tier: nfs
               securityContext:
                 privileged: True
@@ -66,7 +65,6 @@ topology_template:
                 value: admin
               metadata:
                 labels:
-                  app: wordpress
                   tier: mysql
               ports:
               - containerPort: 3306
@@ -118,7 +116,6 @@ topology_template:
                 value: admin
               metadata:
                 labels:
-                  app: wordpress
                   tier: frontend
               ports:
               - containerPort: 80
@@ -127,7 +124,7 @@ topology_template:
                 type: Recreate
               resources:
                 requests:
-                  cpu: "450m"
+                  cpu: "900m"
 
     worker_node:
       type: tosca.nodes.MiCADO.CloudBroker.Compute
