@@ -64,8 +64,6 @@ topology_template:
               env:
               - name: MYSQL_ROOT_PASSWORD
                 value: admin
-              - name: MYSQL_DATABASE
-                value: wordpress
               metadata:
                 labels:
                   app: wordpress
@@ -114,9 +112,9 @@ topology_template:
             inputs:
               name: wordpress
               env:
-              - name: MYSQL_DB_HOST
+              - name: WORDPRESS_DB_HOST
                 value: wordpress-mysql
-              - name: MYSQL_DB_PASSWORD
+              - name: WORDPRESS_DB_PASSWORD
                 value: admin
               metadata:
                 labels:
