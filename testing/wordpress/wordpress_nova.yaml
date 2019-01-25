@@ -207,14 +207,25 @@ policy_types:
     derived_from: tosca.policies.Scaling.MiCADO
     description: base MiCADO policy defining data sources, constants, queries, alerts, limits and rules
     properties:
+      alerts:
+        type: list
+        description: pre-define alerts for node Net
+        default:
+        - alert: node_overloaded
+          expr: 'avg(rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[30s]))/1000 > {{SERVICE_TH_MAX}}'
+          for: 1m
+        - alert: node_underloaded
+          expr: 'avg(rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[30s]))/1000 < {{SERVICE_TH_MIN}}'
+          for: 1m
+        required: true
       scaling_rule:
         type: string
         description: pre-define scaling rule for VM Net
         default: |
-          if len(m_nodes) == m_node_count and 0 < m_time_since_node_count_changed > 60:
-            if service_overloaded:
+          if len(m_nodes) <= m_node_count and 0 < m_time_since_node_count_changed > 180:
+            if node_overloaded:
               m_node_count+=1
-            elif service_underloaded:
+            elif node_underloaded:
               m_node_count-=1
           else:
             print('Transient phase, skipping update of nodes...')
