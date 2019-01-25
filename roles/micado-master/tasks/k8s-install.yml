@@ -68,6 +68,11 @@
     src: /etc/kubernetes/admin.conf
     dest: /root/.kube/config
 
+- name: 'K8s: Add kube/config to ENV'
+  lineinfile:
+    path: /etc/environment
+    line: 'KUBECONFIG=/root/.kube/config'
+
 - name: 'K8s: Copy KubeDashboard deployment'
   copy:
     src: kubernetes/kubedash.yaml
