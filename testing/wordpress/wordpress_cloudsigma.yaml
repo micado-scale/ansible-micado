@@ -23,8 +23,11 @@ topology_template:
          repository: docker_hub
       interfaces:
         Kubernetes:
-          create:
-            implementation: Deployment
+          create:            
+            implementation:
+              kind: Deployment
+              labels:
+                hostedVol: 'nfs'
             inputs:
               name: nfs-server-container
               metadata:

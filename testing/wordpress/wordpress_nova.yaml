@@ -106,7 +106,10 @@ topology_template:
       interfaces:
         Kubernetes:
           create:
-            implementation: Deployment
+            implementation:
+              kind: Deployment
+              labels:
+                hostedVol: 'nfs'
             inputs:
               name: wordpress
               env:
