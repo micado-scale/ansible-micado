@@ -14,15 +14,10 @@
                 compress=no
                 keyexchange=ikev2
                 authby=pubkey
-                leftcert=172.31.32.13
+                leftid="CN=workernode.micado"
+                leftcert=master.crt
                 left={{ ansible_default_ipv4.address }}
                 right=%any
                 auto=start
     dest: /etc/ipsec.conf
 
-# start and enable strongSwan
-- name: 'Enable/Start strongSwan'
-  service:
-    name: strongSwan
-    state: started
-    enabled: yes
