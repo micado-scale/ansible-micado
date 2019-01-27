@@ -54,15 +54,15 @@ write_files:
   permissions: '755'
   content: |
       #!/bin/bash
-      delimiter='-{5}[^-]+-{5}'
-      key=1
-      crt=2
+      fmt -w 35 /tmp/tmp_certs |
+      awk 'BEGIN { of="/etc/ipsec.d/private/node.key" } { print >of } /^-----END/ { of="/etc/ipsec.d/certs/node.crt" }'
 
-      # get the key
-      grep -o -P "\\${delimiter}.*?${delimiter}" /tmp/tmp_certs | cut -d $'\n' -f $key | fmt -w 64 > /etc/ipsec.d/private/node.key
-
-      # get the certificate
-      grep -o -P "\\${delimiter}.*?${delimiter}" /tmp/tmp_certs | cut -d $'\n' -f $crt | fmt -w 64 > /etc/ipsec.d/certs/node.crt
+- path: /tmp/modify_ca.sh
+  permissions: '755'
+  content: |
+      #!/bin/bash
+      fmt -w 35 /etc/ipsec.d/cacerts/master.pem |
+      awk 'BEGIN { of="/etc/ipsec.d/cacerts/uj_master.pem" } { print >of } /^-----END/'
  
 - path: /etc/ipsec.conf
   content: |
@@ -81,6 +81,11 @@ write_files:
   content: | {% raw %}
     : RSA 'node.key'
     {% endraw %}
+
+- path: /etc/ipsec.d/cacerts/master.pem
+  content: | {% raw %}
+      {{cmd('cat /var/lib/micado/occopus/data/master.pem')}}
+    {% endraw %}  
 
 - path: /tmp/tmp_certs
   content: | {% raw %}
@@ -182,11 +187,12 @@ runcmd:
   - systemctl enable strongswan
 
   - /tmp/split_certs.sh
-  - openssl rsa -in /etc/ipsec.d/private/node.key -outform DER -out /etc/ipsec.d/private/node.der
-  - rm /etc/ipsec.d/private/node.key
-  - mv /etc/ipsec.d/private/node.der /etc/ipsec.d/private/node.key
+  - /tmp/modify_ca.sh
+  - rm /etc/ipsec.d/cacerts/master.pem
+  - mv /etc/ipsec.d/cacerts/uj_master.pem /etc/ipsec.d/cacerts/master.p
   - rm /tmp/split_certs.sh
   - rm /tmp/tmp_certs
+  - rm /tmp/modify_ca.sh
 
 # Bring up the iptunnel
   - ipsec restart
