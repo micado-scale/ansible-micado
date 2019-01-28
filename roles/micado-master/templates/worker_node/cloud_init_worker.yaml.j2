@@ -50,6 +50,8 @@ write_files:
   content: |
     nameserver 8.8.8.8
 
+# This script fix the format of cert bundle, and split it into two separate files and copy them to the correct directory
+# Occopus should do this. 
 - path: /tmp/split_certs.sh
   permissions: '755'
   content: |
@@ -57,12 +59,14 @@ write_files:
       fmt -w 35 /tmp/tmp_certs |
       awk 'BEGIN { of="/etc/ipsec.d/private/node.key" } { print >of } /^-----END/ { of="/etc/ipsec.d/certs/node.crt" }'
 
+# This script fix the format of CA, and copy it to the correct directory
+# Occopus should do this.
 - path: /tmp/modify_ca.sh
   permissions: '755'
   content: |
       #!/bin/bash
       fmt -w 35 /etc/ipsec.d/cacerts/master.pem |
-      awk 'BEGIN { of="/etc/ipsec.d/cacerts/uj_master.pem" } { print >of } /^-----END/'
+      awk 'BEGIN { of="/etc/ipsec.d/cacerts/new_master.pem" } { print >of } /^-----END/'
  
 - path: /etc/ipsec.conf
   content: |
@@ -182,19 +186,20 @@ runcmd:
 
   - {{ join_command.stdout }}
 
-   # install strongSwan
+  # install strongSwan
   - apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y strongswan
   - systemctl enable strongswan
 
+  # These removes the temporary scripts, certs and 
   - /tmp/split_certs.sh
   - /tmp/modify_ca.sh
   - rm /etc/ipsec.d/cacerts/master.pem
-  - mv /etc/ipsec.d/cacerts/uj_master.pem /etc/ipsec.d/cacerts/master.p
+  - mv /etc/ipsec.d/cacerts/new_master.pem /etc/ipsec.d/cacerts/master.pem
   - rm /tmp/split_certs.sh
   - rm /tmp/tmp_certs
   - rm /tmp/modify_ca.sh
 
-# Bring up the iptunnel
+  # Bring up the iptunnel
   - ipsec restart
   - ipsec up iptunnel
 
