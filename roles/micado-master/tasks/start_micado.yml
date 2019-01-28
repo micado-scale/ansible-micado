@@ -53,6 +53,7 @@
 - name: Remove temporary cert bundle
   shell: rm /tmp/tmp_certs
 
+  # This copy the Master's CA to the occopus directory because occopus will read this file and put it into the cloud-init template. 
 - name: Copy CA to occopus directory
   command: /bin/cp /etc/ipsec.d/cacerts/master.pem /var/lib/micado/occopus/data/
 
