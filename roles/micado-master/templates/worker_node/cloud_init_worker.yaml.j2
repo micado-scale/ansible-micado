@@ -132,7 +132,7 @@ runcmd:
   - touch /etc/apt/sources.list.d/kubernetes.list
   - bash -c 'echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list'
   - apt-get update
-  - apt-get install -y kubelet kubeadm
+  - apt-get install -y kubelet=1.13.1* kubeadm=1.13.1*
   - apt-mark hold kubelet kubeadm
 
   # Connect to cluster

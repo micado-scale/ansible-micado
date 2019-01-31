@@ -19,7 +19,10 @@ if [ -z "$SSL_PASS" ]; then
   exit
 fi
 
-HTTP_PORT=$(curl --insecure -X GET -s -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/list_app | jq ".data[0].outputs.KubernetesAdaptor.$APP_NAME[0][0].node_port")
+if [ -z "$APP_ID" ]; then
+  echo "Please, set APP_ID in file named \"$settings_file\"!"
+  exit
+fi
 
-echo -n "Holding 40 active connections for 8 minutes at $MICADO_MASTER:$HTTP_PORT... CTRL-C to stop"
-wrk -t4 -c40 -d8m http://$MICADO_MASTER:$HTTP_PORT
+echo "Updating \"$APP_ID\" on MiCADO at $MICADO_MASTER..."
+curl --insecure -s -F file=@"wordpress.yaml" -X PUT -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/update/$APP_ID | jq

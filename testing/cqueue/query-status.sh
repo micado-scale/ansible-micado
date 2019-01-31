@@ -27,5 +27,5 @@ if [ -z "$SSL_PASS" ]; then
   echo " Please, set SSL_PASS in file named \"$settings_file\"!"
 fi
 
-echo "Fetching services info for appid $APP_ID from MiCADO at $MICADO_MASTER..." 
-curl --insecure -s -d query="services" -X GET -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/query/$APP_ID | jq
+echo "Fetching status info for appid $APP_ID from MiCADO at $MICADO_MASTER..." 
+curl --insecure -s -X GET -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/$APP_ID/status | jq
