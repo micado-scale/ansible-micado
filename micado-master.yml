@@ -63,4 +63,4 @@
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
     - github_versions:
         policykeeper: v0.7.1
-        toscasubmitter: v0.7.1
+        toscasubmitter: dev
