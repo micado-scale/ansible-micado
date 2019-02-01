@@ -20,6 +20,13 @@
         msg: >
           "The required OS is Ubuntu 16.04"
 
+    - name: Verify memory requirements (2 GB).
+      assert:
+        that:
+          - "ansible_memtotal_mb >= 1950"
+        msg: >
+          "The required memory size is minimum 2 GB"
+
   roles:
     - micado-master
 
