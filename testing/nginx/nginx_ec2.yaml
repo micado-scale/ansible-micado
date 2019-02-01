@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.6.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.x.2/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -12,34 +12,42 @@ topology_template:
       type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
          ports:
-           - "8080:8080"
-           - "9300:9300"
-         deploy:
-           resources:
-             reservations:
-               cpus: '0.2'
-         labels:
-           kompose.service.type: 'nodeport'
+           - target: "8080"
+             type: NodePort
+           - target: "9300"
       artifacts:
        image:
          type: tosca.artifacts.Deployment.Image.Container.Docker
          file: jaydes/nginxapp:1.2
          repository: docker_hub
+      interfaces:
+        Kubernetes:
+          create:
+            implementation: Deployment
+            inputs:
+              resources:
+                requests:
+                  cpu: "200m"
 
     worker_node:
-      type: tosca.nodes.MiCADO.Occopus.EC2.Compute
+      type: tosca.nodes.MiCADO.EC2.Compute
       properties:
-        cloud:
-          interface_cloud: ec2
-          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com )
+        region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
+        image_id: ADD_YOUR_IMAGE_ID_HERE (e.g. ami-061a2d878e5754b62)
+        instance_type: t2.medium
+        security_group_ids:
+          - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
+      interfaces:
+        Occopus:
+          create:
+            inputs:
+              interface_cloud: ec2
+              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com )
       capabilities:
         host:
           properties:
-            region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
-            image_id: ADD_YOUR_IMAGE_ID_HERE (e.g. ami-061a2d878e5754b62)
-            instance_type: t2.medium
-            security_group_ids:
-              - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
+            num_cpus: 2
+            mem_size: 2 GB
 
   outputs:
     ports:

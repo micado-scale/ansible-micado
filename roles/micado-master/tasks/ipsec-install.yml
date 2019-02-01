@@ -1,0 +1,23 @@
+---
+# install strongSwan
+- name: Install strongSwan
+  apt:
+    name: strongswan
+    state: present
+
+# create configuration
+- name: "Create ipsec configuration"
+  copy:
+    content: |
+        conn iptunnel
+                type=transport
+                compress=no
+                keyexchange=ikev2
+                authby=pubkey
+                leftid="CN=workernode.micado"
+                leftcert=master.crt
+                left={{ ansible_default_ipv4.address }}
+                right=%any
+                auto=start
+    dest: /etc/ipsec.conf
+

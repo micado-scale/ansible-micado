@@ -50,6 +50,52 @@ write_files:
   content: |
     nameserver 8.8.8.8
 
+# This script fix the format of cert bundle, and split it into two separate files and copy them to the correct directory
+# Occopus should do this. 
+- path: /tmp/split_certs.sh
+  permissions: '755'
+  content: |
+      #!/bin/bash
+      fmt -w 35 /tmp/tmp_certs |
+      awk 'BEGIN { of="/etc/ipsec.d/private/node.key" } { print >of } /^-----END/ { of="/etc/ipsec.d/certs/node.crt" }'
+
+# This script fix the format of CA, and copy it to the correct directory
+# Occopus should do this.
+- path: /tmp/modify_ca.sh
+  permissions: '755'
+  content: |
+      #!/bin/bash
+      fmt -w 35 /etc/ipsec.d/cacerts/master.pem |
+      awk 'BEGIN { of="/etc/ipsec.d/cacerts/new_master.pem" } { print >of } /^-----END/'
+ 
+- path: /etc/ipsec.conf
+  content: |
+    conn iptunnel
+       type=transport
+       compress=no
+       keyexchange=ikev2
+       authby=pubkey
+       leftcert=node.crt
+       left=local
+       right={{ ansible_default_ipv4.address }}
+       rightid="CN=workernode.micado"
+       auto=start
+
+- path: /etc/ipsec.secrets
+  content: | {% raw %}
+    : RSA 'node.key'
+    {% endraw %}
+
+- path: /etc/ipsec.d/cacerts/master.pem
+  content: | {% raw %}
+      {{cmd('cat /var/lib/micado/occopus/data/master.pem')}}
+    {% endraw %}  
+
+- path: /tmp/tmp_certs
+  content: | {% raw %}
+      {{cmd('curl -X POST http://security_policy_manager:5003/v1.0/nodecerts')}}
+    {% endraw %}
+
 - path: /etc/micado/docker-compose.yml
   content: |
     version: '3.3'
@@ -94,6 +140,7 @@ write_files:
         driver_opts:
           com.docker.network.driver.mtu: {{ ansible_default_ipv4.mtu }}
 
+
 runcmd:
   - /tmp/wait-updates.sh
   - /bin/consul-set-network.sh
@@ -110,7 +157,7 @@ runcmd:
   # Docker
 
   - apt-get update
-  - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common wget
+  - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common wget nfs-common nfs-kernel-server
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
   - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - apt-get update
@@ -132,14 +179,32 @@ runcmd:
   - touch /etc/apt/sources.list.d/kubernetes.list
   - bash -c 'echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list'
   - apt-get update
-  - apt-get install -y kubelet kubeadm
+  - apt-get install -y kubelet=1.13.1* kubeadm=1.13.1*
   - apt-mark hold kubelet kubeadm
 
   # Connect to cluster
 
   - {{ join_command.stdout }}
 
+  # install strongSwan
+  - apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y strongswan
+  - systemctl enable strongswan
+
+  # These removes the temporary scripts, certs and 
+  - /tmp/split_certs.sh
+  - /tmp/modify_ca.sh
+  - rm /etc/ipsec.d/cacerts/master.pem
+  - mv /etc/ipsec.d/cacerts/new_master.pem /etc/ipsec.d/cacerts/master.pem
+  - rm /tmp/split_certs.sh
+  - rm /tmp/tmp_certs
+  - rm /tmp/modify_ca.sh
+
+  # Bring up the iptunnel
+  - ipsec restart
+  - ipsec up iptunnel
+
   # Infra services start
 
   - export IP=$(hostname -I | cut -d\  -f1)
   - docker-compose -f /etc/micado/docker-compose.yml up -d
+

@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.6.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.x.2/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -12,33 +12,41 @@ topology_template:
       type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
          ports:
-           - "8080:8080"
-           - "9300:9300"
-         deploy:
-           resources:
-             reservations:
-               cpus: '0.2'
-         labels:
-           kompose.service.type: 'nodeport'
+           - target: "8080"
+             type: NodePort
+           - target: "9300"
       artifacts:
        image:
          type: tosca.artifacts.Deployment.Image.Container.Docker
          file: jaydes/nginxapp:1.2
          repository: docker_hub
+      interfaces:
+        Kubernetes:
+          create:
+            implementation: Deployment
+            inputs:
+              resources:
+                requests:
+                  cpu: "200m"
 
     worker_node:
-      type: tosca.nodes.MiCADO.Occopus.CloudBroker.Compute
+      type: tosca.nodes.MiCADO.CloudBroker.Compute
       properties:
-        cloud:
-          interface_cloud: cloudbroker
-          endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://cola-prototype.cloudbroker.com )
+        deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
+        instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
+        key_pair_id: ADD_YOUR_ID_HERE (e.g. d865f75f-d32b-4444-9fbb-3332bcedeb75)
+        opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
+      interfaces:
+        Occopus:
+          create:
+            inputs:
+              interface_cloud: cloudbroker
+              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://cola-prototype.cloudbroker.com )
       capabilities:
         host:
           properties:
-            deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
-            instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
-            key_pair_id: ADD_YOUR_ID_HERE (e.g. d865f75f-d32b-4444-9fbb-3332bcedeb75)
-            opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
+            num_cpus: 2
+            mem_size: 2 GB
 
   outputs:
     ports:

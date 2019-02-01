@@ -36,3 +36,32 @@
     name: micado
     state: restarted
     enabled: yes
+
+- pause:
+    prompt: Waiting for SPM
+    seconds: 70
+
+- name: Get CA for IPSEC (master) (shell)
+  shell: /usr/bin/docker exec -ti security_policy_manager /bin/bash -c 'curl -X GET http://127.0.0.1:5003/v1.0/nodecerts/ca' > /etc/ipsec.d/cacerts/master.pem
+
+- name: Get CRT and KEY for IPSEC (master) (shell)
+  shell: /usr/bin/docker exec -ti security_policy_manager /bin/bash -c 'curl -X POST http://127.0.0.1:5003/v1.0/nodecerts' > /tmp/tmp_certs
+
+- name: Split PEM IPSec (key)
+  command: /usr/bin/openssl pkey -in /tmp/tmp_certs -out /etc/ipsec.d/private/master.key
+
+- name: Split PEM IPSEC (cert)
+  command: /usr/bin/openssl x509 -in /tmp/tmp_certs -out /etc/ipsec.d/certs/master.crt
+
+- name: Put crt into secrets
+  shell: "echo \": RSA 'master.key'\" >> /etc/ipsec.secrets"
+
+- name: Remove temporary cert bundle
+  shell: rm /tmp/tmp_certs
+
+  # This copy the Master's CA to the occopus directory because occopus will read this file and put it into the cloud-init template. 
+- name: Copy CA to occopus directory
+  command: /bin/cp /etc/ipsec.d/cacerts/master.pem /var/lib/micado/occopus/data/
+
+- name: Restart IPSec
+  command: ipsec restart
