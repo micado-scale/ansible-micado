@@ -10,6 +10,11 @@ topology_template:
   node_templates:
     stressng:
       type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+        args: ['--cpu', '0', '--cpu-method', 'pi', '-l', '20']
+        resources:
+          requests:
+            cpu: "900m"
       artifacts:
        image:
          type: tosca.artifacts.Deployment.Image.Container.Docker
@@ -20,12 +25,8 @@ topology_template:
           create:
             implementation: Deployment
             inputs:
-              args: ['--cpu', '0', '--cpu-method', 'pi', '-l', '20']
               strategy: 
                 type: Recreate
-              resources:
-                requests:
-                  cpu: "900m"
 
     worker_node:
       type: tosca.nodes.MiCADO.Nova.Compute
