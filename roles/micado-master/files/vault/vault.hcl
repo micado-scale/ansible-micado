@@ -1,9 +1,9 @@
 # Listener address
 listener "tcp" {
-    address = "127.0.0.1:8200"
+    address = "0.0.0.0:8200"
 
     # TLS configuration for listener
-    tls_disable = 0
+    tls_disable = 1
     tls_min_version = "tls12"
     tls_cert_file = ""
     tils_key_file = ""
