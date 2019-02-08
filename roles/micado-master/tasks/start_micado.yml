@@ -36,10 +36,10 @@
     seconds: 70
 
 - name: Get CA for IPSEC (master) (shell)
-  shell: /usr/bin/docker exec -ti security_policy_manager /bin/bash -c 'curl -X GET http://127.0.0.1:5003/v1.0/nodecerts/ca' > /etc/ipsec.d/cacerts/master.pem
+  shell: /usr/bin/docker exec security_policy_manager /bin/bash -c 'curl -X GET http://127.0.0.1:5003/v1.0/nodecerts/ca' > /etc/ipsec.d/cacerts/master.pem
 
 - name: Get CRT and KEY for IPSEC (master) (shell)
-  shell: /usr/bin/docker exec -ti security_policy_manager /bin/bash -c 'curl -X POST http://127.0.0.1:5003/v1.0/nodecerts' > /tmp/tmp_certs
+  shell: /usr/bin/docker exec security_policy_manager /bin/bash -c 'curl -X POST http://127.0.0.1:5003/v1.0/nodecerts' > /tmp/tmp_certs
 
 - name: Split PEM IPSec (key)
   command: /usr/bin/openssl pkey -in /tmp/tmp_certs -out /etc/ipsec.d/private/master.key
