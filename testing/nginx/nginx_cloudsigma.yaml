@@ -26,7 +26,7 @@ topology_template:
       interfaces:
         Kubernetes:
           create:
-            implementation: Deployment
+            implementation: image
 
     worker_node:
       type: tosca.nodes.MiCADO.CloudSigma.Compute

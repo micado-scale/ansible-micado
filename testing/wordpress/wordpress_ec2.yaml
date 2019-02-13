@@ -28,10 +28,13 @@ topology_template:
       interfaces:
         Kubernetes:
           create:
-            implementation:
+            implementation: image
+            inputs:
               kind: Deployment
-              labels:
-                hostedVol: 'nfs'
+              metadata:
+                labels:
+                  volume: 'nfs'
+          configure:
             inputs:
               metadata:
                 labels:
@@ -66,7 +69,8 @@ topology_template:
       interfaces:
         Kubernetes:
           create:
-            implementation: Deployment
+            implementation: image
+          configure:
             inputs:
               metadata:
                 labels:
@@ -119,7 +123,8 @@ topology_template:
       interfaces:
         Kubernetes:
           create:
-            implementation: Deployment
+            implementation: image
+          configure:
             inputs:
               metadata:
                 labels:
