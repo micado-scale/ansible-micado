@@ -24,7 +24,6 @@ topology_template:
         Kubernetes:
           create:
             implementation: image
-          configure:
             inputs:
               strategy: 
                 type: Recreate
