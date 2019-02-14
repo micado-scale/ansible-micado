@@ -21,5 +21,5 @@ fi
 
 HTTP_PORT=$(curl --insecure -X GET -s -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/list_app | jq ".data[0].outputs.KubernetesAdaptor.$FRONTEND_NAME[0][0].node_port")
 
-echo -n "Holding 40 active connections for 8 minutes at $MICADO_MASTER:$HTTP_PORT... CTRL-C to stop"
+echo "Holding 40 active connections for 8 minutes at $MICADO_MASTER:$HTTP_PORT... CTRL-C to stop"
 wrk -t4 -c40 -d8m http://$MICADO_MASTER:$HTTP_PORT
