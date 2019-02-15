@@ -79,6 +79,61 @@ topology_template:
                 labels:
                   tier: mysql
 
+    nfs-volume:
+      type: tosca.nodes.MiCADO.Container.Volume
+      properties:
+        name: nfs-volume
+      interfaces:
+        Kubernetes:
+          create:
+            inputs:
+              nfs:
+                server: 10.96.0.240
+                path: /
+
+    wordpress:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+         name: wordpress
+         env:
+         - name: WORDPRESS_DB_HOST
+           value: wordpress-mysql
+         - name: WORDPRESS_DB_PASSWORD
+           value: admin
+         resources:
+           requests:
+             cpu: "900m"
+         ports:
+         - target: 80
+           nodePort: 30010
+           type: NodePort
+         - containerPort: 80
+           name: wordpress
+      artifacts:
+       image:
+         type: tosca.artifacts.Deployment.Image.Container.Docker
+         file: wordpress:5.0.3-apache
+         repository: docker_hub
+      requirements:
+        - volume:
+            node: nfs-volume
+            relationship:
+              type: tosca.relationships.AttachesTo
+              properties:
+                location: /var/www/html
+      interfaces:
+        Kubernetes:
+          create:
+            implementation: image
+            inputs:
+              strategy:
+                type: Recreate
+          configure:
+            inputs:
+              metadata:
+                labels:
+                  tier: frontend
+
     worker_node:
       type: tosca.nodes.MiCADO.EC2.Compute
       properties:
