@@ -8,7 +8,7 @@ repositories:
 
 topology_template:
   node_templates:
-    cqueue_worker:
+    cqueue-worker:
       type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
         env:
@@ -120,7 +120,7 @@ topology_template:
             print "Number of requested nodes:",m_node_count
     - scalability:
         type: tosca.policies.Scaling.MiCADO
-        targets: [ cqueue_worker ]
+        targets: [ cqueue-worker ]
         properties:
           min_instances: 1
           max_instances: '{{MAXCONTAINERS}}'
