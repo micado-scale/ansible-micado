@@ -11,7 +11,8 @@
     content: |
         conn iptunnel
                 type=transport
-                compress=no
+                compress=yes
+                fragmentation=yes
                 keyexchange=ikev2
                 authby=pubkey
                 leftid="CN=workernode.micado"

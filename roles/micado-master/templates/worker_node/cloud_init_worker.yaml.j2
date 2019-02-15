@@ -72,7 +72,8 @@ write_files:
   content: |
     conn iptunnel
        type=transport
-       compress=no
+       compress=yes
+       fragmentation=yes
        keyexchange=ikev2
        authby=pubkey
        leftcert=node.crt
@@ -138,7 +139,7 @@ write_files:
       default:
         driver: bridge
         driver_opts:
-          com.docker.network.driver.mtu: {{ ansible_default_ipv4.mtu }}
+          com.docker.network.driver.mtu: '1500'
 
 
 runcmd:
