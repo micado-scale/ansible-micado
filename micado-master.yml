@@ -47,6 +47,8 @@
     - master_hostname: micado-master
     - worker_hostname: micado-worker
 
+    - docker_iivr: true
+
     ##################################################################################
     ##### Please do not edit under this line unless you know what you are doing. #####
     ##################################################################################
