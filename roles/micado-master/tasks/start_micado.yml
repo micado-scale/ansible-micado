@@ -1,10 +1,4 @@
 ---
-- name: "Cloning policy keeper from git"
-  git:
-    repo: https://github.com/micado-scale/component-policy-keeper.git
-    dest: /var/lib/micado/policykeeper/src
-    version: "{{github_versions.policykeeper}}"
-
 - name: "Cloning tosca-submitter from git"
   git:
     repo: https://github.com/micado-scale/component_submitter.git
