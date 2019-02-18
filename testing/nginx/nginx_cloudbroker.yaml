@@ -11,10 +11,13 @@ topology_template:
     nginxapp:
       type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
+         resources:
+           requests:
+             cpu: "200m"
          ports:
-           - target: "8080"
+           - target: 8080
              type: NodePort
-           - target: "9300"
+           - target: 9300
       artifacts:
        image:
          type: tosca.artifacts.Deployment.Image.Container.Docker
@@ -23,11 +26,7 @@ topology_template:
       interfaces:
         Kubernetes:
           create:
-            implementation: Deployment
-            inputs:
-              resources:
-                requests:
-                  cpu: "200m"
+            implementation: image
 
     worker_node:
       type: tosca.nodes.MiCADO.CloudBroker.Compute

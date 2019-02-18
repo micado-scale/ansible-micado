@@ -10,6 +10,11 @@ topology_template:
   node_templates:
     stressng:
       type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+        args: ['--cpu', '0', '--cpu-method', 'pi', '-l', '20']
+        resources:
+          requests:
+            cpu: "900m"
       artifacts:
        image:
          type: tosca.artifacts.Deployment.Image.Container.Docker
@@ -18,14 +23,10 @@ topology_template:
       interfaces:
         Kubernetes:
           create:
-            implementation: Deployment
+            implementation: image
             inputs:
-              args: ['--cpu', '0', '--cpu-method', 'pi', '-l', '20']
               strategy: 
                 type: Recreate
-              resources:
-                requests:
-                  cpu: "900m"
 
     worker_node:
       type: tosca.nodes.MiCADO.CloudBroker.Compute
@@ -62,7 +63,7 @@ topology_template:
         properties:
           constants:
             SERVICE_NAME: 'stressng'
-            SERVICE_FULL_NAME: 'stressng-container'
+            SERVICE_FULL_NAME: 'stressng'
             SERVICE_TH_MAX: '60'
             SERVICE_TH_MIN: '25'
           min_instances: 1

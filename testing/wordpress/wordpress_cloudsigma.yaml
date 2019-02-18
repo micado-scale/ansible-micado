@@ -11,9 +11,13 @@ topology_template:
     nfs-server-pod:
       type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
-         clusterIP: 10.96.0.240
+         name: nfs-server-container
+         securityContext:
+           privileged: True
+         args: ['/exports']
          ports:
            - target: 2049
+             clusterIP: 10.96.0.240
            - target: 111
              protocol: udp
       artifacts:
@@ -23,28 +27,33 @@ topology_template:
          repository: docker_hub
       interfaces:
         Kubernetes:
-          create:            
-            implementation:
-              kind: Deployment
-              labels:
-                hostedVol: 'nfs'
+          create:
+            implementation: image
             inputs:
-              name: nfs-server-container
+              kind: Deployment
+              strategy:
+                type: Recreate
+              metadata:
+                labels:
+                  volume: 'nfs'
+          configure:
+            inputs:
               metadata:
                 labels:
                   tier: nfs
-              securityContext:
-                privileged: True
-              args: ['/exports']
-              strategy:
-                type: Recreate
 
     wordpress-mysql:
       type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
-         clusterIP: None
+         name: mysql
+         env:
+         - name: MYSQL_ROOT_PASSWORD
+           value: admin
          ports:
-           - target: 3306
+         - target: 3306
+           clusterIP: 'None'
+         - containerPort: 3306
+           name: mysql
       artifacts:
        image:
          type: tosca.artifacts.Deployment.Image.Container.Docker
@@ -60,20 +69,15 @@ topology_template:
       interfaces:
         Kubernetes:
           create:
-            implementation: Deployment
+            implementation: image
             inputs:
-              name: mysql
-              env:
-              - name: MYSQL_ROOT_PASSWORD
-                value: admin
+              strategy:
+                type: Recreate
+          configure:
+            inputs:
               metadata:
                 labels:
                   tier: mysql
-              ports:
-              - containerPort: 3306
-                name: mysql
-              strategy:
-                type: Recreate
 
     nfs-volume:
       type: tosca.nodes.MiCADO.Container.Volume
@@ -90,10 +94,21 @@ topology_template:
     wordpress:
       type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
+         name: wordpress
+         env:
+         - name: WORDPRESS_DB_HOST
+           value: wordpress-mysql
+         - name: WORDPRESS_DB_PASSWORD
+           value: admin
+         resources:
+           requests:
+             cpu: "900m"
          ports:
-           - target: 80
-             nodePort: 30010
-             type: NodePort
+         - target: 80
+           nodePort: 30010
+           type: NodePort
+         - containerPort: 80
+           name: wordpress
       artifacts:
        image:
          type: tosca.artifacts.Deployment.Image.Container.Docker
@@ -109,25 +124,15 @@ topology_template:
       interfaces:
         Kubernetes:
           create:
-            implementation: Deployment
+            implementation: image
             inputs:
-              name: wordpress
-              env:
-              - name: WORDPRESS_DB_HOST
-                value: wordpress-mysql
-              - name: WORDPRESS_DB_PASSWORD
-                value: admin
+              strategy:
+                type: Recreate
+          configure:
+            inputs:
               metadata:
                 labels:
                   tier: frontend
-              ports:
-              - containerPort: 80
-                name: wordpress
-              strategy:
-                type: Recreate
-              resources:
-                requests:
-                  cpu: "900m"
 
     worker_node:
       type: tosca.nodes.MiCADO.CloudSigma.Compute
@@ -135,7 +140,7 @@ topology_template:
         num_cpus: 2000
         mem_size: 2147483648
         vnc_password: secret
-        libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 837e9690-d1ae-4ad7-a7fb-895fabe88ec5)
+        libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
         public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
         nics:
         - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)

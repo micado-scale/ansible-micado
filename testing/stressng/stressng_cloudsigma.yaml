@@ -10,6 +10,11 @@ topology_template:
   node_templates:
     stressng:
       type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+        args: ['--cpu', '0', '--cpu-method', 'pi', '-l', '20']
+        resources:
+          requests:
+            cpu: "900m"
       artifacts:
        image:
          type: tosca.artifacts.Deployment.Image.Container.Docker
@@ -18,14 +23,10 @@ topology_template:
       interfaces:
         Kubernetes:
           create:
-            implementation: Deployment
+            implementation: image
             inputs:
-              args: ['--cpu', '0', '--cpu-method', 'pi', '-l', '20']
               strategy: 
                 type: Recreate
-              resources:
-                requests:
-                  cpu: "900m"
 
     worker_node:
       type: tosca.nodes.MiCADO.CloudSigma.Compute
@@ -33,7 +34,7 @@ topology_template:
         num_cpus: 2000
         mem_size: 2147483648
         vnc_password: secret
-        libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 837e9690-d1ae-4ad7-a7fb-895fabe88ec5)
+        libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
         public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
         nics:
         - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
@@ -67,7 +68,7 @@ topology_template:
         properties:
           constants:
             SERVICE_NAME: 'stressng'
-            SERVICE_FULL_NAME: 'stressng-container'
+            SERVICE_FULL_NAME: 'stressng'
             SERVICE_TH_MAX: '60'
             SERVICE_TH_MIN: '25'
           min_instances: 1
