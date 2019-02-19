@@ -9,6 +9,9 @@
 - name: "Create ipsec configuration"
   copy:
     content: |
+        config setup
+                uniqueids=never
+
         conn iptunnel
                 type=transport
                 compress=yes
