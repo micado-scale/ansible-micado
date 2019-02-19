@@ -17,3 +17,8 @@
   script: files/misc/wait-updates.sh
   register: outputsh
   changed_when: outputsh.stdout != ""
+
+- name: "Check the CPU manufacture"
+  set_fact:
+     docker_iivr: false
+  when: '"AMD" in  "{{ ansible_processor }}"'

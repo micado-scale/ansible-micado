@@ -136,12 +136,14 @@
       volumes:
         - "/var/lib/micado/credman/config:/config"
 
+{% if docker_iivr %}
     iivr:
       image: {{ docker_images.iivr }}
       container_name: iivr
       restart: always
       volumes:
         - "/var/lib/micado/iivr/config:/config"
+{% endif %}
 
     crypto_engine:
       image: {{ docker_images.crypto_engine }}
