@@ -205,7 +205,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "count(rate(container_last_seen{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name-[^-]*-[^-]*\"}[$interval])) by (container_label_io_kubernetes_pod_name)",
+          "expr": "count(rate(container_last_seen{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name-[^-]*-[^-]*\"}[$interval]))",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 2,
