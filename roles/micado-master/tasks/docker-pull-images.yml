@@ -54,6 +54,7 @@
 - name: 'Downloading docker image: Image Integrity Verifier'
   docker_image:
       name: "{{docker_images.iivr}}"
+  when: docker_iivr
 
 - name: 'Downloading docker image: Zorp'
   docker_image:
