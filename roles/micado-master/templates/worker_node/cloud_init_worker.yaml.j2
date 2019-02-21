@@ -139,7 +139,7 @@ write_files:
       default:
         driver: bridge
         driver_opts:
-          com.docker.network.driver.mtu: '1450'
+          com.docker.network.driver.mtu: '1400'
 
 
 runcmd:
@@ -200,12 +200,11 @@ runcmd:
   - rm /tmp/tmp_certs
   - rm /tmp/modify_ca.sh
 
-  # Bring up the iptunnel
-  - ipsec restart
-  - ipsec up iptunnel
-
   # Infra services start
 
   - export IP=$(hostname -I | cut -d\  -f1)
   - docker-compose -f /etc/micado/docker-compose.yml up -d
 
+  # Bring up the iptunnel
+  - ipsec restart
+  - ipsec up iptunnel
