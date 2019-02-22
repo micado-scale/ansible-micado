@@ -95,12 +95,6 @@
 - name: 'K8s: Install Flannel pod network'
   shell: kubectl apply -f /etc/kubernetes/kube-flannel.yaml
 
-- name: 'K8s: Install Kompose'
-  get_url:
-    url: https://github.com/kubernetes/kompose/releases/download/v1.16.0/kompose-linux-amd64
-    dest: /usr/local/bin/kompose
-    mode: a+x
-
 - name: 'K8s: Copy dashboard role file'
   copy:
     src: kubernetes/kubedash-role.yaml
