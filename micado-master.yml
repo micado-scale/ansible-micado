@@ -47,6 +47,8 @@
     - master_hostname: micado-master
     - worker_hostname: micado-worker
 
+    - docker_iivr: true
+
     ##################################################################################
     ##### Please do not edit under this line unless you know what you are doing. #####
     ##################################################################################
@@ -67,6 +69,10 @@
         redis: redis:4.0
         toscasubmitter: micado/toscasubmitter:0.1.9
         zorp: micado/zorpgpl:6.0.11
+        vault: vault:1.0.0
+        securitypolicymanager: micado/security-policy-manager:2.0
+        crypto_engine: micado/crypto-engine:1.0
+        iivr: micado/iivr:1.0
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
     - github_versions:
         toscasubmitter: dev
