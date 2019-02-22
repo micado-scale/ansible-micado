@@ -51,12 +51,16 @@
   command: /usr/bin/openssl x509 -in /tmp/tmp_certs -out /etc/ipsec.d/certs/master.crt
 
 - name: Put crt into secrets
-  shell: "echo \": RSA 'master.key'\" >> /etc/ipsec.secrets"
+  lineinfile:
+    path: /etc/ipsec.secrets
+    line: ": RSA 'master.key'"
 
 - name: Remove temporary cert bundle
-  shell: rm /tmp/tmp_certs
+  file:
+    path: /tmp/tmp_certs
+    state: absent
 
-  # This copy the Master's CA to the occopus directory because occopus will read this file and put it into the cloud-init template. 
+  # This copy the Master's CA to the occopus directory because occopus will read this file and put it into the cloud-init template.
 - name: Copy CA to occopus directory
   command: /bin/cp /etc/ipsec.d/cacerts/master.pem /var/lib/micado/occopus/data/
 
