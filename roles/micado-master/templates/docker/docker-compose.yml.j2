@@ -26,7 +26,7 @@
         - redis
       volumes:
         - "/var/lib/micado/occopus/data/:/var/lib/micado/occopus/data/"
-        - "/var/lib/micado/toscasubmitter/src/files/output_configs/:/var/lib/micado/occopus/submitter/"
+        - "/var/lib/micado/toscasubmitter/output/:/var/lib/micado/occopus/submitter/"
         - "/var/log/micado/occopus/:/var/log/occopus/"
       environment:
         - REDIS_NAME=redis
@@ -116,9 +116,8 @@
         - "/var/run/docker.sock:/var/run/docker.sock"
         - "/usr/bin/docker:/usr/bin/docker"
         - "/root/.kube:/root/.kube"
-        - "/usr/local/bin/kompose:/usr/local/bin/kompose"
         - "/usr/bin/kubectl:/usr/bin/kubectl"
-        - "/var/lib/micado/toscasubmitter/src:/var/lib/submitter"
+        - "/var/lib/micado/toscasubmitter/output/:/var/lib/submitter/files/output_configs"
         - "/var/lib/micado/toscasubmitter/system/:/var/lib/submitter/system"
         - "/var/log/micado/toscasubmitter/:/var/log/submitter/"
       user: "root"
