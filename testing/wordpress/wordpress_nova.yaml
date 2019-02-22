@@ -142,6 +142,11 @@ topology_template:
         project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
         network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
         key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
+        context:
+          append: yes
+          cloud_config: |
+            runcmd:
+            - apt-get install -y nfs-kernel-server nfs-common
         security_groups:
           - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
       interfaces:

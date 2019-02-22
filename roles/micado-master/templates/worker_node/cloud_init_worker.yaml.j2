@@ -51,7 +51,7 @@ write_files:
     nameserver 8.8.8.8
 
 # This script fix the format of cert bundle, and split it into two separate files and copy them to the correct directory
-# Occopus should do this. 
+# Occopus should do this.
 - path: /tmp/split_certs.sh
   permissions: '755'
   content: |
@@ -67,7 +67,7 @@ write_files:
       #!/bin/bash
       fmt -w 35 /etc/ipsec.d/cacerts/master.pem |
       awk 'BEGIN { of="/etc/ipsec.d/cacerts/new_master.pem" } { print >of } /^-----END/'
- 
+
 - path: /etc/ipsec.conf
   content: |
     conn iptunnel
@@ -90,7 +90,7 @@ write_files:
 - path: /etc/ipsec.d/cacerts/master.pem
   content: | {% raw %}
       {{cmd('cat /var/lib/micado/occopus/data/master.pem')}}
-    {% endraw %}  
+    {% endraw %}
 
 - path: /tmp/tmp_certs
   content: | {% raw %}
@@ -158,7 +158,7 @@ runcmd:
   # Docker
 
   - apt-get update
-  - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common wget nfs-common nfs-kernel-server
+  - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common wget
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
   - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - apt-get update
@@ -191,7 +191,7 @@ runcmd:
   - apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y strongswan
   - systemctl enable strongswan
 
-  # These removes the temporary scripts, certs and 
+  # These removes the temporary scripts, certs and
   - /tmp/split_certs.sh
   - /tmp/modify_ca.sh
   - rm /etc/ipsec.d/cacerts/master.pem
