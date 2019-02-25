@@ -183,15 +183,13 @@ runcmd:
   - apt-get install -y kubelet=1.13.1* kubeadm=1.13.1* kubectl=1.13.1*
   - apt-mark hold kubelet kubeadm kubectl
 
-  # Connect to cluster
+  # Install strongSwan
 
-  - {{ join_command.stdout }}
-
-  # install strongSwan
   - apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y strongswan
   - systemctl enable strongswan
 
   # These removes the temporary scripts, certs and
+
   - /tmp/split_certs.sh
   - /tmp/modify_ca.sh
   - rm /etc/ipsec.d/cacerts/master.pem
@@ -200,11 +198,15 @@ runcmd:
   - rm /tmp/tmp_certs
   - rm /tmp/modify_ca.sh
 
+  # Bring up the iptunnel
+
+  - ipsec restart
+
   # Infra services start
 
   - export IP=$(hostname -I | cut -d\  -f1)
   - docker-compose -f /etc/micado/docker-compose.yml up -d
 
-  # Bring up the iptunnel
-  - ipsec restart
-  - ipsec up iptunnel
+  # Connect to cluster
+
+  - {{ join_command.stdout }}
