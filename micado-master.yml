@@ -64,7 +64,7 @@
         grafana: grafana/grafana:5.1.0
         node_exporter: prom/node-exporter:v0.15.2
         occopus: micado/occopus:1.6-rc1
-        policykeeper: micado/policykeeper:dev
+        policykeeper: micado/policykeeper:v0.7.2
         prometheus: prom/prometheus:v2.1.0
         redis: redis:4.0
         toscasubmitter: micado/toscasubmitter:0.2.0
