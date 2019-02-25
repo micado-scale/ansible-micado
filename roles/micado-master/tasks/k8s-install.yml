@@ -68,6 +68,11 @@
     src: /etc/kubernetes/admin.conf
     dest: /root/.kube/config
 
+- name: 'K8s: Add kube/config to ENV'
+  lineinfile:
+    path: /etc/environment
+    line: 'KUBECONFIG=/root/.kube/config'
+
 - name: 'K8s: Copy KubeDashboard deployment'
   copy:
     src: kubernetes/kubedash.yaml
@@ -89,24 +94,6 @@
 
 - name: 'K8s: Install Flannel pod network'
   shell: kubectl apply -f /etc/kubernetes/kube-flannel.yaml
-
-- name: 'K8s: Install Kompose'
-  get_url:
-    url: https://github.com/kubernetes/kompose/releases/download/v1.16.0/kompose-linux-amd64
-    dest: /usr/local/bin/kompose
-    mode: a+x
-
-- name: 'K8s: Copy CoreDNS configmap'
-  copy:
-    src: kubernetes/coredns-config.yaml
-    dest: /etc/kubernetes/coredns-config.yaml
-    mode: 0644
-
-- name: 'K8s: Apply CoreDNS config'
-  shell: kubectl apply -f /etc/kubernetes/coredns-config.yaml
-
-- name: 'K8s: Restart CoreDNS pods'
-  shell: kubectl get pods -n kube-system -oname |grep coredns |xargs kubectl delete -n kube-system
 
 - name: 'K8s: Copy dashboard role file'
   copy:

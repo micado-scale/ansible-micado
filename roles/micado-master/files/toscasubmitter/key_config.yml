@@ -5,28 +5,28 @@ main_config:
 
 step:
   translate:
-    - K8sAdaptor
+    - KubernetesAdaptor
     - OccopusAdaptor
     - PkAdaptor
   execute:
     - OccopusAdaptor
-    - K8sAdaptor
+    - KubernetesAdaptor
     - PkAdaptor
   update:
     - OccopusAdaptor
-    - K8sAdaptor
+    - KubernetesAdaptor
     - PkAdaptor
   undeploy:
     - PkAdaptor
-    - K8sAdaptor
+    - KubernetesAdaptor
     - OccopusAdaptor
   cleanup:
-    - K8sAdaptor
+    - KubernetesAdaptor
     - OccopusAdaptor
     - PkAdaptor
 
 adaptor_config:
- K8sAdaptor:
+ KubernetesAdaptor:
    types:
      - "tosca.nodes.MiCADO.Container.Application.Docker"
    endoint: "endpoint"

@@ -39,6 +39,23 @@
   docker_image:
       name: "{{docker_images.credential_manager}}"
 
+- name: 'Downloading docker image: Vault'
+  docker_image:
+      name: "{{docker_images.vault}}"
+
+- name: 'Downloading docker image: Security Policy Manager'
+  docker_image:
+      name: "{{docker_images.securitypolicymanager}}"
+
+- name: 'Downloading docker image: Crypto Engine'
+  docker_image:
+      name: "{{docker_images.crypto_engine}}"
+
+- name: 'Downloading docker image: Image Integrity Verifier'
+  docker_image:
+      name: "{{docker_images.iivr}}"
+  when: docker_iivr
+
 - name: 'Downloading docker image: Zorp'
   docker_image:
       name: "{{docker_images.zorp}}"

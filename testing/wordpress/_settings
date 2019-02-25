@@ -1,0 +1,28 @@
+MICADO_MASTER="123.45.67.89"
+MICADO_PORT="443"
+FRONTEND_NAME="wordpress"
+APP_ID="wpapp"
+SSL_USER="admin"
+SSL_PASS="admin"
+###########################################################################
+############ CONFIGURE SETTINGS ABOVE FOR YOUR MiCADO INSTANCE ############
+######### AND RENAME wordpress_<your cloud>.yaml TO wordpress.yaml ##########
+###########################################################################
+echo "Settings used:"
+echo "  MICADO_MASTER: $MICADO_MASTER"
+
+if [ -z $MICADO_PORT ]; then
+  MICADO_PORT="443"
+  PORT_MESSAGE="(none specified, using default)"
+fi
+
+echo "  MICADO_PORT: $MICADO_PORT $PORT_MESSAGE"
+echo "  APP_ID: $APP_ID"
+
+if [ $SSL_USER ]; then
+  echo "  SSL_USER: $SSL_USER"
+fi
+
+if [ $SSL_PASS ]; then
+  echo "  SSL_PASS: (hidden)"
+fi
