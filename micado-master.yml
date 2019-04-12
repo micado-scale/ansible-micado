@@ -8,9 +8,17 @@
       raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
       register: output
       changed_when: output.stdout != ""
+      tags:
+      - build
+      - start
+      - worker
 
     - name: Turn back gather_fact
       setup:
+      tags:
+      - build
+      - start
+      - worker
 
     - name: Verify OS meets the version requirements (Ubuntu 16.04).
       assert:
@@ -19,6 +27,10 @@
           - "ansible_distribution_version == '16.04'"
         msg: >
           "The required OS is Ubuntu 16.04"
+      tags:
+      - build
+      - start
+      - worker
 
     - name: Verify memory requirements (2 GB).
       assert:
@@ -26,6 +38,10 @@
           - "ansible_memtotal_mb >= 1950"
         msg: >
           "The required memory size is minimum 2 GB"
+      tags:
+      - build
+      - start
+      - worker
 
   roles:
     - micado-master
