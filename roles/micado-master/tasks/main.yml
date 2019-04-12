@@ -26,7 +26,7 @@
   tags: start
 
 - include: docker-pull-images.yml
-  tags: start
+  tags: build
 
 - include: docker-pull-worker-images.yml
   tags: worker
