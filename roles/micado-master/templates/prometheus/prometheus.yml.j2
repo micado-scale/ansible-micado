@@ -6,8 +6,10 @@ scrape_configs:
   consul_sd_configs:
   - server: consul:8500
     datacenter: application
-    services: [lb_cluster, worker_cluster, app_docker_cluster]
   relabel_configs:
+  - source_labels: [__meta_consul_service]
+    regex: (.*_cluster)
+    action: keep
   - source_labels: [__meta_consul_service]
     regex: (.*)
     target_label: job
