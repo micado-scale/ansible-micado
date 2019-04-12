@@ -4,7 +4,9 @@
   apt:
     name: strongswan
     state: present
-  tags: 'build'
+  tags:
+  - build
+  - worker
 
 # create configuration
 - name: "Create ipsec configuration"
@@ -25,5 +27,5 @@
                 right=%any
                 auto=start
     dest: /etc/ipsec.conf
-  tags: 'start'
+  tags: start
 

@@ -1,0 +1,12 @@
+---
+- name: 'Downloading docker image: Consul'
+  docker_image:
+      name: "{{docker_images.consul}}"
+
+- name: 'Downloading docker image: Node Exporter'
+  docker_image:
+      name: "{{docker_images.node_exporter}}"
+
+- name: 'Downloading docker image: cAdvisor'
+  docker_image:
+      name: "{{docker_images.cadvisor}}"

@@ -3,31 +3,33 @@
   lineinfile:
     path: /etc/resolv.conf
     line: 'nameserver 8.8.8.8'
-  tags: 'build'
+  tags:
+  - build
+  - worker
 
 - name: "Setting hostname"
   hostname:
     name: "{{ master_hostname }}-{{ ansible_host | replace('.', '-') }}"
-  tags: 'start'
+  tags: start
 
 - name: "Configuring hostfile"
   lineinfile:
     path: /etc/hosts
     line: "127.0.0.1 localhost\t{{ master_hostname }}-{{ ansible_host | replace('.', '-') }}"
-  tags: 'build'
+  tags: build
 
 - name: "Waiting for automatic security updates to finish"
   script: files/misc/wait-updates.sh
   register: outputsh
   changed_when: outputsh.stdout != ""
   tags:
-  - 'build'
-  - 'start'
+  - build
+  - start
 
 - name: "Check the CPU manufacture"
   set_fact:
      docker_iivr: false
   when: '"AMD" in  "{{ ansible_processor }}"'
   tags:
-  - 'build'
-  - 'start'
+  - build
+  - start

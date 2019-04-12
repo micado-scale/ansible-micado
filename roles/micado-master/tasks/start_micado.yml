@@ -6,28 +6,28 @@
       - click
       - terminaltables
     state: present
-  tags: 'build'
+  tags: build
 
 - name: Enable packet filtering
   service:
     name: iptables
     state: restarted
     enabled: yes
-  tags: 'start'
+  tags: start
 
 - name: Enable IPv6 packet filtering
   service:
     name: ip6tables
     state: restarted
     enabled: yes
-  tags: 'start'
+  tags: start
 
 - name: Enable and start MiCADO systemd service
   service:
     name: micado
     state: restarted
     enabled: yes
-  tags: 'start'
+  tags: start
 
 - name: "Wait for SPM running state"
   shell: "i=0 ; while [ `docker ps --filter name=security_policy_manager --filter health=healthy | wc -l` -eq 1 ] && [ $i -lt 110 ] ; do echo -e 'Security policy manager is not healthy yet!' ;  sleep 1 ; ((i++)) ; done ; if [ $i -eq 20 ] ; then exit 1 ; fi ; exit 0"
@@ -35,41 +35,41 @@
     executable: /bin/bash
   register: output
   changed_when: output.stdout != ""
-  tags: 'start'
+  tags: start
 
 - name: Get CA for IPSEC (master) (shell)
   shell: /usr/bin/docker exec security_policy_manager /bin/bash -c 'curl -X GET http://127.0.0.1:5003/v1.0/nodecerts/ca' > /etc/ipsec.d/cacerts/master.pem
-  tags: 'start'
+  tags: start
 
 - name: Get CRT and KEY for IPSEC (master) (shell)
   shell: /usr/bin/docker exec security_policy_manager /bin/bash -c 'curl -X POST http://127.0.0.1:5003/v1.0/nodecerts' > /tmp/tmp_certs
-  tags: 'start'
+  tags: start
 
 - name: Split PEM IPSec (key)
   command: /usr/bin/openssl pkey -in /tmp/tmp_certs -out /etc/ipsec.d/private/master.key
-  tags: 'start'
+  tags: start
 
 - name: Split PEM IPSEC (cert)
   command: /usr/bin/openssl x509 -in /tmp/tmp_certs -out /etc/ipsec.d/certs/master.crt
-  tags: 'start'
+  tags: start
 
 - name: Put crt into secrets
   lineinfile:
     path: /etc/ipsec.secrets
     line: ": RSA 'master.key'"
-  tags: 'start'
+  tags: start
 
 - name: Remove temporary cert bundle
   file:
     path: /tmp/tmp_certs
     state: absent
-  tags: 'start'
+  tags: start
 
   # This copy the Master's CA to the occopus directory because occopus will read this file and put it into the cloud-init template.
 - name: Copy CA to occopus directory
   command: /bin/cp /etc/ipsec.d/cacerts/master.pem /var/lib/micado/occopus/data/
-  tags: 'start'
+  tags: start
 
 - name: Restart IPSec
   command: ipsec restart
-  tags: 'start'
+  tags: start
