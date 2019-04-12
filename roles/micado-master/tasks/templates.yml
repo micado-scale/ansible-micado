@@ -1,0 +1,65 @@
+---
+- name: "Occopus Credentials: Load the credentials from the playbook"
+  include_vars:
+    file: "{{ cloud_cred_path }}"
+    name: config
+
+- name: "Security Credentials: Load the credentials and security settings from the playbook"
+  include_vars:
+    file: "{{ micado_cred_path  }}"
+    name: security
+
+- name: "Consul config: Generate encrypton key"
+  shell: "tr -dc 'a-zA-Z0-9-!@#$%^&*()_+~' < /dev/urandom 2>/dev/null | head -c 16 | base64"
+  register: consul_key
+
+- name: "Consul config: Copy file"
+  template:
+    src: consul/config.json.j2
+    dest: /var/lib/micado/consul/config/config.json
+    mode: 0644
+
+- name: "Consul config: Create checks.json"
+  template:
+    src: consul/checks.json.j2
+    dest: /var/lib/micado/consul/config/checks.json
+    mode: 0644
+
+- name: "Prometheus config: Copy file"
+  template:
+    src: prometheus/prometheus.yml.j2
+    dest: /var/lib/micado/prometheus/config/prometheus.yml
+    mode: 0644
+
+- name: "Policy-keeper config: Copy file"
+  template:
+    src: policykeeper/policykeeper_config.yaml.j2
+    dest: /var/lib/micado/policykeeper/config/policykeeper_config.yaml
+
+- name: "Credential Manager initial config: Copy file"
+  template:
+    src: user_data/auth_data_credential_manager.csv.j2
+    dest: /var/lib/micado/credman/config/provisioning.csv
+
+- name: Create user_data_zorp.env for Zorp
+  template:
+      src: user_data/user_data_zorp.env.j2
+      dest: "/var/lib/micado/zorp/config/user_data_zorp.env"
+
+- name: "Docker-compose: Copy file"
+  template:
+    src: docker/docker-compose.yml.j2
+    dest: /var/lib/micado/docker-compose.yml
+    mode: 0644
+
+- name: "Iptables configuration: Copy file"
+  template:
+    src: iptables/iptables.conf.j2
+    dest: /etc/iptables.conf
+    mode: 0640
+
+- name: "Ip6tables configuration: Copy file"
+  template:
+    src: iptables/ip6tables.conf.j2
+    dest: /etc/ip6tables.conf
+    mode: 0640

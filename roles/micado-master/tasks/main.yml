@@ -2,18 +2,30 @@
 - include: setup-master-node.yml
 
 - include: docker-install.yml
+  tags: 'build'
 
 - include: k8s-install.yml
+  tags: 'build'
+
+- include: k8s-init.yml
+  tags: 'start'
 
 - include: files.yml
+  tags: 'build'
+
+- include: templates.yml
+  tags: 'start'
 
 - include: ipsec-install.yml
 
 - include: worker_node.yml
+  tags: 'start'
 
 - include: docker-pull-images.yml
+  tags: 'build'
 
 - include: start_micado.yml
 
 - include: docker-login.yml
   when: docker_cred_path is defined
+  tags: 'start'
