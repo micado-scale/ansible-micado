@@ -16,7 +16,7 @@
   lineinfile:
     path: /etc/hosts
     line: "127.0.0.1 localhost\t{{ master_hostname }}-{{ ansible_host | replace('.', '-') }}"
-  tags: build
+  tags: start
 
 - name: "Waiting for automatic security updates to finish"
   script: files/misc/wait-updates.sh
