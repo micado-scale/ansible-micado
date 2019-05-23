@@ -1,16 +1,16 @@
 [Unit]
 Description=MiCADO
-After=docker.service
-Requires=docker.service
+After=kubelet.service
+Requires=kubelet.service
 
 [Service]
 User=root
-Type=simple
-ExecStart=/usr/local/bin/docker-compose -f /var/lib/micado/docker-compose.yml up
+Type=forking
+ExecStart=/usr/bin/kubectl apply -f /var/lib/micado/micado-manifest.yml
 StandardOutput=syslog
 StandardError=syslog
-
-ExecStop=/usr/local/bin/docker-compose -f /var/lib/micado/docker-compose.yml stop
+RemainAfterExit=true
+ExecStop=/usr/bin/kubectl delete -f /var/lib/micado/micado-manifest.yml
 TimeoutStartSec=60min
 
 [Install]

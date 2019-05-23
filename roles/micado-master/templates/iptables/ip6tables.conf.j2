@@ -43,15 +43,6 @@
 -A FILTERS -m state --state NEW -m udp -p udp --dport 4500 -j ACCEPT
 -A FILTERS -m state --state NEW -p 50 -j ACCEPT
 -A FILTERS -m state --state NEW -p 51 -j ACCEPT
-#consul
--A FILTERS -m state --state NEW -m tcp -p tcp --dport 8300 -j ACCEPT
--A FILTERS -m state --state NEW -m tcp -p tcp --dport 8301 -j ACCEPT
--A FILTERS -m state --state NEW -m udp -p udp --dport 8301 -j ACCEPT
--A FILTERS -m state --state NEW -m tcp -p tcp --dport 8302 -j ACCEPT
--A FILTERS -m state --state NEW -m udp -p udp --dport 8302 -j ACCEPT
--A FILTERS -m state --state NEW -m tcp -p tcp --dport 8500 -j ACCEPT
--A FILTERS -m state --state NEW -m tcp -p tcp --dport 8600 -j ACCEPT
--A FILTERS -m state --state NEW -m udp -p udp --dport 8600 -j ACCEPT
 
 -A FILTERS -j LOG --log-prefix="FILTERS DROP: "
 -A FILTERS -j DROP

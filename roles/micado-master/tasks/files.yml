@@ -9,29 +9,6 @@
     file: "{{ micado_cred_path  }}"
     name: security
 
-- name: "Consul config: Create directory"
-  file:
-    path: /var/lib/micado/consul/config/
-    state: directory
-    mode: 0775
-    recurse: yes
-
-- name: "Consul config: Generate encrypton key"
-  shell: "tr -dc 'a-zA-Z0-9-!@#$%^&*()_+~' < /dev/urandom 2>/dev/null | head -c 16 | base64"
-  register: consul_key
-
-- name: "Consul config: Copy file"
-  template:
-    src: consul/config.json.j2
-    dest: /var/lib/micado/consul/config/config.json
-    mode: 0644
-
-- name: "Consul config: Create checks.json"
-  template:
-    src: consul/checks.json.j2
-    dest: /var/lib/micado/consul/config/checks.json
-    mode: 0644
-
 - name: "Prometheus config: Create directory"
   file:
     path: /var/lib/micado/prometheus/config/
@@ -40,8 +17,8 @@
     recurse: yes
 
 - name: "Prometheus config: Copy file"
-  template:
-    src: prometheus/prometheus.yml.j2
+  file:
+    src: prometheus/prometheus.yml
     dest: /var/lib/micado/prometheus/config/prometheus.yml
     mode: 0644
 
@@ -226,19 +203,6 @@
     mode: 0777
     recurse: yes
 
-- name: "Consul logging: Create log directory"
-  file:
-    path: /var/log/micado/consul/
-    state: directory
-    mode: 0775
-    recurse: yes
-
-- name: "Consul logging: Create log output info"
-  copy:
-    content: "Check the logs by the following command:\ndocker logs consul\n"
-    dest: /var/log/micado/consul/README
-    mode: 0644
-
 - name: "Prometheus logging: Create log directory"
   file:
     path: /var/log/micado/prometheus/
@@ -337,10 +301,10 @@
     mode: 0775
     recurse: yes
 
-- name: "Docker-compose: Copy file"
+- name: "MiCADO Kubernetes Manifest: Copy file"
   template:
-    src: docker/docker-compose.yml.j2
-    dest: /var/lib/micado/docker-compose.yml
+    src: micado/micado-manifest.yml.j2
+    dest: /var/lib/micado/micado-manifest.yml
     mode: 0644
 
 - name: "Iptables configuration: Copy file"

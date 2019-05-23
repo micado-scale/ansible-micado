@@ -3,10 +3,6 @@
   docker_image:
       name: "{{docker_images.redis}}"
 
-- name: 'Downloading docker image: Consul'
-  docker_image:
-      name: "{{docker_images.consul}}"
-
 - name: 'Downloading docker image: Prometheus'
   docker_image:
       name: "{{docker_images.prometheus}}"

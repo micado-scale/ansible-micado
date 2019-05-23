@@ -26,7 +26,7 @@
     enabled: yes
 
 - name: "Wait for SPM running state"
-  shell: "i=0 ; while [ `docker ps --filter name=security_policy_manager --filter health=healthy | wc -l` -eq 1 ] && [ $i -lt 110 ] ; do echo -e 'Security policy manager is not healthy yet!' ;  sleep 1 ; ((i++)) ; done ; if [ $i -eq 20 ] ; then exit 1 ; fi ; exit 0"
+  shell: "i=0 ; while [ `kubectl get -n micado-system pod | grep security-policy-manager | grep 1/1 | wc -l` -eq 0 ] && [ $i -lt 110 ] ; do echo -e 'Security policy manager is not healthy yet!' ;  sleep 1 ; ((i++)) ; done ; if [ $i -eq 20 ] ; then exit 1 ; fi ; exit 0"
   args:
     executable: /bin/bash
   register: output

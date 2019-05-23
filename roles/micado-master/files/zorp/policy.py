@@ -487,7 +487,7 @@ class MicadoMasterHttpProxy(AuthorizingFormAuthHttpProxy):
         self.url_mapping["/prometheus"] = ("prometheus", 9090, False)
         self.url_mapping["/grafana"] = ("grafana", 3000, True)
         self.url_mapping["/toscasubmitter"] = ("toscasubmitter", 5050, True)
-        self.url_mapping["/kubernetes"] = ("172.17.0.1", 8001, True)
+        self.url_mapping["/kubernetes"] = ("kubernetes-dashboard.kube-system", 8001, True)
         self.auth_mapping["/"] = "user"
         self.auth_mapping["/prometheus"] = "user"
         self.auth_mapping["/grafana"] = "user"
