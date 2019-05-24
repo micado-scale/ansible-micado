@@ -73,6 +73,24 @@
     path: /etc/environment
     line: 'KUBECONFIG=/root/.kube/config'
 
+- name: 'K8s: Lower imagefs eviction limits'
+  replace:
+    path: /var/lib/kubelet/config.yaml
+    regexp: 'imagefs.available: \d+%'
+    replace: 'imagefs.available: 5%'
+
+- name: 'K8s: Lower nodefs eviction limits'
+  replace:
+    path: /var/lib/kubelet/config.yaml
+    regexp: 'nodefs.available: \d+%'
+    replace: 'nodefs.available: 5%'
+
+- name: 'K8s: Restart kubelet'
+  service:
+    name: kubelet
+    state: restarted
+    enabled: yes
+
 - name: 'K8s: Copy KubeDashboard deployment'
   copy:
     src: kubernetes/kubedash.yaml

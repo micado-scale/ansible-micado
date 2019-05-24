@@ -48,3 +48,14 @@
     enabled: yes
     masked: no
   when: docker_service.changed
+
+- name: 'Docker-py: Installing python tools'
+  action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=present"
+  with_items:
+    - python-setuptools
+    - python3-pip
+
+- name: 'Docker-py: Install'
+  pip:
+    name: docker
+    state: present

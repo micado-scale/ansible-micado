@@ -18,7 +18,7 @@
 
 - name: "Prometheus config: Copy file"
   file:
-    src: prometheus/prometheus.yml
+    copy: prometheus/prometheus.yml
     dest: /var/lib/micado/prometheus/config/prometheus.yml
     mode: 0644
 
