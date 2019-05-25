@@ -956,6 +956,23 @@ spec:
         image: {{docker_images.node_exporter}}
         ports:
         - containerPort: 9100
+        volumeMounts:
+        - name: nodex-proc
+          mountPath: /host/proc
+          readOnly: true
+        - name: nodex-sys
+          mountPath: /host/sys
+          readOnly: true
+        args:
+          - '--path.procfs=/host/proc'
+          - '--path.sysfs=/host/sys'
+      volumes:
+      - name: nodex-proc
+        hostPath:
+          path: /proc
+      - name: nodex-sys
+        hostPath:
+          path: /sys
 ---
 ## cAdvisor (Worker Nodes) ##
 apiVersion: apps/v1
