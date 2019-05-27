@@ -7,36 +7,6 @@ package_upgrade: false
 
 write_files:
 
-- path: /etc/consul/config.json
-  content: |
-    {
-    "server": false,
-    "datacenter": "application",
-    "data_dir": "/var/consul",
-    "encrypt": "{{ consul_key.stdout }}",
-    "log_level": "INFO",
-    "enable_syslog": false,
-    "retry_join": ["{{ ansible_default_ipv4.address }}"],
-    "rejoin_after_leave": true,
-    "services": [{"name":"worker_cluster","port":9100}, {"name":"app_docker_cluster","port":9200}]
-    }
-
-- path: /bin/consul-set-network.sh
-  permissions: '755'
-  content: |
-    #!/bin/bash
-    echo "Setup NETWORK starts."
-    myhost=`hostname`
-    ipaddress=`ifconfig | awk '/inet addr/{print substr($2,6)}' | grep -v 127.0.0.1 | head -n 1`
-    cp /etc/hosts /etc/hosts.old
-    grep -v "$myhost" /etc/hosts.old > /etc/hosts
-
-    echo "IPADDRESS: $ipaddress"
-    echo "$ipaddress $myhost" >> /etc/hosts
-
-    rm -rf /etc/resolvconf/*
-    echo "Setup NETWORK finished."
-
 - path: /tmp/wait-updates.sh
   permissions: '755'
   content: |
@@ -45,10 +15,6 @@ write_files:
     while [[ `ps aufx | grep -v "grep" | grep "apt.systemd.daily" | wc -l` -gt 0 ]]; do
       sleep 1
     done
-
-- path: /etc/resolvconf/resolv.conf.d/base
-  content: |
-    nameserver 8.8.8.8
 
 # This script fix the format of cert bundle, and split it into two separate files and copy them to the correct directory
 # Occopus should do this.
@@ -94,63 +60,11 @@ write_files:
 
 - path: /tmp/tmp_certs
   content: | {% raw %}
-      {{cmd('curl -X POST http://security_policy_manager:5003/v1.0/nodecerts')}}
+      {{cmd('curl -X POST http://10.97.170.199:5003/v1.0/nodecerts')}}
     {% endraw %}
-
-- path: /etc/micado/docker-compose.yml
-  content: |
-    version: '3.3'
-
-    services:
-      consul:
-        image: {{ docker_images.consul }}
-        container_name: consul
-        ports:
-          - 8300:8300
-          - 8301:8301
-          - 8301:8301/udp
-          - 8302:8302
-          - 8302:8302/udp
-          - 8500:8500
-          - 8600:8600
-          - 8600:8600/udp
-        volumes:
-          - "/etc/consul/:/etc/consul/"
-        command: agent -advertise=$IP -retry-join={{ ansible_default_ipv4.address }} -config-file=/etc/consul/config.json
-
-      node-exporter:
-        image: {{ docker_images.node_exporter }}
-        container_name: node-exporter
-        ports:
-          - 9100:9100
-        command:
-          - '--path.procfs=/host/proc'
-          - '--path.sysfs=/host/sys'
-        volumes:
-          - /proc:/host/proc:ro
-          - /sys:/host/sys:ro
-
-      cadvisor:
-        image: {{ docker_images.cadvisor }}
-        container_name: cadvisor
-        ports:
-          - 9200:8080
-        volumes:
-          - "/:/rootfs/:ro"
-          - "/var/run/:/var/run/:rw"
-          - "/sys:/sys/:ro"
-          - "/var/lib/docker/:/var/lib/docker/:ro"
-          - "/dev/disk/:/dev/disk/"
-    networks:
-      default:
-        driver: bridge
-        driver_opts:
-          com.docker.network.driver.mtu: '1400'
-
 
 runcmd:
   - /tmp/wait-updates.sh
-  - /bin/consul-set-network.sh
   - while [ -z $IP ]; do IP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 's/\./-/g'`; done
   - hostname={{ worker_hostname }}-$IP
   - oldhostname=$(hostname -s)
@@ -158,7 +72,7 @@ runcmd:
   - sed -i "s/\b127.0.0.1 localhost/127.0.0.1 localhost\\t$hostname/g" /etc/hosts
   - hostnamectl set-hostname $hostname
   - dpkg-reconfigure openssh-server
-  - echo nameserver 8.8.8.8 >> /etc/resolv.conf
+  - echo nameserver 8.8.8.8 >> /etc/resolvconf/resolv.conf.d/head
   - resolvconf -u
 
   # Docker
@@ -173,11 +87,6 @@ runcmd:
   - sed -i -e "s/-H fd:\/\//-H fd:\/\/ --mtu={{ ansible_default_ipv4.mtu }}/g" /lib/systemd/system/docker.service
   - systemctl daemon-reload
   - systemctl restart docker.service
-
-  # Install Docker Compose
-
-  - curl -L https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
-  - chmod +x /usr/local/bin/docker-compose
 
   # K8s
 
@@ -194,6 +103,10 @@ runcmd:
   - apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y strongswan
   - systemctl enable strongswan
 
+  # Connect to cluster
+
+  - {{ join_command.stdout }}
+
   # These removes the temporary scripts, certs and
 
   - /tmp/split_certs.sh
@@ -207,12 +120,3 @@ runcmd:
   # Bring up the iptunnel
 
   - ipsec restart
-
-  # Infra services start
-
-  - export IP=$(hostname -I | cut -d\  -f1)
-  - docker-compose -f /etc/micado/docker-compose.yml up -d
-
-  # Connect to cluster
-
-  - {{ join_command.stdout }}

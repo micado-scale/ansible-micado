@@ -57,7 +57,7 @@ topology_template:
         targets: [ worker_node ]
         properties:
           sources:
-            - "nginxapp"
+            - "nginxapp:9300"
           constants:
             MAXNODES: 2
             MAXCONTAINERS: 8

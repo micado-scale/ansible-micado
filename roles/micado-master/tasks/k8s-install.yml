@@ -73,6 +73,24 @@
     path: /etc/environment
     line: 'KUBECONFIG=/root/.kube/config'
 
+- name: 'K8s: Lower imagefs eviction limits'
+  replace:
+    path: /var/lib/kubelet/config.yaml
+    regexp: 'imagefs.available: \d+%'
+    replace: 'imagefs.available: 5%'
+
+- name: 'K8s: Lower nodefs eviction limits'
+  replace:
+    path: /var/lib/kubelet/config.yaml
+    regexp: 'nodefs.available: \d+%'
+    replace: 'nodefs.available: 5%'
+
+- name: 'K8s: Restart kubelet'
+  service:
+    name: kubelet
+    state: restarted
+    enabled: yes
+
 - name: 'K8s: Copy KubeDashboard deployment'
   copy:
     src: kubernetes/kubedash.yaml
@@ -94,33 +112,3 @@
 
 - name: 'K8s: Install Flannel pod network'
   shell: kubectl apply -f /etc/kubernetes/kube-flannel.yaml
-
-- name: 'K8s: Copy dashboard role file'
-  copy:
-    src: kubernetes/kubedash-role.yaml
-    dest: /etc/kubernetes/kubedash-role.yaml
-    mode: 0644
-
-- name: 'K8s: Create ro-dashboard ClusterRole'
-  shell: kubectl apply -f /etc/kubernetes/kubedash-role.yaml
-
-- name: 'K8s: Copy dashboard role binding file'
-  copy:
-    src: kubernetes/kubedash-binding.yaml
-    dest: /etc/kubernetes/kubedash-binding.yaml
-    mode: 0644
-
-- name: 'K8s: Grant dashboard admin rights'
-  shell: kubectl apply -f /etc/kubernetes/kubedash-binding.yaml
-
-- name: 'K8s: Setup insecure host in APIServer'
-  lineinfile:
-    path: /etc/kubernetes/manifests/kube-apiserver.yaml
-    insertafter: '^    - kube-apiserver'
-    line: '    - --insecure-bind-address=0.0.0.0'
-
-- name: 'K8s: Setup insecure port in APIServer'
-  lineinfile:
-    path: /etc/kubernetes/manifests/kube-apiserver.yaml
-    regexp: '^    - --insecure-port=\d*'
-    line: '    - --insecure-port=8001'
