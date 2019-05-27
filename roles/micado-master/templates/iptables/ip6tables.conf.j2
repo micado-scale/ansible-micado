@@ -27,17 +27,17 @@
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport {{ web_listening_port }} -j ACCEPT
 #k8s
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 6443 -j ACCEPT
--A FILTERS -m state --state NEW -m udp -p udp --dport 2379 -j ACCEPT
+-A FILTERS -m state --state NEW -m tcp -p tcp --dport 2379 -j ACCEPT
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 2380 -j ACCEPT
--A FILTERS -m state --state NEW -m udp -p udp --dport 10250 -j ACCEPT
--A FILTERS -m state --state NEW -m udp -p udp --dport 10251 -j ACCEPT
+-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10250 -j ACCEPT
+-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10251 -j ACCEPT
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 10252 -j ACCEPT
-#vxlan
--A FILTERS -m state --state NEW -m udp -p udp --dport 8472 -j ACCEPT 
--A FILTERS -m state --state NEW -i flannel.1 -j ACCEPT
--A FILTERS -o flannel.1 -j ACCEPT
+#cni
 -A FILTERS -m state --state NEW -i cni0 -j ACCEPT
 -A FILTERS -m state --state NEW -o cni0 -j ACCEPT
+#vxlan
+-A FILTERS -m state --state NEW -m udp -p udp --dport 8285 -j ACCEPT
+-A FILTERS -m state --state NEW -m udp -p udp --dport 8472 -j ACCEPT
 #ipsec
 -A FILTERS -m state --state NEW -m udp -p udp --dport 500 -j ACCEPT
 -A FILTERS -m state --state NEW -m udp -p udp --dport 4500 -j ACCEPT
