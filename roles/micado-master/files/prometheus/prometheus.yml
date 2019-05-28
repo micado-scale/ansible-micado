@@ -9,6 +9,10 @@ scrape_configs:
   - source_labels: [__meta_kubernetes_namespace]
     action: keep
     regex: micado-worker
+  - source_labels: [__meta_kubernetes_pod_node_name]
+    target_label: node
+    replacement: $1
+    regex: (.*)-\d{1,3}-\d{1,3}-\d{1,3}-\d{1,3}
   metric_relabel_configs:
   - source_labels: [container_label_io_kubernetes_pod_namespace]
     regex: .*-system
@@ -20,19 +24,15 @@ scrape_configs:
 - job_name: kube-services
   scrape_interval: 10s
   kubernetes_sd_configs:
-    - role: endpoints
+    - role: pod
   relabel_configs:
-  - source_labels: [__meta_kubernetes_namespace]
-    action: drop
-    regex: .*-system
-  - source_labels: [__meta_kubernetes_namespace]
-    action: drop
-    regex: micado-worker
-  - source_labels: [__meta_kubernetes_service_label_component]
-    action: drop
-    regex: apiserver
-  - source_labels: [__address__]
+  - source_labels: [__meta_kubernetes_pod_container_name, __address__]
     target_label: instance
+    regex: (.*);\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:(\d*)
+    replacement: "${1}:${2}"
+  - source_labels: [instance]
+    regex: (a^)
+    action: keep
 
 alerting:
   alertmanagers:
