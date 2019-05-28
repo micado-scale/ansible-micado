@@ -55,18 +55,18 @@ write_files:
 
 - path: /etc/ipsec.d/cacerts/master.pem
   content: | {% raw %}
-      {{cmd('cat /var/lib/micado/occopus/data/master.pem')}}
+      {{ '{{' }}cmd('cat /var/lib/micado/occopus/data/master.pem'){{ '}}' }}
     {% endraw %}
 
 - path: /tmp/tmp_certs
   content: | {% raw %}
-      {{cmd('curl -X POST http://10.97.170.199:5003/v1.0/nodecerts')}}
+      {{ '{{' }}cmd('curl -X POST http://10.97.170.199:5003/v1.0/nodecerts'){{ '}}' }}
     {% endraw %}
 
 runcmd:
   - /tmp/wait-updates.sh
   - while [ -z $IP ]; do IP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 's/\./-/g'`; done
-  - hostname={{ worker_hostname }}-$IP
+  - hostname={{ '{{ worker_name }}' }}-$IP
   - oldhostname=$(hostname -s)
   - sed -i "s/$oldhostname//g" /etc/hosts
   - sed -i "s/\b127.0.0.1 localhost/127.0.0.1 localhost\\t$hostname/g" /etc/hosts
@@ -98,6 +98,13 @@ runcmd:
   - apt-get install -y kubelet={{ kubernetes_version }} kubeadm={{ kubernetes_version }} kubectl={{ kubernetes_version }}
   - apt-mark hold kubelet kubeadm kubectl
 
+  # Auto-label k8s nodes
+
+  - touch /etc/systemd/system/kubelet.service.d/20-labels.conf
+  - echo '[Service]' >> /etc/systemd/system/kubelet.service.d/20-labels.conf
+  - echo 'Environment="KUBELET_EXTRA_ARGS=--node-labels=micado.eu/node_type={{ '{{ worker_name }}' }}"' >> /etc/systemd/system/kubelet.service.d/20-labels.conf
+  - systemctl daemon-reload
+  
   # Install strongSwan
 
   - apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y strongswan
