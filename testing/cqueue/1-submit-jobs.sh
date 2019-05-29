@@ -14,5 +14,5 @@ if [ -z "$NUM" ]; then
 fi
 
 echo "Submitting $NUM items to CQueue at $CQUEUE_SERVER_IP ..."
-for i in `seq $NUM`; do curl -H 'Content-Type: application/json' -X POST -d'{"image":"ubuntu", "cmd":["/bin/sh", "-c", "echo Hello World! Sleeping...;sleep 30;echo finished."]}' http://$CQUEUE_SERVER_IP:8888/task; done
+for i in `seq $NUM`; do curl -H 'Content-Type: application/json' -X POST -d'{"image":"ubuntu", "cmd":["/bin/sh", "-c", "echo Hello World! Sleeping...;sleep 30;echo finished."]}' http://$CQUEUE_SERVER_IP:30888/task; done
 echo

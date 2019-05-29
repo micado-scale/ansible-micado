@@ -8,14 +8,124 @@ repositories:
 
 topology_template:
   node_templates:
+    rabbitmq:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+        env:
+          - name: RABBITMQ_DEFAULT_USER
+            value: guest
+          - name: RABBITMQ_DEFAULT_PASS
+            value: guest
+        ports:
+        - target: 15672
+        - target: 5672
+      requirements:
+      - host:
+          node: cq-server
+      artifacts:
+        image:
+          type: tosca.artifacts.Deployment.Image.Container.Docker
+          file: rabbitmq:3-management
+          repository: docker_hub
+      interfaces:
+        Kubernetes:
+          create:
+            implementation: image
+          configure:
+            inputs:
+              restartPolicy: "Always"
+
+    redis:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+        command:
+        - redis-server
+        args:
+        - --appendonly yes
+        ports:
+        - target: 6379
+      requirements:
+      - host:
+          node: cq-server
+      artifacts:
+        image:
+          type: tosca.artifacts.Deployment.Image.Container.Docker
+          file: redis
+          repository: docker_hub
+      interfaces:
+        Kubernetes:
+          create:
+            implementation: image
+          configure:
+            inputs:
+              restartPolicy: "Always"
+
+    frontend:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+        env:
+          - name: BROKER
+            value: amqp://guest:guest@rabbitmq:5672
+          - name: RESULT_BACKEND
+            value: redis://redis:6379
+        ports:
+        - port: 8080
+          nodePort: 30888
+      requirements:
+      - host:
+          node: cq-server
+      artifacts:
+        image:
+          type: tosca.artifacts.Deployment.Image.Container.Docker
+          file: sanyi86/cqueue_frontend
+          repository: docker_hub
+      interfaces:
+        Kubernetes:
+          create:
+            implementation: image
+          configure:
+            inputs:
+              restartPolicy: "Always"
+
+    rabbitmq-exporter:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+        env:
+          - name: RABBIT_URL
+            value: http://rabbitmq:15672
+          - name: PUBLISH_PORT
+            value: "8090"
+          - name: RABBIT_EXPORTERS
+            value: queue
+        ports:
+        - containerPort: 8090
+      requirements:
+      - host:
+          node: cq-server
+      artifacts:
+        image:
+          type: tosca.artifacts.Deployment.Image.Container.Docker
+          file: kbudde/rabbitmq-exporter
+          repository: docker_hub
+      interfaces:
+        Kubernetes:
+          create:
+            implementation: image
+          configure:
+            inputs:
+              restartPolicy: "Always"
+      
     cqueue-worker:
       type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
         env:
           - name: BROKER
-            value: amqp://guest:guest@cqueue.server.ip.address:5672
+            value: amqp://guest:guest@rabbitmq:5672
           - name: RESULT_BACKEND
-            value: redis://cqueue.server.ip.address:6379
+            value: redis://redis:6379
+      requirements:
+      - host:
+          node: worker-node
       artifacts:
         image:
           type: tosca.artifacts.Deployment.Image.Container.Docker
@@ -64,11 +174,11 @@ topology_template:
               hostPath:
                 path: /var/run/docker.sock
                          
-    worker_node:
+    worker-node:
       type: tosca.nodes.MiCADO.CloudSigma.Compute
       properties:
         num_cpus: 2000
-        mem_size: 1073741824
+        mem_size: 2147483648
         vnc_password: secret
         libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
         public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
@@ -86,15 +196,39 @@ topology_template:
         host:
           properties:
             num_cpus: 2
-            mem_size: 1 GB
+            mem_size: 2 GB
+                         
+    cq-server:
+      type: tosca.nodes.MiCADO.CloudSigma.Compute
+      properties:
+        num_cpus: 2000
+        mem_size: 2147483648
+        vnc_password: secret
+        libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
+        public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
+        nics:
+        - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
+          ip_v4_conf:
+            conf: dhcp
+      interfaces:
+        Occopus:
+          create:
+            inputs:
+              interface_cloud: cloudsigma
+              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g. https://zrh.cloudsigma.com/api/2.0)
+      capabilities:
+        host:
+          properties:
+            num_cpus: 2
+            mem_size: 2 GB
 
   policies:
     - scalability:
         type: tosca.policies.Scaling.MiCADO
-        targets: [ worker_node ]
+        targets: [ worker-node ]
         properties:
           sources:
-          - 'cqueue.server.ip.address:8090'
+          - 'rabbitmq-exporter:8090'
           constants: 
             AET: 30
             DEADLINE: 1530270216
