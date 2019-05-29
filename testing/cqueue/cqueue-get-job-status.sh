@@ -14,5 +14,5 @@ if [ -z "$JOBID" ]; then
 fi
 
 echo "Querying status of job: \"$JOBID\" from CQueue at $CQUEUE_SERVER_IP ..."
-curl -X GET http://$CQUEUE_SERVER_IP:8888/task/$JOBID
+curl -X GET http://$CQUEUE_SERVER_IP:30888/task/$JOBID
 echo

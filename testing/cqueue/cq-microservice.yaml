@@ -69,7 +69,7 @@ topology_template:
           - name: RESULT_BACKEND
             value: redis://redis:6379
         ports:
-        - port: 8080
+        - target: 8080
           nodePort: 30888
       requirements:
       - host:
