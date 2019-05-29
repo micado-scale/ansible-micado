@@ -1,0 +1,56 @@
+---
+- name: 'K8s: Turn off swap'
+  shell: swapoff -a
+
+- name: 'K8s: Disable swap permanently'
+  replace:
+    path: /etc/fstab
+    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+    replace: '#\1\2\3swap\4'
+
+- name: 'K8s: Add APT key'
+  apt_key:
+    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+    state: present
+
+- name: 'K8s: Add APT repository'
+  apt_repository:
+    repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+    state: present
+    filename: 'kubernetes'
+
+- name: 'K8s: Install APT packages'
+  apt:
+    name:
+    - kubelet={{ kubernetes_version }}
+    - kubeadm={{ kubernetes_version }}
+    - kubectl={{ kubernetes_version }}
+    state: present
+    update_cache: yes
+
+- name: 'K8s: prevent package from being upgraded'
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  with_items:
+    - kubelet
+    - kubeadm
+    - kubectl
+
+- name: 'K8s: CNI plugin fix'
+  shell: sysctl net.bridge.bridge-nf-call-iptables=1
+
+- name: 'K8s: Pull config images'
+  shell: kubeadm config images pull
+
+- name: 'Kubernetes: Copy Dashboard manifest'
+  copy:
+    src: kubernetes/kube-dash.yaml
+    dest: /etc/kubernetes/kube-dash.yaml
+    mode: 0644
+
+- name: 'Kubernetes: Copy Flannel-CNI manifest'
+  copy:
+    src: kubernetes/kube-flannel.yaml
+    dest: /etc/kubernetes/kube-flannel.yaml
+    mode: 0644

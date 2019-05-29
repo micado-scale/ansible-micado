@@ -1,0 +1,57 @@
+---
+- name: 'Kubernetes: Check if initialised'
+  shell: kubeadm token list
+  register: k8smember
+  changed_when: k8smember.rc == 1
+  failed_when: k8smember.rc not in [0,1]
+
+- name: 'Kubernetes: Initialisation'
+  shell: kubeadm init
+        --apiserver-advertise-address={{ ansible_default_ipv4.address }}
+        --pod-network-cidr=10.244.0.0/16
+        --ignore-preflight-errors=NumCPU
+  when: k8smember.rc == 1
+
+- name: 'Kubernetes: Create /root/.kube'
+  file:
+    state: directory
+    path: /root/.kube
+
+- name: 'Kubernetes: Copy admin.conf to .kube/'
+  copy:
+    remote_src: yes
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+
+- name: 'Kubernetes: Add kube/config to ENV'
+  lineinfile:
+    path: /etc/environment
+    line: 'KUBECONFIG=/root/.kube/config'
+
+- name: 'Kubernetes: Lower imagefs eviction limits'
+  replace:
+    path: /var/lib/kubelet/config.yaml
+    regexp: 'imagefs.available: \d+%'
+    replace: 'imagefs.available: 5%'
+
+- name: 'Kubernetes: Lower nodefs eviction limits'
+  replace:
+    path: /var/lib/kubelet/config.yaml
+    regexp: 'nodefs.available: \d+%'
+    replace: 'nodefs.available: 5%'
+
+- name: 'Kubernetes: Restart Kubelet'
+  service:
+    name: kubelet
+    state: restarted
+    enabled: yes
+
+- name: 'Kubernetes: Create Dashboard'
+  shell: kubectl apply -f /etc/kubernetes/kube-dash.yaml
+
+- name: 'Kubernetes: Create Flannel-CNI'
+  shell: kubectl apply -f /etc/kubernetes/kube-flannel.yaml
+
+- name: 'Kubernetes: Get cluster join command'
+  shell: kubeadm token create --ttl 0 --print-join-command
+  register: join_command

@@ -1,13 +1,10 @@
 ---
-- name: "Occopus Credentials: Load the credentials from the playbook"
-  include_vars:
-    file: "{{ cloud_cred_path }}"
-    name: config
-
-- name: "Security Credentials: Load the credentials and security settings from the playbook"
-  include_vars:
-    file: "{{ micado_cred_path  }}"
-    name: security
+- name: "Occopus data: Creating Occopus data directory"
+  file:
+    path: /var/lib/micado/occopus/data/
+    state: directory
+    mode: 0775
+    recurse: yes
 
 - name: "Prometheus config: Create directory"
   file:
@@ -52,15 +49,9 @@
     recurse: yes
 
 - name: "Policy-keeper config: Copy file"
-  template:
-    src: policykeeper/policykeeper_config.yaml.j2
-    dest: /var/lib/micado/policykeeper/config/policykeeper_config.yaml
-
-- name: "Policy-keeper config: Copy prometheus config template"
   copy:
-    src: policykeeper/prometheus_config_template.yaml
-    dest: /var/lib/micado/policykeeper/config/prometheus_config_template.yaml
-    mode: 0644
+    src: policykeeper/policykeeper_config.yaml
+    dest: /var/lib/micado/policykeeper/config/policykeeper_config.yaml
 
 - name: "Grafana config: Create config directory"
   file:
@@ -134,11 +125,6 @@
     mode: 0775
     recurse: yes
 
-- name: "Credential Manager initial config: Copy file"
-  template:
-    src: user_data/auth_data_credential_manager.csv.j2
-    dest: /var/lib/micado/credman/config/provisioning.csv
-
 - name: "Vault configuration: Create config directory"
   file:
    path: /var/lib/micado/vault/config
@@ -190,11 +176,6 @@
     src: zorp/zorp-entrypoint.sh
     dest: /var/lib/micado/zorp/scripts/docker-entrypoint.sh
     mode: 0755
-
-- name: Create user_data_zorp.env for Zorp
-  template:
-      src: user_data/user_data_zorp.env.j2
-      dest: "/var/lib/micado/zorp/config/user_data_zorp.env"
 
 - name: "Redis logging: Create log directory"
   file:
@@ -301,29 +282,11 @@
     mode: 0775
     recurse: yes
 
-- name: "MiCADO Kubernetes Manifest: Copy file"
-  template:
-    src: micado/micado-manifest.yml.j2
-    dest: /var/lib/micado/micado-manifest.yml
-    mode: 0644
-
-- name: "Iptables configuration: Copy file"
-  template:
-    src: iptables/iptables.conf.j2
-    dest: /etc/iptables.conf
-    mode: 0640
-
 - name: "Iptables systemd unit file: Copy file"
   copy:
     src: iptables/iptables.service
     dest: /etc/systemd/system/iptables.service
     mode: 0644
-
-- name: "Ip6tables configuration: Copy file"
-  template:
-    src: iptables/ip6tables.conf.j2
-    dest: /etc/ip6tables.conf
-    mode: 0640
 
 - name: "Ip6tables systemd unit file: Copy file"
   copy:
