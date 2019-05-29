@@ -28,7 +28,7 @@ topology_template:
           create:
             implementation: image
 
-    worker_node:
+    worker-node:
       type: tosca.nodes.MiCADO.Nova.Compute
       properties:
         image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
@@ -57,7 +57,7 @@ topology_template:
   policies:
     - scalability:
         type: tosca.policies.Scaling.MiCADO
-        targets: [ worker_node ]
+        targets: [ worker-node ]
         properties:
           sources:
             - "nginxapp:9300"

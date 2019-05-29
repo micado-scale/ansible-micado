@@ -28,7 +28,7 @@ topology_template:
           create:
             implementation: image
 
-    worker_node:
+    worker-node:
       type: tosca.nodes.MiCADO.CloudBroker.Compute
       properties:
         deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
@@ -54,7 +54,7 @@ topology_template:
   policies:
     - scalability:
         type: tosca.policies.Scaling.MiCADO
-        targets: [ worker_node ]
+        targets: [ worker-node ]
         properties:
           sources:
             - "nginxapp:9300"

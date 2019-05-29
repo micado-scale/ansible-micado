@@ -28,7 +28,7 @@ topology_template:
           create:
             implementation: image
 
-    worker_node:
+    worker-node:
       type: tosca.nodes.MiCADO.CloudSigma.Compute
       properties:
         num_cpus: 2000
@@ -59,7 +59,7 @@ topology_template:
   policies:
     - scalability:
         type: tosca.policies.Scaling.MiCADO
-        targets: [ worker_node ]
+        targets: [ worker-node ]
         properties:
           sources:
             - "nginxapp:9300"
