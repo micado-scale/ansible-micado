@@ -1,12 +1,4 @@
 ---
-- name: 'Installing mictl dependencies'
-  pip:
-    name:
-      - requests
-      - click
-      - terminaltables
-    state: present
-
 - name: Enable packet filtering
   service:
     name: iptables

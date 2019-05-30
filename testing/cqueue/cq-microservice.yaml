@@ -123,15 +123,14 @@ topology_template:
             value: amqp://guest:guest@rabbitmq:5672
           - name: RESULT_BACKEND
             value: redis://redis:6379
-      requirements:
-      - host:
-          node: worker-node
       artifacts:
         image:
           type: tosca.artifacts.Deployment.Image.Container.Docker
           file: sztakilpds/cqueue_worker
           repository: docker_hub
       requirements:
+        - host:
+            node: worker-node
         - volume:
             node: docker-binary-host-vol
             relationship:

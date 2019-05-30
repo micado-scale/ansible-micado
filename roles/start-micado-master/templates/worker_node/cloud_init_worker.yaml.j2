@@ -65,7 +65,7 @@ write_files:
 
 runcmd:
   - /tmp/wait-updates.sh
-  - while [ -z $IP ]; do IP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 's/\./-/g'`; done
+  - while [ -z $IP ]; do IP=`ip -oneline -4 addr show scope global | tr -s ' ' | tr '/' ' ' | grep -v dock | grep -v br- | cut -f 4 -d ' ' | sed 's/\./-/g'`; done
   - hostname={{ '{{ worker_name }}' }}-$IP
   - oldhostname=$(hostname -s)
   - sed -i "s/$oldhostname//g" /etc/hosts

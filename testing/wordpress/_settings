@@ -1,5 +1,6 @@
 MICADO_MASTER="123.45.67.89"
 MICADO_PORT="443"
+MICADO_WORKER=""
 FRONTEND_NAME="wordpress"
 APP_ID="wpapp"
 SSL_USER="admin"
@@ -18,6 +19,7 @@ fi
 
 echo "  MICADO_PORT: $MICADO_PORT $PORT_MESSAGE"
 echo "  APP_ID: $APP_ID"
+echo "  MICADO_WORKER: $MICADO_WORKER"
 
 if [ $SSL_USER ]; then
   echo "  SSL_USER: $SSL_USER"

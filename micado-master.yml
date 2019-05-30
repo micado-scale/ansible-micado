@@ -8,9 +8,15 @@
       raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
       register: output
       changed_when: output.stdout != ""
+      tags:
+      - build
+      - start
 
     - name: Turn back gather_fact
       setup:
+      tags:
+      - build
+      - start
 
     - name: Verify OS meets the version requirements (Ubuntu 16.04).
       assert:
@@ -19,6 +25,9 @@
           - "ansible_distribution_version == '16.04'"
         msg: >
           "The required OS is Ubuntu 16.04"
+      tags:
+      - build
+      - start
 
     - name: Verify memory requirements (2 GB).
       assert:
@@ -26,9 +35,33 @@
           - "ansible_memtotal_mb >= 1950"
         msg: >
           "The required memory size is minimum 2 GB"
+      tags:
+      - build
+      - start
+      
+    - name: "Waiting for automatic security updates to finish"
+      script: pre-task/wait-updates.sh
+      register: outputsh
+      changed_when: outputsh.stdout != ""
+      tags:
+      - build
+      - start
+
+    - name: "Check the CPU manufacture"
+      set_fact:
+         docker_iivr: false
+      when: '"AMD" in  "{{ ansible_processor }}"'
+      tags:
+      - build
+      - start
 
   roles:
-    - micado-master
+    - role: build-micado-master
+      tags:
+      - build
+    - role: start-micado-master
+      tags:
+      - start
 
   vars:
 
@@ -57,11 +90,9 @@
     - docker_compose_version: 1.16.1
     - docker_images:
         alertmanager: prom/alertmanager:v0.12.0
-        cadvisor: google/cadvisor:v0.28.3
         credential_manager: micado/credential-manager:0.2.0
         dashboard: micado/dashboard:0.7.3-dev
         grafana: grafana/grafana:5.1.0
-        node_exporter: prom/node-exporter:v0.15.2
         occopus: micado/occopus:1.6-rc1
         policykeeper: micado/policykeeper:0.7.3-dev
         prometheus: prom/prometheus:v2.1.0
@@ -72,5 +103,7 @@
         securitypolicymanager: micado/security-policy-manager:2.0
         crypto_engine: micado/crypto-engine:1.0
         iivr: micado/iivr:1.0
+        cadvisor: google/cadvisor:v0.33.0
+        node_exporter: prom/node-exporter:v0.15.2
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
     - kubernetes_version: 1.13.5-00

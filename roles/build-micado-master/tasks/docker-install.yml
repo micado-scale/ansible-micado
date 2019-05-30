@@ -1,13 +1,12 @@
 ---
 - name: 'Docker: Installing dependencies'
   apt:
-    pkg: "{{ item }}"
-    state: present
-  with_items:
+    name:
     - apt-transport-https
     - ca-certificates
     - curl
     - software-properties-common
+    state: present
 
 - name: 'Docker: Adding APT key'
   apt_key:
@@ -19,14 +18,12 @@
     repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
     state: present
 
-- name: 'Docker: Installing APT packages'
+- name: 'Docker: Installing APT package'
   apt:
-    name: "{{ item }}"
+    name:
+    - "{{ docker_package }}"
     state: present
     update_cache: yes
-  with_items:
-    - python-setuptools
-    - "{{ docker_package }}"
 
 - name: 'Docker: prevent package from being upgraded'
   dpkg_selections:
@@ -48,14 +45,3 @@
     enabled: yes
     masked: no
   when: docker_service.changed
-
-- name: 'Docker-py: Installing python tools'
-  action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=present"
-  with_items:
-    - python-setuptools
-    - python3-pip
-
-- name: 'Docker-py: Install'
-  pip:
-    name: docker
-    state: present

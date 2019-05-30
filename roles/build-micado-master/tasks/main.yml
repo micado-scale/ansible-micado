@@ -1,0 +1,15 @@
+---
+- name: "Ensure Google DNS server"
+  lineinfile:
+    path: /etc/resolv.conf
+    line: 'nameserver 8.8.8.8'
+
+- include: docker-install.yml
+
+- include: kubernetes-install.yml
+
+- include: other-install.yml
+
+- include: files.yml
+
+- include: pull-docker-images.yml

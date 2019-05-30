@@ -16,6 +16,7 @@ topology_template:
              cpu: "200m"
          ports:
            - target: 8080
+             nodePort: 30012
              type: NodePort
            - containerPort: 9300
       artifacts:
@@ -28,7 +29,7 @@ topology_template:
           create:
             implementation: image
 
-    worker_node:
+    worker-node:
       type: tosca.nodes.MiCADO.CloudBroker.Compute
       properties:
         deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
@@ -54,7 +55,7 @@ topology_template:
   policies:
     - scalability:
         type: tosca.policies.Scaling.MiCADO
-        targets: [ worker_node ]
+        targets: [ worker-node ]
         properties:
           sources:
             - "nginxapp:9300"
@@ -62,14 +63,14 @@ topology_template:
             MAXNODES: 2
             MAXCONTAINERS: 8
           queries:
-            REQUESTS: 'sum(nginx_connections_active)'
+            REQUESTS: 'rate(nginx_connections_accepted[30s])'
           min_instances: 1
           max_instances: '{{MAXNODES}}'
           scaling_rule: |
             reqnodes=0
             REQUESTS = ceil(REQUESTS/5)
             if REQUESTS>0:
-              reqconts = min(REQUESTS, MAXCONTAINERS)
+              reqconts = min([REQUESTS, MAXCONTAINERS])
               reqnodes = reqconts/4
               if reqnodes<m_node_count:
                 m_node_count-=1

@@ -1,0 +1,48 @@
+---
+- name: Build MiCADO worker
+  hosts: micado-worker
+  gather_facts: False
+
+  pre_tasks:
+    - name: Ensure that python3 installed
+      raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
+      register: output
+      changed_when: output.stdout != ""
+
+    - name: Turn back gather_fact
+      setup:
+
+    - name: Verify OS meets the version requirements (Ubuntu 16.04).
+      assert:
+        that:
+          - "ansible_os_family == 'Debian'"
+          - "ansible_distribution_version == '16.04'"
+        msg: >
+          "The required OS is Ubuntu 16.04"
+
+    - name: Verify memory requirements (2 GB).
+      assert:
+        that:
+          - "ansible_memtotal_mb >= 1950"
+        msg: >
+          "The required memory size is minimum 2 GB"
+      
+    - name: "Waiting for automatic security updates to finish"
+      script: pre-task/wait-updates.sh
+      register: outputsh
+      changed_when: outputsh.stdout != ""
+      
+  roles:
+    - micado-worker
+
+  vars:
+
+    ##################################################################################
+    ##### Please do not edit under this line unless you know what you are doing. #####
+    ##################################################################################
+
+    - docker_images:
+        cadvisor: google/cadvisor:v0.33.0
+        node_exporter: prom/node-exporter:v0.15.2
+    - docker_package: docker-ce=17.09.1~ce-0~ubuntu
+    - kubernetes_version: 1.13.5-00
