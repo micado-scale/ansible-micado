@@ -42,7 +42,7 @@
     ##################################################################################
 
     - docker_images:
-        cadvisor: google/cadvisor:v0.28.3
+        cadvisor: google/cadvisor:v0.33.0
         node_exporter: prom/node-exporter:v0.15.2
     - docker_package: docker-ce=17.09.1~ce-0~ubuntu
     - kubernetes_version: 1.13.5-00
