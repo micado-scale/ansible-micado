@@ -16,6 +16,7 @@ topology_template:
              cpu: "200m"
          ports:
            - target: 8080
+             nodePort: 30012
              type: NodePort
            - containerPort: 9300
       artifacts:
@@ -67,14 +68,14 @@ topology_template:
             MAXNODES: 2
             MAXCONTAINERS: 8
           queries:
-            REQUESTS: 'sum(nginx_connections_active)'
+            REQUESTS: 'rate(nginx_connections_accepted[30s])'
           min_instances: 1
           max_instances: '{{MAXNODES}}'
           scaling_rule: |
             reqnodes=0
             REQUESTS = ceil(REQUESTS/5)
             if REQUESTS>0:
-              reqconts = min(REQUESTS, MAXCONTAINERS)
+              reqconts = min([REQUESTS, MAXCONTAINERS])
               reqnodes = reqconts/4
               if reqnodes<m_node_count:
                 m_node_count-=1
