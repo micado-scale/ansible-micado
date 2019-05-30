@@ -450,7 +450,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "100 - (avg(irate(node_cpu{mode=\"idle\",instance=~\"$instance\"}[$interval])) * 100)",
+          "expr": "100 - (avg(irate(node_cpu{mode=\"idle\",node=~\"$node\"}[$interval])) * 100)",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -663,7 +663,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "100 - (avg by (instance) (irate(node_cpu{mode=\"idle\",instance=~\"$instance\"}[$interval])) * 100)",
+          "expr": "100 - (avg by (instance) (irate(node_cpu{mode=\"idle\",node=~\"$node\"}[$interval])) * 100)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
@@ -756,7 +756,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": " label_replace(topk($topk, sum without (cpu) (irate(container_cpu_usage_seconds_total{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name|$service_name-[^-]*-[^-]*\",container_label_io_kubernetes_pod_uid=~\"$node\"}[1m])) * 100), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
+          "expr": " label_replace(topk($topk, sum without (cpu) (irate(container_cpu_usage_seconds_total{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name|$service_name-[^-]*-[^-]*\"}[1m])) * 100), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -936,7 +936,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(topk($topk, sum(container_memory_usage_bytes{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name|$service_name-[^-]*-[^-]*\",container_label_io_kubernetes_pod_uid=~\"$node\"}) by (name, container_label_io_kubernetes_pod_name)), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
+          "expr": "label_replace(topk($topk, sum(container_memory_usage_bytes{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name|$service_name-[^-]*-[^-]*\"}) by (name, container_label_io_kubernetes_pod_name)), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -1149,7 +1149,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(topk($topk, rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~\"$service_name|$service_name-[^-]*-[^-]*\",container_label_io_kubernetes_pod_uid=~\"$node\"}[2m])*100), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
+          "expr": "label_replace(topk($topk, rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~\"$service_name|$service_name-[^-]*-[^-]*\"}[2m])*100), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{task_name}}",
@@ -1333,7 +1333,7 @@
         "multi": true,
         "name": "node",
         "options": [],
-        "query": "label_values(container_label_io_kubernetes_pod_uid)",
+        "query": "label_values(node)",
         "refresh": 2,
         "regex": "",
         "sort": 0,
