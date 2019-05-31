@@ -86,8 +86,6 @@
     ##### Please do not edit under this line unless you know what you are doing. #####
     ##################################################################################
 
-    - docker_compose_pip_version: pip
-    - docker_compose_version: 1.16.1
     - docker_images:
         alertmanager: prom/alertmanager:v0.12.0
         credential_manager: micado/credential-manager:0.2.0
