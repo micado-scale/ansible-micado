@@ -2,7 +2,7 @@ rule_files:
 - '*.rules'
 scrape_configs:
 - job_name: worker-metrics
-  scrape_interval: 10s
+  scrape_interval: 20s
   kubernetes_sd_configs:
     - role: pod
   relabel_configs:
@@ -22,7 +22,7 @@ scrape_configs:
     action: drop
 
 - job_name: kube-services
-  scrape_interval: 10s
+  scrape_interval: 20s
   kubernetes_sd_configs:
     - role: pod
   relabel_configs:
