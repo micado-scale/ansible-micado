@@ -1000,6 +1000,9 @@ spec:
       containers:
       - name: cadvisor
         image: {{docker_images.cadvisor}}
+        args:
+        - --housekeeping_interval=5s
+        - --disable_metrics=tcp,udp,disk
         ports:
         - containerPort: 8080
         volumeMounts:
