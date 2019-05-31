@@ -845,7 +845,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "node_memory_MemTotal - node_memory_Inactive",
+          "expr": "node_memory_MemTotal{node=~\"$node\"} - node_memory_Inactive{node=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
