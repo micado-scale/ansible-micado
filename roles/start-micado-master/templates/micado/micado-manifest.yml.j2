@@ -840,6 +840,10 @@ spec:
         effect: NoSchedule
       nodeSelector:
         node-role.kubernetes.io/master: ''
+      initContainers:
+      - name: init-wait-vault
+        image: busybox:1.30
+        command: ['sh', '-c', 'until nslookup vault; do echo waiting for vault; sleep 2; done;']
       containers:
       - name: security-policy-manager
         image: {{docker_images.securitypolicymanager}}
