@@ -85,10 +85,10 @@ policy_types:
         description: pre-define alerts for container CPU
         default:
         - alert: service_overloaded
-          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[30s]))*100 > {{SERVICE_TH_MAX}}'
+          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[60s]))*100 > {{SERVICE_TH_MAX}}'
           for: 30s
         - alert: service_underloaded
-          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[30s]))*100 < {{SERVICE_TH_MIN}}'
+          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[60s]))*100 < {{SERVICE_TH_MIN}}'
           for: 30s
         required: true
       scaling_rule:

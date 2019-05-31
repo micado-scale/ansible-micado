@@ -68,7 +68,7 @@ topology_template:
             MAXNODES: 2
             MAXCONTAINERS: 8
           queries:
-            REQUESTS: 'rate(nginx_connections_accepted[30s])'
+            REQUESTS: 'rate(nginx_connections_accepted[60s])'
           min_instances: 1
           max_instances: '{{MAXNODES}}'
           scaling_rule: |
