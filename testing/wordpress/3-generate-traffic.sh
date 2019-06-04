@@ -24,5 +24,5 @@ if [ -z "$SSL_PASS" ]; then
   exit
 fi
 
-echo "Threading (4) 20 connections for 10 minutes at $MICADO_WORKER:30010... CTRL-C to stop"
-wrk -t4 -c20 -d10m http://$MICADO_WORKER:30010
+echo "Small HTTP load test for 10 minutes at $MICADO_WORKER:30010... CTRL-C to stop"
+wrk -t1 -c1 -d10m http://$MICADO_WORKER:30010
