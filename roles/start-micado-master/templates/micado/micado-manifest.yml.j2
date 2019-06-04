@@ -1001,6 +1001,7 @@ spec:
       - name: cadvisor
         image: {{docker_images.cadvisor}}
         args:
+        - --docker_only=true
         - --housekeeping_interval=5s
         - --disable_metrics=tcp,udp,disk
         ports:
