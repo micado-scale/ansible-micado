@@ -39,6 +39,26 @@
       - build
       - start
 
+    - name: Verify disk space requirements (Disk size is >= 15 GB).
+      assert:
+        that:
+          - "{{ ansible_mounts | selectattr('mount','equalto', '/') | list | first }}.size_total >= 14000000000"
+        msg: >
+          "The minimum required disk size is 15 GB"
+      tags:
+      - build
+      - start
+
+    - name: Verify disk space requirements (Free disk size >= 5 GB).
+      assert:
+        that:
+          - "{{ ansible_mounts | selectattr('mount','equalto', '/') | list | first }}.size_available >= 5400000000"
+        msg: >
+          "The minimum required free disk size is 5 GB"
+      tags:
+      - build
+      - start
+
     - name: "Waiting for automatic security updates to finish"
       script: pre-task/wait-updates.sh
       register: outputsh
