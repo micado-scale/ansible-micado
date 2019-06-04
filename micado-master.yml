@@ -29,12 +29,12 @@
       - build
       - start
 
-    - name: Verify memory requirements (2 GB).
+    - name: Verify memory requirements (3 GB).
       assert:
         that:
-          - "ansible_memtotal_mb >= 1950"
+          - "ansible_memtotal_mb >= 2950"
         msg: >
-          "The required memory size is minimum 2 GB"
+          "The minimum required memory size is 3 GB"
       tags:
       - build
       - start
