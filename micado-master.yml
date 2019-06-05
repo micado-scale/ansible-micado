@@ -42,7 +42,7 @@
     - name: Verify disk space requirements (Disk size is >= 15 GB).
       assert:
         that:
-          - "{{ ansible_mounts | selectattr('mount','equalto', '/') | list | first }}.size_total >= 14000000000"
+          - "{{ ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first }} >= 14000000000"
         msg: >
           "The minimum required disk size is 15 GB"
       tags:
@@ -52,7 +52,7 @@
     - name: Verify disk space requirements (Free disk size >= 5 GB).
       assert:
         that:
-          - "{{ ansible_mounts | selectattr('mount','equalto', '/') | list | first }}.size_available >= 5400000000"
+          - "{{ ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_available') | list | first }} >= 5400000000"
         msg: >
           "The minimum required free disk size is 5 GB"
       tags:
