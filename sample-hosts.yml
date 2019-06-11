@@ -1,0 +1,34 @@
+################
+##  MiCADO Ansible Deployment
+##   hosts.yml
+##
+##  Adjust ansible_host & ansible_user parameters as required
+################
+all:
+  hosts:
+    micado-master:
+      # 
+      # Host info for building/starting a micado-master node      
+      # Usage:   ansible-playbook -i hosts.yml micado-master.yml
+      #
+      #  (optional) add --tags 'build' to simply prepare a VM (for image & re-use)
+      #  (optional) later use --tags 'start' to initialise a prepared VM
+      #
+      ansible_host: localhost
+      ansible_connection: ssh
+      ansible_user: ubuntu
+      ansible_become: True
+      ansible_become_method: sudo
+      ansible_python_interpreter: /usr/bin/python3
+
+    micado-worker: 
+      #
+      # Host info for building a micado-worker node      
+      # Usage:   ansible-playbook -i hosts.yml build-micado-worker.yml
+      #
+      ansible_host: localhost
+      ansible_connection: ssh
+      ansible_user: ubuntu
+      ansible_become: True
+      ansible_become_method: sudo
+      ansible_python_interpreter: /usr/bin/python3
