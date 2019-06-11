@@ -26,3 +26,5 @@ fi
 
 echo "Small HTTP load test for 8 minutes at $MICADO_WORKER:30012... CTRL-C to stop"
 wrk -t1 -c1 -d8m http://$MICADO_WORKER:30012
+# if necessary, adjust the line above to increase the load test
+# e.g. wrk -t4 -c40 -d8m http://$MICADO_WORKER:30012 
