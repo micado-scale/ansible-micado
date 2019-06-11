@@ -7,6 +7,7 @@ MiCADO is an auto-scaling framework for Docker applications. It supports autosca
 MiCADO manual is hosted at https://micado-scale.readthedocs.io .
 
 Manuals for MiCADO versions are as follows, and then is a very basic quick start guide below:
+ - [MiCADO 0.7.3](https://micado-scale.readthedocs.io/en/0.7.3)
  - [MiCADO 0.7.2-rev1](https://micado-scale.readthedocs.io/en/0.7.2-rev1)
  - [MiCADO 0.7.2](https://micado-scale.readthedocs.io/en/0.7.2)
  - [MiCADO 0.7.1](https://micado-scale.readthedocs.io/en/0.7.1)
@@ -20,20 +21,20 @@ Manuals for MiCADO versions are as follows, and then is a very basic quick start
 ## Requirements
 
 ### 1x MiCADO Master
-* **2 CPU / 4GB RAM / 20GB DISK**
-*  **Ubuntu 16.04 LTS**
-* **On a supported cloud**
-  * **AWS EC2**
-  * **CloudSigma**
-  * **CloudBroker**
-  * **OpenStack**
+* 2 CPU / 4GB RAM / 20GB DISK
+*  Ubuntu 16.04 LTS
+* On a supported cloud
+  * AWS EC2
+  * CloudSigma
+  * CloudBroker
+  * OpenStack
 
 ### 1x Ansible Remote (or locally on Master)
 
-* **Ansible >= v2.4**
-* **curl**
-* **jq (for test scripts)**
-* **wrk (for test scripts)**
+* Ansible >= v2.4
+* curl
+* jq (for test scripts)
+* wrk (for test scripts)
 ## Set-up
 
 Clone the repository & prepare the credentials:
@@ -46,7 +47,7 @@ Clone the repository & prepare the credentials:
     #option to login to private registry# cp sample-credentials-docker-registry.yml credentials-docker-registry.yml
 
 Fill the *hosts* file with **micado-master** vars for *ansible_host (Master IP)* and *ansible_user (SSH user)* and the *credentials-* files with usernames & passwords:
- 
+
     vim hosts
     vim credentials-cloud-api.yml
     vim credentials-micado.yml
@@ -60,12 +61,12 @@ Run the playbook to completion:
 
 ## Testing
 Prepare a test by filling *_settings* with your MiCADO Master IP:
-    
+
     cd testing/stressng
     vim _settings
 
 Fill the required fields (**ADD_YOUR_ID ...**) under the **worker-node** virtual machine with IDs from your cloud service provider, then run the test scripts:
-    
+
     cp stressng_<yourcloud>.yaml stressng.yaml
     vim stressng.yaml
     ./1-submit-tosca-stressng.sh
