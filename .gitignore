@@ -1,6 +1,6 @@
 # Ansible
 
-hosts
+hosts.yml
 *.retry
 
 # Credentials
