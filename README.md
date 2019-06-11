@@ -41,21 +41,21 @@ Clone the repository & prepare the credentials:
 
     git clone https://github.com/micado-scale/ansible-micado micado
     cd micado
-    cp sample-hosts hosts
+    cp sample-hosts.yml hosts.yml
     cp sample-credentials-cloud-api.yml credentials-cloud-api.yml
     cp sample-credentials-micado.yml credentials-micado.yml
     #option to login to private registry# cp sample-credentials-docker-registry.yml credentials-docker-registry.yml
 
 Fill the *hosts* file with **micado-master** vars for *ansible_host (Master IP)* and *ansible_user (SSH user)* and the *credentials-* files with usernames & passwords:
 
-    vim hosts
+    vim hosts.yml
     vim credentials-cloud-api.yml
     vim credentials-micado.yml
     #option to login to private registry# vim credentials-docker-registry.yml
 
 Run the playbook to completion:
 
-    ansible-playbook -i hosts micado-master.yml
+    ansible-playbook -i hosts.yml micado-master.yml
 
 #### Now view the MiCADO Dashboard at https://<MiCADO_Master_IP>
 
