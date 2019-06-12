@@ -1004,6 +1004,7 @@ spec:
         - --docker_only=true
         - --housekeeping_interval=5s
         - --disable_metrics=tcp,udp,disk
+        - --max_housekeeping_interval=15s
         ports:
         - containerPort: 8080
         volumeMounts:
