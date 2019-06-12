@@ -64,12 +64,12 @@ topology_template:
             MAXNODES: 2
             MAXCONTAINERS: 8
           queries:
-            REQUESTS: 'rate(nginx_connections_accepted[60s])'
+            REQUESTS: 'avg(rate(nginx_connections_accepted[60s]))'
           min_instances: 1
           max_instances: '{{MAXNODES}}'
           scaling_rule: |
             reqnodes=0
-            REQUESTS = ceil(REQUESTS/5)
+            REQUESTS = ceil(REQUESTS)
             if REQUESTS>0:
               reqconts = min([REQUESTS, MAXCONTAINERS])
               reqnodes = reqconts/4
@@ -91,7 +91,7 @@ topology_template:
           scaling_rule: |
             print "Number of active connections:",REQUESTS
             required_count = 0
-            REQUESTS = ceil(REQUESTS/5)
+            REQUESTS = ceil(REQUESTS)
             if REQUESTS>0:
               required_count = min([REQUESTS, MAXCONTAINERS])
               m_container_count = min([required_count, len(m_nodes) * 4])
