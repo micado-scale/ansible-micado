@@ -4,7 +4,7 @@ galaxy_info:
     - Jay Deslauriers
     - Attila Farkas
     - Gregoire Gesmier
-  description: Build MiCADO master
+  description: Build MiCADO worker
   company:
     - MTA SZTAKI
     - UoW

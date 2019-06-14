@@ -1,11 +1,17 @@
 galaxy_info:
-  author: Attila Csaba Marosi
-  description: Deploy MiCADO master (and spawn a worker)
-  company: MTA SZTAKI
+  author:
+    - Mark Emodi
+    - Jay Deslauriers
+    - Attila Farkas
+    - Gregoire Gesmier
+  description: Start MiCADO master
+  company:
+    - MTA SZTAKI
+    - UoW
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
-  issue_tracker_url: https://github.com/micado-scale/ansible-micado/issues 
+  issue_tracker_url: https://github.com/micado-scale/ansible-micado/issues
 
   # Some suggested licenses:
   # - BSD (default)
@@ -16,7 +22,7 @@ galaxy_info:
   # - CC-BY
   license: Apache
 
-  min_ansible_version: 2.2
+  min_ansible_version: 2.5
 
   # Optionally specify the branch Galaxy will use when accessing the GitHub
   # repo for this role. During role install, if no tags are available,
@@ -33,7 +39,7 @@ galaxy_info:
   #
   platforms:
     - name: Ubuntu
-      versions: 
+      versions:
         - xenial
   #- name: OpenBSD
   #  versions:

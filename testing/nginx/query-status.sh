@@ -2,7 +2,7 @@
 
 settings_file="./_settings"
 
-. $settings_file 
+. $settings_file
 
 if [ -z "$MICADO_MASTER" ]; then
   echo "Please, set MICADO_MASTER in file named \"$settings_file\"!"

@@ -9,7 +9,7 @@ if [ -z "$CQUEUE_SERVER_IP" ]; then
 fi
 NUM=$1
 if [ -z "$NUM" ]; then
-  echo "Please, set number of jobs to submit as argument!" 
+  echo "Please, set number of jobs to submit as argument!"
   exit
 fi
 
