@@ -1,0 +1,11 @@
+---
+- include: set-hostname.yml
+
+- include: kubernetes-start.yml
+
+- include: files.yml
+
+- include: micado-start.yml
+
+- include: docker-login.yml
+  when: docker_cred_path is defined

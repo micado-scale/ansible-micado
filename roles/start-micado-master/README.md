@@ -1,0 +1,3 @@
+# ansible-role-start-micado
+
+Run this with _ansible-playbook -i hosts micado-master.yml --tags 'start'_ to initialise and start a Ubuntu 16.04 LTS image which already includes the necessary libraries and dependencies for a MiCADO Master deployment (this requires *ansible-role-build-micado* to be run first). Make sure the *micado-master* entry in the _hosts_ file is populated with the correct *ansible_host* (IP) and *ansible_user* (username).

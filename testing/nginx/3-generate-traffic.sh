@@ -9,6 +9,11 @@ if [ -z "$MICADO_MASTER" ]; then
   exit
 fi
 
+if [ -z "$MICADO_WORKER" ]; then
+  MICADO_WORKER=$MICADO_MASTER
+  echo "No MICADO_WORKER specified, trying MICADO MASTER - ensure port 30012 is open..."
+fi
+
 if [ -z "$SSL_USER" ]; then
   echo " Please, set SSL_USER in file named \"$settings_file\"!"
   exit
@@ -19,7 +24,7 @@ if [ -z "$SSL_PASS" ]; then
   exit
 fi
 
-HTTP_PORT=$(curl --insecure -X GET -s -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/list_app | jq ".data[0].outputs.KubernetesAdaptor.$APP_NAME[0][0].node_port")
-
-echo -n "Holding 40 active connections for 8 minutes at $MICADO_MASTER:$HTTP_PORT... CTRL-C to stop"
-wrk -t4 -c40 -d8m http://$MICADO_MASTER:$HTTP_PORT
+echo "Small HTTP load test for 8 minutes at $MICADO_WORKER:30012... CTRL-C to stop"
+wrk -t1 -c1 -d8m http://$MICADO_WORKER:30012
+# if necessary, adjust the line above to increase the load test
+# e.g. wrk -t4 -c40 -d8m http://$MICADO_WORKER:30012

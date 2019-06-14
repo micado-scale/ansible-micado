@@ -1,0 +1,44 @@
+prometheus_endpoint: 'http://prometheus:9090/prometheus'
+prometheus_config_template: '/config/policykeeper/prometheus_config_template.yaml'
+prometheus_config_target: '/config/prometheus/prometheus.yml'
+prometheus_rules_directory: '/config/prometheus'
+
+swarm_endpoint: 'unix:///var/run/docker.sock'
+k8s_endpoint: 'unix:///var/run/docker.sock'
+occopus_endpoint: 'http://occopus:5000'
+occopus_infra_name: 'micado_worker_infra'
+occopus_worker_name: 'worker'
+
+docker_node_unreachable_timeout: 60
+
+logging:
+    version: 1
+    root:
+        level: INFO
+        handlers: [console, file]
+    formatters:
+        simpleFormatter:
+            #format: "%(module)s %(asctime)s %(levelname)s %(message)s"
+            format: "%(asctime)s %(levelname)s %(message)s"
+    handlers:
+        console:
+            class: logging.StreamHandler
+            formatter: simpleFormatter
+            level: DEBUG
+            stream: ext://sys.stdout
+        file:
+            class : logging.FileHandler
+            formatter: simpleFormatter
+            mode: w
+            level: DEBUG
+            filename: /var/log/policykeeper/pk.log
+    loggers:
+        pk:
+            propagate: false
+            handlers: [console, file]
+        pk_docker:
+            propagate: false
+            handlers: [console, file]
+        pk_prometheus:
+            propagate: false
+            handlers: [console, file]

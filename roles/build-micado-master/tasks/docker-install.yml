@@ -1,0 +1,47 @@
+---
+- name: 'Docker: Installing dependencies'
+  apt:
+    name:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - software-properties-common
+    state: present
+
+- name: 'Docker: Adding APT key'
+  apt_key:
+    url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
+    state: present
+
+- name: 'Docker: Adding APT repository'
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+    state: present
+
+- name: 'Docker: Installing APT package'
+  apt:
+    name:
+    - "{{ docker_package }}"
+    state: present
+    update_cache: yes
+
+- name: 'Docker: prevent package from being upgraded'
+  dpkg_selections:
+    name: docker-ce
+    selection: hold
+
+- name: 'Docker: Replace ExecStart for systemd'
+  lineinfile:
+    dest: /lib/systemd/system/docker.service
+    regexp: '^ExecStart=/usr/bin/dockerd[.]?'
+    line: "ExecStart=/usr/bin/dockerd -H fd:// --mtu={{ ansible_default_ipv4.mtu }}"
+  register: docker_service
+
+- name: 'Docker: Restart service'
+  systemd:
+    daemon_reload: yes
+    name: docker
+    state: restarted
+    enabled: yes
+    masked: no
+  when: docker_service.changed

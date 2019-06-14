@@ -1,0 +1,57 @@
+---
+- name: 'Downloading docker image: Redis'
+  docker_image:
+      name: "{{docker_images.redis}}"
+
+- name: 'Downloading docker image: Prometheus'
+  docker_image:
+      name: "{{docker_images.prometheus}}"
+
+- name: 'Downloading docker image: Alertmanager'
+  docker_image:
+      name: "{{docker_images.alertmanager}}"
+
+- name: 'Downloading docker image: Grafana'
+  docker_image:
+      name: "{{docker_images.grafana}}"
+
+- name: 'Downloading docker image: Policykeeper'
+  docker_image:
+      name: "{{docker_images.policykeeper}}"
+
+- name: 'Downloading docker image: Occopus'
+  docker_image:
+      name: "{{docker_images.occopus}}"
+
+- name: 'Downloading docker image: Dashboard'
+  docker_image:
+      name: "{{docker_images.dashboard}}"
+
+- name: 'Downloading docker image: ToscaSubmitter'
+  docker_image:
+      name: "{{docker_images.toscasubmitter}}"
+
+- name: 'Downloading docker image: Credential Manager'
+  docker_image:
+      name: "{{docker_images.credential_manager}}"
+
+- name: 'Downloading docker image: Vault'
+  docker_image:
+      name: "{{docker_images.vault}}"
+
+- name: 'Downloading docker image: Security Policy Manager'
+  docker_image:
+      name: "{{docker_images.securitypolicymanager}}"
+
+- name: 'Downloading docker image: Crypto Engine'
+  docker_image:
+      name: "{{docker_images.crypto_engine}}"
+
+- name: 'Downloading docker image: Image Integrity Verifier'
+  docker_image:
+      name: "{{docker_images.iivr}}"
+  when: docker_iivr
+
+- name: 'Downloading docker image: Zorp'
+  docker_image:
+      name: "{{docker_images.zorp}}"

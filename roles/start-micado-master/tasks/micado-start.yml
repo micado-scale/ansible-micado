@@ -1,0 +1,54 @@
+---
+- name: Enable packet filtering
+  service:
+    name: iptables
+    state: restarted
+    enabled: yes
+
+- name: Enable IPv6 packet filtering
+  service:
+    name: ip6tables
+    state: restarted
+    enabled: yes
+
+- name: Enable and start MiCADO systemd service
+  service:
+    name: micado
+    state: restarted
+    enabled: yes
+
+- name: "Wait for SPM running state"
+  shell: "i=0 ; while [ `kubectl get -n micado-system pod | grep security-policy-manager | grep 1/1 | wc -l` -eq 0 ] && [ $i -lt 110 ] ; do echo -e 'Security policy manager is not healthy yet!' ;  sleep 1 ; ((i++)) ; done ; if [ $i -eq 20 ] ; then exit 1 ; fi ; exit 0"
+  args:
+    executable: /bin/bash
+  register: output
+  changed_when: output.stdout != ""
+
+- name: Get CA for IPSEC (master) (shell)
+  shell: /usr/bin/docker exec $(docker ps -f label=io.kubernetes.container.name=security-policy-manager -q) /bin/bash -c 'curl -X GET http://127.0.0.1:5003/v1.0/nodecerts/ca' > /etc/ipsec.d/cacerts/master.pem
+
+- name: Get CRT and KEY for IPSEC (master) (shell)
+  shell: /usr/bin/docker exec $(docker ps -f label=io.kubernetes.container.name=security-policy-manager -q) /bin/bash -c 'curl -X POST http://127.0.0.1:5003/v1.0/nodecerts' > /tmp/tmp_certs
+
+- name: Split PEM IPSec (key)
+  command: /usr/bin/openssl pkey -in /tmp/tmp_certs -out /etc/ipsec.d/private/master.key
+
+- name: Split PEM IPSEC (cert)
+  command: /usr/bin/openssl x509 -in /tmp/tmp_certs -out /etc/ipsec.d/certs/master.crt
+
+- name: Put crt into secrets
+  lineinfile:
+    path: /etc/ipsec.secrets
+    line: ": RSA 'master.key'"
+
+- name: Remove temporary cert bundle
+  file:
+    path: /tmp/tmp_certs
+    state: absent
+
+  # This copy the Master's CA to the occopus directory because occopus will read this file and put it into the cloud-init template.
+- name: Copy CA to occopus directory
+  command: /bin/cp /etc/ipsec.d/cacerts/master.pem /var/lib/micado/occopus/data/
+
+- name: Restart IPSec
+  command: ipsec restart

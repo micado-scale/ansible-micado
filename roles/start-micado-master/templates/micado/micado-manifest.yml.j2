@@ -1,0 +1,1039 @@
+# MiCADO System Namespace ##
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: micado-system
+  labels:
+    name: micado-system
+---
+# MiCADO Worker Namespace ##
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: micado-worker
+  labels:
+    name: micado-worker
+---
+# Prometheus Service Account ##
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: micado-system
+---
+# Prometheus Cluster Role ##
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: prometheus
+  namespace: micado-system
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources:
+  - configmaps
+  verbs: ["get"]
+- nonResourceURLs: ["/metrics"]
+  verbs: ["get"]
+---
+# Prometheus Cluster Role Binding ##
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+  namespace: micado-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+- kind: ServiceAccount
+  name: prometheus
+  namespace: micado-system
+---
+## MiCADO Dashboard ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: micado-dashboard
+  namespace: micado-system
+  labels:
+    tier: frontend
+spec:
+  selector:
+    matchLabels:
+      name: micado-dashboard
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        name: micado-dashboard
+        tier: frontend
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: micado-dashboard
+        image: {{docker_images.dashboard}}
+        env:
+        - name: MICADO_FRONTEND_IP
+          value: {{ ansible_host }}
+---
+## Service: MiCADO Dashboard ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: micado-dashboard
+  namespace: micado-system
+  labels:
+    tier: frontend
+spec:
+  ports:
+  - port: 4000
+  selector:
+    name: micado-dashboard
+    tier: frontend
+---
+## Redis for Occopus ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: micado-system
+  labels:
+    tier: cloud-orchestration
+spec:
+  selector:
+    matchLabels:
+      name: redis
+      tier: cloud-orchestration
+  template:
+    metadata:
+      labels:
+        name: redis
+        tier: cloud-orchestration
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: occopus-redis
+        image: {{docker_images.redis}}
+        command:
+        - redis-server
+        args:
+        - --appendonly
+        - "yes"
+        - --logfile
+        - /tmp/redis-server.log
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        - name: redis-tmp
+          mountPath: /tmp
+      volumes:
+      - name: redis-data
+        hostPath:
+          path: /var/lib/micado/redis/data
+      - name: redis-tmp
+        hostPath:
+          path: /var/lib/micado/redis
+---
+## Service: Redis for Occopus ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: micado-system
+  labels:
+    tier: cloud-orchestration
+spec:
+  ports:
+  - port: 6379
+  selector:
+    name: redis
+    tier: cloud-orchestration
+---
+## Occopus ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: occopus
+  namespace: micado-system
+  labels:
+    tier: cloud-orchestration
+spec:
+  selector:
+    matchLabels:
+      name: occopus
+      tier: cloud-orchestration
+  template:
+    metadata:
+      labels:
+        name: occopus
+        tier: cloud-orchestration
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: occopus
+        image: {{docker_images.occopus}}
+        args:
+        - occopus-rest-service
+        - --auth_data_path
+        - /var/lib/micado/occopus/data/auth_data.yaml
+        - --host
+        - 0.0.0.0
+        - --parallelize
+        env:
+        - name: REDIS_NAME
+          value: redis
+        - name: LOG_DIR
+          value: /var/log/occopus
+        volumeMounts:
+        - name: occopus-data
+          mountPath: /var/lib/micado/occopus/data
+        - name: occopus-submitter
+          mountPath: /var/lib/micado/occopus/submitter
+        - name: occopus-log
+          mountPath: /var/log/occopus
+      volumes:
+      - name: occopus-data
+        hostPath:
+          path: /var/lib/micado/occopus/data
+      - name: occopus-submitter
+        hostPath:
+          path: /var/lib/micado/toscasubmitter/output
+      - name: occopus-log
+        hostPath:
+          path: /var/log/micado/occopus
+---
+## Service: Occopus ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: occopus
+  namespace: micado-system
+  labels:
+    tier: cloud-orchestration
+spec:
+  ports:
+  - port: 5000
+  selector:
+    name: occopus
+    tier: cloud-orchestration
+---
+## Prometheus ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: micado-system
+  labels:
+    tier: monitoring
+spec:
+  selector:
+    matchLabels:
+      name: prometheus
+      tier: monitoring
+  template:
+    metadata:
+      labels:
+        name: prometheus
+        tier: monitoring
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      serviceAccount: prometheus
+      containers:
+      - name: prometheus
+        image: {{docker_images.prometheus}}
+        args:
+        - --config.file=/etc/prometheus/prometheus.yml
+        - --storage.tsdb.path=/prometheus
+        - --web.console.libraries=/usr/share/prometheus/console_libraries
+        - --web.console.templates=/usr/share/prometheus/consoles
+        - --web.enable-lifecycle
+        - --web.external-url=http://prometheus/prometheus/
+        - --web.route-prefix=/prometheus
+        volumeMounts:
+        - name: prometheus-config
+          mountPath: /etc/prometheus
+        - name: prometheus-data
+          mountPath: /prometheus
+      volumes:
+      - name: prometheus-config
+        hostPath:
+          path: /var/lib/micado/prometheus/config
+      - name: prometheus-data
+        hostPath:
+          path: /var/lib/micado/prometheus/data
+---
+## Service: Prometheus ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: micado-system
+  labels:
+    tier: monitoring
+spec:
+  ports:
+  - port: 9090
+  selector:
+    name: prometheus
+    tier: monitoring
+---
+## Alert Manager ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: micado-system
+  labels:
+    tier: monitoring
+spec:
+  selector:
+    matchLabels:
+      name: alertmanager
+      tier: monitoring
+  template:
+    metadata:
+      labels:
+        name: alertmanager
+        tier: monitoring
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: alertmanager
+        image: {{docker_images.alertmanager}}
+        volumeMounts:
+        - name: alertmanager-config
+          mountPath: /etc/alertmanager
+        - name: alertmanager-data
+          mountPath: /alertmanager
+      volumes:
+      - name: alertmanager-config
+        hostPath:
+          path: /var/lib/micado/alertmanager/config
+      - name: alertmanager-data
+        hostPath:
+          path: /var/lib/micado/alertmanager/data
+---
+## Service: Alert Manager ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  namespace: micado-system
+  labels:
+    tier: monitoring
+spec:
+  ports:
+  - port: 9093
+  selector:
+    name: alertmanager
+    tier: monitoring
+---
+## PolicyKeeper ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: policykeeper
+  namespace: micado-system
+  labels:
+    tier: scaling
+spec:
+  selector:
+    matchLabels:
+      name: policykeeper
+      tier: scaling
+  template:
+    metadata:
+      labels:
+        name: policykeeper
+        tier: scaling
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: policykeeper
+        image: {{docker_images.policykeeper}}
+        command:
+        - /policykeeper/policy_keeper.py
+        args:
+        - --srv
+        - --cfg
+        - /config/policykeeper/policykeeper_config.yaml
+        - --host
+        - 0.0.0.0
+        - --port
+        - '12345'
+        volumeMounts:
+        - name: policykeeper-config
+          mountPath: /config/policykeeper
+        - name: pk-prom-config
+          mountPath: /config/prometheus
+        - name: policykeeper-log
+          mountPath: /var/log/policykeeper
+        - name: pk-kube-config
+          mountPath: /root/.kube
+      volumes:
+      - name: policykeeper-config
+        hostPath:
+          path: /var/lib/micado/policykeeper/config
+      - name: pk-prom-config
+        hostPath:
+          path: /var/lib/micado/prometheus/config
+      - name: policykeeper-log
+        hostPath:
+          path: /var/log/micado/policykeeper
+      - name: pk-kube-config
+        hostPath:
+          path: /root/.kube
+---
+## Service: PolicyKeeper ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: policykeeper
+  namespace: micado-system
+  labels:
+    tier: scaling
+spec:
+  ports:
+  - port: 12345
+  selector:
+    name: policykeeper
+    tier: scaling
+---
+## Grafana ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: micado-system
+  labels:
+    tier: monitoring
+spec:
+  selector:
+    matchLabels:
+      name: grafana
+      tier: monitoring
+  template:
+    metadata:
+      labels:
+        name: grafana
+        tier: monitoring
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: grafana
+        image: {{docker_images.grafana}}
+        securityContext:
+          runAsUser: 0
+        env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: {{grafana_admin_pwd}}
+        - name: GF_LOG_MODE
+          value: console file
+        volumeMounts:
+        - name: grafana-config
+          mountPath: /etc/grafana/grafana.ini
+        - name: grafana-data
+          mountPath: /var/lib/grafana
+        - name: grafana-setup
+          mountPath: /etc/grafana/provisioning
+        - name: grafana-log
+          mountPath: /var/log/grafana
+      volumes:
+      - name: grafana-config
+        hostPath:
+          path: /var/lib/micado/grafana/config/grafana.ini
+      - name: grafana-data
+        hostPath:
+          path: /var/lib/micado/grafana/data
+      - name: grafana-setup
+        hostPath:
+          path: /var/lib/micado/grafana/provisioning
+      - name: grafana-log
+        hostPath:
+          path: /var/log/micado/grafana
+---
+## Service: Grafana ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: micado-system
+  labels:
+    tier: monitoring
+spec:
+  ports:
+  - port: 3000
+  selector:
+    name: grafana
+    tier: monitoring
+---
+## TOSCA Submitter ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: toscasubmitter
+  namespace: micado-system
+  labels:
+    tier: orchestration
+spec:
+  selector:
+    matchLabels:
+      name: toscasubmitter
+      tier: orchestration
+  template:
+    metadata:
+      labels:
+        name: toscasubmitter
+        tier: orchestration
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: toscasubmitter
+        image: {{docker_images.toscasubmitter}}
+        args:
+        - -h
+        - 0.0.0.0
+        - -p
+        - '5050'
+        volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+        - name: docker-binary
+          mountPath: /usr/bin/docker
+        - name: kube-config
+          mountPath: /root/.kube
+        - name: kube-binary
+          mountPath: /usr/bin/kubectl
+        - name: submitter-outputs
+          mountPath: /var/lib/submitter/files/output_configs
+        - name: submitter-config
+          mountPath: /var/lib/submitter/system
+        - name: submitter-log
+          mountPath: /var/log/submitter
+      volumes:
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
+      - name: docker-binary
+        hostPath:
+          path: /usr/bin/docker
+      - name: kube-config
+        hostPath:
+          path: /root/.kube
+      - name: kube-binary
+        hostPath:
+          path: /usr/bin/kubectl
+      - name: submitter-outputs
+        hostPath:
+          path: /var/lib/micado/toscasubmitter/output
+      - name: submitter-config
+        hostPath:
+          path: /var/lib/micado/toscasubmitter/system
+      - name: submitter-log
+        hostPath:
+          path: /var/log/micado/toscasubmitter
+---
+## Service: TOSCA Submitter ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: toscasubmitter
+  namespace: micado-system
+  labels:
+    tier: orchestration
+spec:
+  ports:
+  - port: 5050
+  selector:
+    name: toscasubmitter
+    tier: orchestration
+---
+## Credential Manager ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: credman
+  namespace: micado-system
+  labels:
+    tier: security
+spec:
+  selector:
+    matchLabels:
+      name: credman
+      tier: security
+  template:
+    metadata:
+      labels:
+        name: credman
+        tier: security
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: alertmanager
+        image: {{docker_images.credential_manager}}
+        env:
+        - name: PROVISION_FILE
+          value: /config/provisioning.csv
+        - name: DATABASE_URL
+          value: sqlite:////config/credential.db
+        volumeMounts:
+        - name: credman-config
+          mountPath: /config
+      volumes:
+      - name: credman-config
+        hostPath:
+          path: /var/lib/micado/credman/config
+---
+## Service: Credential Manager ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: credman
+  namespace: micado-system
+  labels:
+    tier: security
+spec:
+  ports:
+  - port: 5001
+  selector:
+    name: credman
+    tier: security
+---
+{% if docker_iivr %}
+## Image Intergrity Verifier ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iivr
+  namespace: micado-system
+  labels:
+    tier: security
+spec:
+  selector:
+    matchLabels:
+      name: iivr
+      tier: security
+  template:
+    metadata:
+      labels:
+        name: iivr
+        tier: security
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: iivr
+        image: {{docker_images.iivr}}
+        volumeMounts:
+        - name: iivr-config
+          mountPath: /config
+      volumes:
+      - name: iivr-config
+        hostPath:
+          path: /var/lib/micado/iivr/config
+---
+## Service: Image Intergrity Verifier ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: iivr
+  namespace: micado-system
+  labels:
+    tier: security
+spec:
+  ports:
+  - port: 5000
+  selector:
+    name: iivr
+    tier: security
+---
+{% endif %}
+## Crypto Engine ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crypto-engine
+  namespace: micado-system
+  labels:
+    tier: security
+spec:
+  selector:
+    matchLabels:
+      name: crypto-engine
+      tier: security
+  template:
+    metadata:
+      labels:
+        name: crypto-engine
+        tier: security
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: crypto-engine
+        image: {{docker_images.crypto_engine}}
+        volumeMounts:
+        - name: crypto-engine-config
+          mountPath: /config
+      volumes:
+      - name: crypto-engine-config
+        hostPath:
+          path: /var/lib/micado/crypto_engine/config
+---
+## Service: Crypto Engine ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: crypto-engine
+  namespace: micado-system
+  labels:
+    tier: security
+spec:
+  ports:
+  - port: 5000
+  selector:
+    name: crypto-engine
+    tier: security
+---
+## Vault ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault
+  namespace: micado-system
+  labels:
+    tier: security
+spec:
+  selector:
+    matchLabels:
+      name: vault
+      tier: security
+  template:
+    metadata:
+      labels:
+        name: vault
+        tier: security
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: vault
+        image: {{docker_images.vault}}
+        securityContext:
+          capabilities:
+            add: ["IPC_LOCK"]
+        command:
+        - vault
+        args:
+        - server
+        - -config
+        - /vault/config/vault.hcl
+        volumeMounts:
+        - name: vault-config
+          mountPath: /vault/config
+        - name: vault-storage
+          mountPath: /vault/file
+        - name: vault-log
+          mountPath: /vault/logs
+      volumes:
+      - name: vault-config
+        hostPath:
+          path: /var/lib/micado/vault/config
+      - name: vault-storage
+        emptyDir: {}
+      - name: vault-log
+        hostPath:
+          path: /var/log/micado/vault
+---
+## Service: Vault ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault
+  namespace: micado-system
+  labels:
+    tier: security
+spec:
+  ports:
+  - name: tcp-8201
+    port: 8201
+  - name: tcp-8200
+    port: 8200
+  selector:
+    name: vault
+    tier: security
+---
+## Security Policy Manager ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: security-policy-manager
+  namespace: micado-system
+  labels:
+    tier: security
+spec:
+  selector:
+    matchLabels:
+      name: security-policy-manager
+      tier: security
+  template:
+    metadata:
+      labels:
+        name: security-policy-manager
+        tier: security
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      initContainers:
+      - name: init-wait-vault
+        image: busybox:1.30
+        command: ['sh', '-c', 'until nslookup vault; do echo waiting for vault; sleep 2; done;']
+      containers:
+      - name: security-policy-manager
+        image: {{docker_images.securitypolicymanager}}
+        readinessProbe:
+          httpGet:
+            path: /v1.0/nodecerts/ca
+            port: 5003
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - name: kube-config
+          mountPath: /root/.kube/config
+      volumes:
+      - name: kube-config
+        hostPath:
+          path: /root/.kube/config
+---
+## Service: Security Policy Manager ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: security-policy-manager
+  namespace: micado-system
+  labels:
+    tier: security
+spec:
+  clusterIP: 10.97.170.199
+  ports:
+  - port: 5003
+  selector:
+    name: security-policy-manager
+    tier: security
+---
+## Zorp ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zorp
+  namespace: micado-system
+  labels:
+    tier: security
+spec:
+  selector:
+    matchLabels:
+      name: zorp
+      tier: security
+  template:
+    metadata:
+      labels:
+        name: zorp
+        tier: security
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: zorp
+        image: {{docker_images.zorp}}
+        ports:
+        - hostPort: {{ web_listening_port | default('443') }}
+          containerPort: 443
+        volumeMounts:
+        - name: zorp-config
+          mountPath: /etc/zorp
+        - name: zorp-scripts
+          mountPath: /app
+      volumes:
+      - name: zorp-config
+        hostPath:
+          path: /var/lib/micado/zorp/config
+      - name: zorp-scripts
+        hostPath:
+          path: /var/lib/micado/zorp/scripts
+---
+## Service: Zorp ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: zorp
+  namespace: micado-system
+  labels:
+    tier: security
+spec:
+  ports:
+  - port: {{ web_listening_port | default('443') }}
+    targetPort: 443
+  selector:
+    name: zorp
+    tier: security
+---
+## NodeExporter (Worker Nodes) ##
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: micado-worker
+  labels:
+    tier: monitoring
+spec:
+  selector:
+    matchLabels:
+      name: node-exporter
+      tier: monitoring
+  template:
+    metadata:
+      labels:
+        name: node-exporter
+        tier: monitoring
+    spec:
+      containers:
+      - name: node-exporter
+        image: {{docker_images.node_exporter}}
+        ports:
+        - containerPort: 9100
+        volumeMounts:
+        - name: nodex-proc
+          mountPath: /host/proc
+          readOnly: true
+        - name: nodex-sys
+          mountPath: /host/sys
+          readOnly: true
+        args:
+          - '--path.procfs=/host/proc'
+          - '--path.sysfs=/host/sys'
+      volumes:
+      - name: nodex-proc
+        hostPath:
+          path: /proc
+      - name: nodex-sys
+        hostPath:
+          path: /sys
+---
+## cAdvisor (Worker Nodes) ##
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cadvisor
+  namespace: micado-worker
+  labels:
+    tier: monitoring
+spec:
+  selector:
+    matchLabels:
+      name: cadvisor
+      tier: monitoring
+  template:
+    metadata:
+      labels:
+        name: cadvisor
+        tier: monitoring
+    spec:
+      containers:
+      - name: cadvisor
+        image: {{docker_images.cadvisor}}
+        args:
+        - --docker_only=true
+        - --housekeeping_interval=5s
+        - --disable_metrics=tcp,udp,disk
+        - --max_housekeeping_interval=15s
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: cadvisor-root
+          mountPath: /rootfs
+          readOnly: true
+        - name: cadvisor-run
+          mountPath: /var/run
+        - name: cadvisor-sys
+          mountPath: /sys
+          readOnly: true
+        - name: cadvisor-docker
+          mountPath: /var/lib/docker
+          readOnly: true
+        - name: cadvisor-disk
+          mountPath: /dev/disk
+      volumes:
+      - name: cadvisor-root
+        hostPath:
+          path: /
+      - name: cadvisor-run
+        hostPath:
+          path: /var/run
+      - name: cadvisor-sys
+        hostPath:
+          path: /sys
+      - name: cadvisor-docker
+        hostPath:
+          path: /var/lib/docker
+      - name: cadvisor-disk
+        hostPath:
+          path: /dev/disk

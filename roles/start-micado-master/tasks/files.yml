@@ -1,0 +1,82 @@
+---
+- name: "Occopus Credentials: Load the credentials from the playbook"
+  include_vars:
+    file: "{{ cloud_cred_path }}"
+    name: config
+
+- name: "Security Credentials: Load the credentials and security settings from the playbook"
+  include_vars:
+    file: "{{ micado_cred_path  }}"
+    name: security
+
+- name: "Credential Manager initial config: Copy file"
+  template:
+    src: user_data/auth_data_credential_manager.csv.j2
+    dest: /var/lib/micado/credman/config/provisioning.csv
+
+- name: Create user_data_zorp.env for Zorp
+  template:
+      src: user_data/user_data_zorp.env.j2
+      dest: "/var/lib/micado/zorp/config/user_data_zorp.env"
+
+- name: "MiCADO Kubernetes Manifest: Copy file"
+  template:
+    src: micado/micado-manifest.yml.j2
+    dest: /var/lib/micado/micado-manifest.yml
+    mode: 0644
+
+- name: "Iptables configuration: Copy file"
+  template:
+    src: iptables/iptables.conf.j2
+    dest: /etc/iptables.conf
+    mode: 0640
+
+- name: "Ip6tables configuration: Copy file"
+  template:
+    src: iptables/ip6tables.conf.j2
+    dest: /etc/ip6tables.conf
+    mode: 0640
+
+- name: "Occopus config: Deploying credential file"
+  template:
+    src: user_data/auth_data.yaml.j2
+    dest: "/var/lib/micado/occopus/data/auth_data.yaml"
+
+- name: "Occopus: Deploying cloud-config for workers"
+  template:
+    src: worker_node/cloud_init_worker.yaml.j2
+    dest: /var/lib/micado/toscasubmitter/system/cloud_init_worker.yaml
+    mode: 0644
+
+- name: "Worker node: Disable Unattended Upgrades"
+  lineinfile:
+    path: /var/lib/micado/toscasubmitter/system/cloud_init_worker.yaml
+    insertafter: '^runcmd:'
+    line: '  - sed -i ''s/APT::Periodic::Unattended-Upgrade "1";/APT::Periodic::Unattended-Upgrade "0";/g'' /etc/apt/apt.conf.d/20auto-upgrades'
+  when: disable_worker_updates is defined and disable_worker_updates
+
+- name: "Occopus: Deploying infrastructure descriptor"
+  template:
+    src: worker_node/temp_infrastructure_descriptor.yaml.j2
+    dest: /var/lib/micado/toscasubmitter/system/infrastructure_descriptor.yaml
+    mode: 0644
+
+# TODO: Can this be moved to a j2 template?
+- name: "Create ipsec configuration"
+  copy:
+    content: |
+        config setup
+                uniqueids=never
+
+        conn iptunnel
+                type=transport
+                compress=yes
+                fragmentation=yes
+                keyexchange=ikev2
+                authby=pubkey
+                leftid="CN=workernode.micado"
+                leftcert=master.crt
+                left={{ ansible_default_ipv4.address }}
+                right=%any
+                auto=start
+    dest: /etc/ipsec.conf

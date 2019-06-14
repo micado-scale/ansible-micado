@@ -1,0 +1,18 @@
+[Unit]
+Description=MiCADO
+After=kubelet.service
+Requires=kubelet.service
+
+[Service]
+User=root
+Type=forking
+ExecStart=/usr/bin/kubectl apply -f /var/lib/micado/micado-manifest.yml
+StandardOutput=syslog
+StandardError=syslog
+RemainAfterExit=true
+ExecStop=/usr/bin/kubectl delete -f /var/lib/micado/micado-manifest.yml
+TimeoutStartSec=60min
+
+[Install]
+WantedBy=multi-user.target
+

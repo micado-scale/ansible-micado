@@ -9,10 +9,10 @@ if [ -z "$CQUEUE_SERVER_IP" ]; then
 fi
 JOBID=$1
 if [ -z "$JOBID" ]; then
-  echo "Please, set JOBID as argument!" 
+  echo "Please, set JOBID as argument!"
   exit
 fi
 
 echo "Querying stdout of job: \"$JOBID\" from CQueue at $CQUEUE_SERVER_IP ..."
-curl -X GET http://$CQUEUE_SERVER_IP:8888/task/$JOBID/result
+curl -X GET http://$CQUEUE_SERVER_IP:30888/task/$JOBID/result
 echo

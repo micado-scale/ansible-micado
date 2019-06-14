@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.x.2/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.7.3/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -20,6 +20,9 @@ topology_template:
              clusterIP: 10.96.0.240
            - target: 111
              protocol: udp
+      requirements:
+      - host:
+          node: static-worker
       artifacts:
        image:
          type: tosca.artifacts.Deployment.Image.Container.Docker
@@ -66,6 +69,9 @@ topology_template:
               type: tosca.relationships.AttachesTo
               properties:
                 location: /var/lib/mysql
+        - host:
+            node: static-worker
+
       interfaces:
         Kubernetes:
           create:
@@ -121,6 +127,8 @@ topology_template:
               type: tosca.relationships.AttachesTo
               properties:
                 location: /var/www/html
+        - host:
+            node: scaling-worker
       interfaces:
         Kubernetes:
           create:
@@ -134,7 +142,34 @@ topology_template:
                 labels:
                   tier: frontend
 
-    worker_node:
+    scaling-worker:
+      type: tosca.nodes.MiCADO.Nova.Compute
+      properties:
+        image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
+        flavor_name: ADD_YOUR_FLAVOUR_ID_HERE (e.g. 3)
+        project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
+        network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
+        key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
+        context:
+          append: yes
+          cloud_config: |
+            runcmd:
+            - apt-get install -y nfs-kernel-server nfs-common
+        security_groups:
+          - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
+      interfaces:
+        Occopus:
+          create:
+            inputs:
+              interface_cloud: nova
+              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
+      capabilities:
+        host:
+          properties:
+            num_cpus: 2
+            mem_size: 2 GB
+
+    static-worker:
       type: tosca.nodes.MiCADO.Nova.Compute
       properties:
         image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
@@ -168,8 +203,10 @@ topology_template:
   policies:
     - scalability:
         type: tosca.policies.Scaling.MiCADO.VirtualMachine.Net.wordpress
-        targets: [ worker_node ]
+        targets: [ scaling-worker ]
         properties:
+          constants:
+            NODE_NAME: 'scaling-worker'
           min_instances: 1
           max_instances: 3
     - scalability:
@@ -194,10 +231,10 @@ policy_types:
         description: pre-define alerts for container Net
         default:
         - alert: service_overloaded
-          expr: 'avg(rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[30s]))/1000 > {{SERVICE_TH_MAX}}'
+          expr: 'avg(rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[60s]))/1000 > {{SERVICE_TH_MAX}}'
           for: 30s
         - alert: service_underloaded
-          expr: 'avg(rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[30s]))/1000 < {{SERVICE_TH_MIN}}'
+          expr: 'avg(rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[60s]))/1000 < {{SERVICE_TH_MIN}}'
           for: 30s
         required: true
       scaling_rule:
@@ -205,7 +242,7 @@ policy_types:
         description: pre-define scaling rule for container Net
         default: |
           if len(m_nodes) == m_node_count:
-            if service_overloaded and m_node_count > m_container_count-1:
+            if service_overloaded and m_node_count > m_container_count:
               m_container_count+=1
             if service_underloaded:
               m_container_count-=1
@@ -222,10 +259,10 @@ policy_types:
         description: pre-define alerts for node Net
         default:
         - alert: node_overloaded
-          expr: 'avg(rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[30s]))/1000 > {{SERVICE_TH_MAX}}'
+          expr: 'avg(rate(container_network_receive_bytes_total{node="{{ NODE_NAME }}", container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[60s]))/1000 > {{SERVICE_TH_MAX}}'
           for: 1m
         - alert: node_underloaded
-          expr: 'avg(rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[30s]))/1000 < {{SERVICE_TH_MIN}}'
+          expr: 'avg(rate(container_network_receive_bytes_total{node="{{ NODE_NAME }}", container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[60s]))/1000 < {{SERVICE_TH_MIN}}'
           for: 1m
         required: true
       scaling_rule:

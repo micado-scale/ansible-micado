@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.x.2/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.7.3/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -25,10 +25,10 @@ topology_template:
           create:
             implementation: image
             inputs:
-              strategy: 
+              strategy:
                 type: Recreate
 
-    worker_node:
+    worker-node:
       type: tosca.nodes.MiCADO.EC2.Compute
       properties:
         region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
@@ -51,9 +51,10 @@ topology_template:
   policies:
     - scalability:
         type: tosca.policies.Scaling.MiCADO.VirtualMachine.CPU.stressng
-        targets: [ worker_node ]
+        targets: [ worker-node ]
         properties:
           constants:
+            NODE_NAME: 'worker-node'
             NODE_TH_MAX: '60'
             NODE_TH_MIN: '25'
           min_instances: 1
@@ -80,10 +81,10 @@ policy_types:
         description: pre-define alerts for container CPU
         default:
         - alert: service_overloaded
-          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[30s]))*100 > {{SERVICE_TH_MAX}}'
+          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[60s]))*100 > {{SERVICE_TH_MAX}}'
           for: 30s
         - alert: service_underloaded
-          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[30s]))*100 < {{SERVICE_TH_MIN}}'
+          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[60s]))*100 < {{SERVICE_TH_MIN}}'
           for: 30s
         required: true
       scaling_rule:
@@ -108,10 +109,10 @@ policy_types:
         description: pre-define alerts for VM CPU
         default:
         - alert: node_overloaded
-          expr: '(100-(avg(rate(node_cpu{group="worker_cluster",mode="idle"}[60s]))*100)) > {{NODE_TH_MAX}}'
+          expr: '(100-(avg(rate(node_cpu{node="{{ NODE_NAME }}", mode="idle"}[60s]))*100)) > {{NODE_TH_MAX}}'
           for: 1m
         - alert: node_underloaded
-          expr: '(100-(avg(rate(node_cpu{group="worker_cluster",mode="idle"}[60s]))*100)) < {{NODE_TH_MIN}}'
+          expr: '(100-(avg(rate(node_cpu{node="{{ NODE_NAME }}", mode="idle"}[60s]))*100)) < {{NODE_TH_MIN}}'
           for: 1m
         required: true
       scaling_rule:
