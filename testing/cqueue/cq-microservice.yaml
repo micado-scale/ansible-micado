@@ -114,7 +114,7 @@ topology_template:
           configure:
             inputs:
               restartPolicy: "Always"
-      
+
     cqueue-worker:
       type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
@@ -150,7 +150,7 @@ topology_template:
           configure:
             inputs:
               restartPolicy: "Always"
-    
+
     docker-binary-host-vol:
       type: tosca.nodes.MiCADO.Container.Volume
       properties:
@@ -172,7 +172,7 @@ topology_template:
             inputs:
               hostPath:
                 path: /var/run/docker.sock
-                         
+
     worker-node:
       type: tosca.nodes.MiCADO.CloudSigma.Compute
       properties:
@@ -196,7 +196,7 @@ topology_template:
           properties:
             num_cpus: 2
             mem_size: 2 GB
-                         
+
     cq-server:
       type: tosca.nodes.MiCADO.CloudSigma.Compute
       properties:
@@ -228,7 +228,7 @@ topology_template:
         properties:
           sources:
           - 'rabbitmq-exporter:8090'
-          constants: 
+          constants:
             AET: 30
             DEADLINE: 1530270216
             MAXNODES: 2

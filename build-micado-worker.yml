@@ -26,12 +26,12 @@
           - "ansible_memtotal_mb >= 1950"
         msg: >
           "The required memory size is minimum 2 GB"
-      
+
     - name: "Waiting for automatic security updates to finish"
       script: pre-task/wait-updates.sh
       register: outputsh
       changed_when: outputsh.stdout != ""
-      
+
   roles:
     - micado-worker
 

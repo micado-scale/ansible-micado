@@ -25,7 +25,7 @@ topology_template:
           create:
             implementation: image
             inputs:
-              strategy: 
+              strategy:
                 type: Recreate
 
     worker-node:

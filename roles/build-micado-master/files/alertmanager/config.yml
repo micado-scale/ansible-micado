@@ -1,5 +1,5 @@
 global:
-  resolve_timeout: 30s 
+  resolve_timeout: 30s
 # The root route on which each incoming alert enters.
 # The root route with all parameters, which are inherited by the child
 # routes if they are not overwritten.

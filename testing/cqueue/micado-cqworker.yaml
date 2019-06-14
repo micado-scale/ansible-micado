@@ -41,7 +41,7 @@ topology_template:
           configure:
             inputs:
               restartPolicy: "Always"
-    
+
     docker-binary-host-vol:
       type: tosca.nodes.MiCADO.Container.Volume
       properties:
@@ -63,7 +63,7 @@ topology_template:
             inputs:
               hostPath:
                 path: /var/run/docker.sock
-                         
+
     worker-node:
       type: tosca.nodes.MiCADO.CloudSigma.Compute
       properties:
@@ -95,7 +95,7 @@ topology_template:
         properties:
           sources:
           - 'cqueue.server.ip.address:8090'
-          constants: 
+          constants:
             AET: 30
             DEADLINE: 1530270216
             MAXNODES: 2

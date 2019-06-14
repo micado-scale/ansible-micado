@@ -9,7 +9,7 @@ if [ -z "$CQUEUE_SERVER_IP" ]; then
 fi
 JOBID=$1
 if [ -z "$JOBID" ]; then
-  echo "Please, set JOBID as argument!" 
+  echo "Please, set JOBID as argument!"
   exit
 fi
 

@@ -9,7 +9,7 @@ listener "tcp" {
     tils_key_file = ""
 }
 
-# Specify storage 
+# Specify storage
 storage "file" {
     path = "/vault/file"
 }
@@ -17,8 +17,8 @@ storage "file" {
 # Vault built-in web UI
 ui = false
 
-# Vault log level. 
-#Supported values (in order of detail) are "trace", "debug", "info", "warn", and "err". 
+# Vault log level.
+#Supported values (in order of detail) are "trace", "debug", "info", "warn", and "err".
 log_level = "info"
 
 # Default is 768h
