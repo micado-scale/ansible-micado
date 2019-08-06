@@ -14,4 +14,3 @@ receivers:
 - name: 'default'
   webhook_configs:
      - url: http://policykeeper:12345/alerts/fire
-

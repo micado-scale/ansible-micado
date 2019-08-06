@@ -3,23 +3,34 @@ prometheus_config_template: '/config/policykeeper/prometheus_config_template.yam
 prometheus_config_target: '/config/prometheus/prometheus.yml'
 prometheus_rules_directory: '/config/prometheus'
 
-swarm_endpoint: 'unix:///var/run/docker.sock'
+docker_node_unreachable_timeout: 120
+
 k8s_endpoint: 'unix:///var/run/docker.sock'
+
 occopus_endpoint: 'http://occopus:5000'
 occopus_infra_name: 'micado_worker_infra'
 occopus_worker_name: 'worker'
 
-docker_node_unreachable_timeout: 60
+optimizer_endpoint: 'http://optimizer:12346'
+
+optimizer_vars_prefix_init: 'm_opt_init_'
+optimizer_vars_prefix_input: 'm_opt_input_'
+optimizer_vars_prefix_target: 'm_opt_target_'
+optimizer_vars_prefix_target_query: 'query_'
+optimizer_vars_prefix_target_minth: 'minth_'
+optimizer_vars_prefix_target_maxth: 'maxth_'
 
 logging:
     version: 1
     root:
-        level: INFO
+        level: DEBUG
         handlers: [console, file]
     formatters:
         simpleFormatter:
             #format: "%(module)s %(asctime)s %(levelname)s %(message)s"
             format: "%(asctime)s %(levelname)s %(message)s"
+        usercodeFormatter:
+            format: "%(message)s"
     handlers:
         console:
             class: logging.StreamHandler
@@ -32,13 +43,25 @@ logging:
             mode: w
             level: DEBUG
             filename: /var/log/policykeeper/pk.log
+        file_usercode:
+            class : logging.FileHandler
+            formatter: usercodeFormatter
+            mode: w
+            level: DEBUG
+            filename: /var/log/policykeeper/pk_usercode.log
     loggers:
         pk:
             propagate: false
             handlers: [console, file]
-        pk_docker:
+        pk_k8s:
             propagate: false
             handlers: [console, file]
         pk_prometheus:
+            propagate: true
+            handlers: [console, file]
+        pk_optimizer:
             propagate: false
             handlers: [console, file]
+        pk_usercode:
+            propagate: false
+            handlers: [file_usercode]
