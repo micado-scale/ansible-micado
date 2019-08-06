@@ -28,6 +28,15 @@
     mode: 0775
     recurse: yes
 
+- name: "Alertmanager data: Create directory"
+  file:
+    path: /var/lib/micado/alertmanager/data/
+    state: directory
+    owner: nobody
+    group: nogroup
+    mode: 0775
+    recurse: yes
+
 - name: "Alertmanager config: Create directory"
   file:
     path: /var/lib/micado/alertmanager/config/
@@ -38,7 +47,7 @@
 - name: "Alertmanager config: Copy file"
   copy:
     src: alertmanager/config.yml
-    dest: /var/lib/micado/alertmanager/config/config.yml
+    dest: /var/lib/micado/alertmanager/config/alertmanager.yml
     mode: 0644
 
 - name: "Policy-keeper config: Create directory"
