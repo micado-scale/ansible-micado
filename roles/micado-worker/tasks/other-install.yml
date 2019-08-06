@@ -1,5 +1,5 @@
 ---
-- name: 'Install pip package manager'
+- name: Install pip package manager
   apt:
     name:
     - python-setuptools
@@ -11,7 +11,7 @@
     name: strongswan
     state: present
 
-- name: 'Installing Python packages'
+- name: Installing Python packages
   pip:
     name:
     - docker

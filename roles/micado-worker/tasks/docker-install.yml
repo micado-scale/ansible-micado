@@ -21,14 +21,20 @@
 - name: 'Docker: Installing APT package'
   apt:
     name:
-    - "{{ docker_package }}"
+    - "{{ packages.docker_ce }}"
+    - "{{ packages.docker_ce_cli }}"
+    - "{{ packages.containerd_io }}"
     state: present
     update_cache: yes
 
 - name: 'Docker: prevent package from being upgraded'
   dpkg_selections:
-    name: docker-ce
+    name: "{{ item }}"
     selection: hold
+  loop:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
 
 - name: 'Docker: Replace ExecStart for systemd'
   lineinfile:

@@ -18,48 +18,22 @@
       - build
       - start
 
-    - name: Verify OS meets the version requirements (Ubuntu 16.04).
+    - name: Check system requirements
       assert:
         that:
-          - "ansible_os_family == 'Debian'"
-          - "ansible_distribution_version == '16.04'"
+          "{{ item.that }}"
         msg: >
-          "The required OS is Ubuntu 16.04"
+          "{{ item.msg }}"
+      loop:
+        - { that: "ansible_os_family == 'Debian' and ansible_distribution_version == '16.04' or ansible_distribution_version == '18.04'", msg: 'The required OS is Ubuntu 16.04 or 18.04' }
+        - { that: "ansible_memtotal_mb >= 2950", msg: 'The minimum required memory size is 3 GB' }
+        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first >= 14000000000", msg: 'The minimum required disk size is 15 GB' }
+        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_available') | list | first >= 5400000000", msg: 'The minimum required free disk size is 5 GB' }
       tags:
       - build
       - start
 
-    - name: Verify memory requirements (3 GB).
-      assert:
-        that:
-          - "ansible_memtotal_mb >= 2950"
-        msg: >
-          "The minimum required memory size is 3 GB"
-      tags:
-      - build
-      - start
-
-    - name: Verify disk space requirements (Disk size is >= 15 GB).
-      assert:
-        that:
-          - "{{ ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first }} >= 14000000000"
-        msg: >
-          "The minimum required disk size is 15 GB"
-      tags:
-      - build
-      - start
-
-    - name: Verify disk space requirements (Free disk size >= 5 GB).
-      assert:
-        that:
-          - "{{ ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_available') | list | first }} >= 5400000000"
-        msg: >
-          "The minimum required free disk size is 5 GB"
-      tags:
-      - build
-      - start
-
-    - name: "Waiting for automatic security updates to finish"
+    - name: Waiting for automatic security updates to finish
       script: pre-task/wait-updates.sh
       register: outputsh
       changed_when: outputsh.stdout != ""
@@ -67,10 +41,10 @@
       - build
       - start
 
-    - name: "Check the CPU manufacture"
+    - name: "Check the CPU manufacture (Intel)"
       set_fact:
-         docker_iivr: false
-      when: '"AMD" in  "{{ ansible_processor }}"'
+         intel_cpu: true
+      when: "ansible_processor | select('match', '.*Intel') | list | length > 0"
       tags:
       - build
       - start
@@ -100,11 +74,11 @@
     - master_hostname: micado-master
     - worker_hostname: micado-worker
 
-    - docker_iivr: true
-
     ##################################################################################
     ##### Please do not edit under this line unless you know what you are doing. #####
     ##################################################################################
+
+    - intel_cpu: false
 
     - docker_images:
         alertmanager: prom/alertmanager:v0.18.0

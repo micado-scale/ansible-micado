@@ -43,7 +43,7 @@
     line: "ExecStart=/usr/bin/dockerd -H fd:// --mtu={{ ansible_default_ipv4.mtu }}"
   register: docker_service
 
-- name: 'Docker: Set docker log options'
+- name: 'Docker: Copy log options'
   copy:
     src: 'docker/daemon.json'
     dest: '/etc/docker/daemon.json'

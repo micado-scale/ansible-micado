@@ -1,8 +1,7 @@
 ---
-- name: 'Downloading docker image: cAdvisor'
+- name: Downloading docker images
   docker_image:
-      name: "{{docker_images.cadvisor}}"
-
-- name: 'Downloading docker image: Node Exporter'
-  docker_image:
-      name: "{{docker_images.node_exporter}}"
+      name: "{{ item }}"
+  loop:
+    - "{{docker_images.cadvisor}}"
+    - "{{docker_images.node_exporter}}"

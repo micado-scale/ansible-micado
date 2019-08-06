@@ -32,7 +32,7 @@
   dpkg_selections:
     name: "{{ item }}"
     selection: hold
-  with_items:
+  loop:
     - kubelet
     - kubeadm
     - kubectl

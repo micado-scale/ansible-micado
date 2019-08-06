@@ -1,5 +1,5 @@
 ---
-- name: "Ensure Google DNS server"
+- name: Ensure Google DNS server
   lineinfile:
     path: /etc/resolv.conf
     line: 'nameserver 8.8.8.8'
