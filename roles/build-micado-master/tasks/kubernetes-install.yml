@@ -22,9 +22,9 @@
 - name: 'K8s: Install APT packages'
   apt:
     name:
-    - kubelet={{ kubernetes_version }}
-    - kubeadm={{ kubernetes_version }}
-    - kubectl={{ kubernetes_version }}
+    - kubelet={{ packages.kubernetes_version }}
+    - kubeadm={{ packages.kubernetes_version }}
+    - kubectl={{ packages.kubernetes_version }}
     state: present
     update_cache: yes
 
@@ -32,7 +32,7 @@
   dpkg_selections:
     name: "{{ item }}"
     selection: hold
-  with_items:
+  loop:
     - kubelet
     - kubeadm
     - kubectl
@@ -43,14 +43,11 @@
 - name: 'K8s: Pull config images'
   shell: kubeadm config images pull
 
-- name: 'Kubernetes: Copy Dashboard manifest'
+- name: 'Kubernetes: Copy Kubernetes Dashboard and flannel manifest'
   copy:
-    src: kubernetes/kube-dash.yaml
-    dest: /etc/kubernetes/kube-dash.yaml
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
     mode: 0644
-
-- name: 'Kubernetes: Copy Flannel-CNI manifest'
-  copy:
-    src: kubernetes/kube-flannel.yaml
-    dest: /etc/kubernetes/kube-flannel.yaml
-    mode: 0644
+  loop:
+    - { src: 'kubernetes/kube-dash.yaml', dest: '/etc/kubernetes/kube-dash.yaml'}
+    - { src: 'kubernetes/kube-flannel.yaml', dest: '/etc/kubernetes/kube-flannel.yaml'}

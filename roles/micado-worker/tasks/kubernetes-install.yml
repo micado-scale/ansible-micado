@@ -22,9 +22,9 @@
 - name: 'K8s: Install APT packages'
   apt:
     name:
-    - kubelet={{ kubernetes_version }}
-    - kubeadm={{ kubernetes_version }}
-    - kubectl={{ kubernetes_version }}
+    - kubelet={{ packages.kubernetes_version }}
+    - kubeadm={{ packages.kubernetes_version }}
+    - kubectl={{ packages.kubernetes_version }}
     state: present
     update_cache: yes
 
@@ -32,7 +32,7 @@
   dpkg_selections:
     name: "{{ item }}"
     selection: hold
-  with_items:
+  loop:
     - kubelet
     - kubeadm
     - kubectl

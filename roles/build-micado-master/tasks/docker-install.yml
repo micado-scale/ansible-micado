@@ -21,14 +21,20 @@
 - name: 'Docker: Installing APT package'
   apt:
     name:
-    - "{{ docker_package }}"
+    - "{{ packages.docker_ce }}"
+    - "{{ packages.docker_ce_cli }}"
+    - "{{ packages.containerd_io }}"
     state: present
     update_cache: yes
 
 - name: 'Docker: prevent package from being upgraded'
   dpkg_selections:
-    name: docker-ce
+    name: "{{ item }}"
     selection: hold
+  loop:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
 
 - name: 'Docker: Replace ExecStart for systemd'
   lineinfile:
@@ -36,6 +42,12 @@
     regexp: '^ExecStart=/usr/bin/dockerd[.]?'
     line: "ExecStart=/usr/bin/dockerd -H fd:// --mtu={{ ansible_default_ipv4.mtu }}"
   register: docker_service
+
+- name: 'Docker: Copy log options'
+  copy:
+    src: 'docker/daemon.json'
+    dest: '/etc/docker/daemon.json'
+    mode: 0644
 
 - name: 'Docker: Restart service'
   systemd:
