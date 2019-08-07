@@ -96,7 +96,7 @@
         securitypolicymanager: micado/security-policy-manager:2.0
         toscasubmitter: micado/toscasubmitter:v0.7.3
         vault: vault:1.2.0
-        zorp: micado/zorpgpl:6.0.11
+        zorp: micado/zorpgpl:6.0.12
 
     - packages:
         docker_ce: "docker-ce=5:19.03.1~3-0~ubuntu-{{ ansible_distribution_release }}"
