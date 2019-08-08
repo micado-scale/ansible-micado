@@ -70,6 +70,7 @@
     - disable_worker_updates: True
     - grafana_admin_pwd: secret
     - web_listening_port: 443
+    - web_session_timeout: 600
 
     - master_hostname: micado-master
     - worker_hostname: micado-worker
