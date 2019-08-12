@@ -205,6 +205,8 @@ spec:
         - name: LOG_DIR
           value: /var/log/occopus
         volumeMounts:
+        - name: occopus-config
+          mountPath: /root/.occopus/
         - name: occopus-data
           mountPath: /var/lib/micado/occopus/data
         - name: occopus-submitter
@@ -212,6 +214,9 @@ spec:
         - name: occopus-log
           mountPath: /var/log/occopus
       volumes:
+      - name: occopus-config
+        hostPath:
+          path: /var/lib/micado/occopus/config
       - name: occopus-data
         hostPath:
           path: /var/lib/micado/occopus/data

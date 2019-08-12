@@ -38,17 +38,21 @@ logging:
             level: DEBUG
             stream: ext://sys.stdout
         file:
-            class : logging.FileHandler
+            class : logging.handlers.RotatingFileHandler
             formatter: simpleFormatter
-            mode: w
+            mode: a
             level: DEBUG
             filename: /var/log/policykeeper/pk.log
+            maxBytes: 52428800
+            backupCount: 3
         file_usercode:
-            class : logging.FileHandler
+            class : logging.handlers.RotatingFileHandler
             formatter: usercodeFormatter
-            mode: w
+            mode: a
             level: DEBUG
             filename: /var/log/policykeeper/pk_usercode.log
+            maxBytes: 52428800
+            backupCount: 3
     loggers:
         pk:
             propagate: false

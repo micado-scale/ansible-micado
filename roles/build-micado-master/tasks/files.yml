@@ -16,6 +16,7 @@
     - { path: '/var/lib/micado/grafana/provisioning/datasources', owner: 'root', group: 'root' }
     - { path: '/var/lib/micado/grafana/provisioning/dashboards', owner: 'root', group: 'root' }
     - { path: '/var/lib/micado/grafana/provisioning/notifiers', owner: 'root', group: 'root' }
+    - { path: '/var/lib/micado/occopus/config/', owner: 'root', group: 'root' }
     - { path: '/var/lib/micado/occopus/data/', owner: 'root', group: 'root' }
     - { path: '/var/lib/micado/policykeeper/config/', owner: 'root', group: 'root' }
     - { path: '/var/lib/micado/prometheus/config/', owner: 'root', group: 'root' }
@@ -56,6 +57,7 @@
     - { src: 'iptables/ip6tables.service', dest: '/etc/systemd/system/ip6tables.service', mode: '0644'}
     - { src: 'micado/micado.service', dest: '/etc/systemd/system/micado.service', mode: '0644'}
     - { src: 'misc/micadoctl', dest: '/usr/local/bin/micadoctl', mode: '0755'}
+    - { src: 'occopus/occopus_config.yaml', dest: '/var/lib/micado/occopus/config/occopus_config.yaml', mode: '0775'}
     - { src: 'policykeeper/policykeeper_config.yaml', dest: '/var/lib/micado/policykeeper/config/policykeeper_config.yaml', mode: '0644'}
     - { src: 'prometheus/prometheus.yml', dest: '/var/lib/micado/prometheus/config/prometheus.yml', mode: '0644'}
     - { src: 'toscasubmitter/key_config.yml', dest: '/var/lib/micado/toscasubmitter/system/key_config.yml', mode: '0644'}
