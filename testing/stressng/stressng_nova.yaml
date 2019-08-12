@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.7.3/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/develop/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -9,24 +9,13 @@ repositories:
 topology_template:
   node_templates:
     stressng:
-      type: tosca.nodes.MiCADO.Container.Application.Docker
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
+        image: lorel/docker-stress-ng
         args: ['--cpu', '0', '--cpu-method', 'pi', '-l', '20']
         resources:
           requests:
             cpu: "900m"
-      artifacts:
-       image:
-         type: tosca.artifacts.Deployment.Image.Container.Docker
-         file: lorel/docker-stress-ng
-         repository: docker_hub
-      interfaces:
-        Kubernetes:
-          create:
-            implementation: image
-            inputs:
-              strategy:
-                type: Recreate
 
     worker-node:
       type: tosca.nodes.MiCADO.Nova.Compute
