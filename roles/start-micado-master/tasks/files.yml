@@ -19,6 +19,7 @@
     - { src: 'micado/micado-manifest.yml.j2', dest: '/var/lib/micado/micado-manifest.yml'}
     - { src: 'iptables/iptables.conf.j2', dest: '/etc/iptables.conf'}
     - { src: 'iptables/ip6tables.conf.j2', dest: '/etc/ip6tables.conf'}
+    - { src: 'zorp/policy.py.j2', dest: '/var/lib/micado/zorp/config/policy.py', mode: '0644'}
     - { src: 'user_data/auth_data.yaml.j2', dest: '/var/lib/micado/occopus/data/auth_data.yaml'}
     - { src: 'worker_node/cloud_init_worker.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/cloud_init_worker.yaml'}
     - { src: 'worker_node/temp_infrastructure_descriptor.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/infrastructure_descriptor.yaml'}

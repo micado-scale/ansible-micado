@@ -62,7 +62,6 @@
     - { src: 'prometheus/prometheus.yml', dest: '/var/lib/micado/prometheus/config/prometheus.yml', mode: '0644'}
     - { src: 'toscasubmitter/key_config.yml', dest: '/var/lib/micado/toscasubmitter/system/key_config.yml', mode: '0644'}
     - { src: 'vault/vault.hcl', dest: '/var/lib/micado/vault/config/vault.hcl', mode: '0644'}
-    - { src: 'zorp/policy.py', dest: '/var/lib/micado/zorp/config/policy.py', mode: '0644'}
     - { src: 'zorp/authform.html', dest: '/var/lib/micado/zorp/config/authform.html', mode: '0644'}
     - { src: 'zorp/zorp-entrypoint.sh', dest: '/var/lib/micado/zorp/scripts/docker-entrypoint.sh', mode: '0755'}
 
