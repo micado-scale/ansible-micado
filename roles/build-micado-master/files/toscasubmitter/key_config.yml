@@ -1,7 +1,27 @@
 main_config:
   dry_run: False
-  log_level: INFO
-  path_log: "/var/log/submitter/submitter.log"
+logging:
+    version: 1
+    root:
+        level: INFO
+        handlers: [console, file]
+    formatters:
+        simpleFormatter:
+            format: "%(asctime)s %(name)s %(levelname)s %(message)s"
+    handlers:
+        console:
+            class: logging.StreamHandler
+            formatter: simpleFormatter
+            level: INFO
+            stream: ext://sys.stdout
+        file:
+            class : logging.handlers.RotatingFileHandler
+            formatter: simpleFormatter
+            mode: a
+            level: INFO
+            filename: /var/log/submitter/submitter.log
+            maxBytes: 52428800
+            backupCount: 3
 
 step:
   translate:
