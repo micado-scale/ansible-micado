@@ -95,7 +95,7 @@
         prometheus: prom/prometheus:v2.11.1
         redis: redis:5-alpine
         securitypolicymanager: micado/security-policy-manager:2.0
-        toscasubmitter: micado/toscasubmitter:v0.7.3
+        toscasubmitter: micado/toscasubmitter:dev
         vault: vault:1.2.0
         zorp: micado/zorpgpl:6.0.12
 
