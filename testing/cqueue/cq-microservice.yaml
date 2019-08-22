@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.7.3/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/develop/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -11,88 +11,25 @@ topology_template:
     rabbitmq:
       type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
+        image: rabbitmq:3-management
         env:
           - name: RABBITMQ_DEFAULT_USER
             value: guest
           - name: RABBITMQ_DEFAULT_PASS
             value: guest
         ports:
-        - target: 15672
-        - target: 5672
+        - port: 15672
+        - port: 5672
       requirements:
-      - host:
-          node: cq-server
-      artifacts:
-        image:
-          type: tosca.artifacts.Deployment.Image.Container.Docker
-          file: rabbitmq:3-management
-          repository: docker_hub
-      interfaces:
-        Kubernetes:
-          create:
-            implementation: image
-          configure:
-            inputs:
-              restartPolicy: "Always"
-
-    redis:
-      type: tosca.nodes.MiCADO.Container.Application.Docker
-      properties:
-        command:
-        - redis-server
-        args:
-        - --appendonly yes
-        ports:
-        - target: 6379
-      requirements:
-      - host:
-          node: cq-server
-      artifacts:
-        image:
-          type: tosca.artifacts.Deployment.Image.Container.Docker
-          file: redis
-          repository: docker_hub
-      interfaces:
-        Kubernetes:
-          create:
-            implementation: image
-          configure:
-            inputs:
-              restartPolicy: "Always"
-
-    frontend:
-      type: tosca.nodes.MiCADO.Container.Application.Docker
-      properties:
-        env:
-          - name: BROKER
-            value: amqp://guest:guest@rabbitmq:5672
-          - name: RESULT_BACKEND
-            value: redis://redis:6379
-        ports:
-        - target: 8080
-          nodePort: 30888
-      requirements:
-      - host:
-          node: cq-server
-      artifacts:
-        image:
-          type: tosca.artifacts.Deployment.Image.Container.Docker
-          file: sanyi86/cqueue_frontend
-          repository: docker_hub
-      interfaces:
-        Kubernetes:
-          create:
-            implementation: image
-          configure:
-            inputs:
-              restartPolicy: "Always"
+      - host: cq-server
 
     rabbitmq-exporter:
       type: tosca.nodes.MiCADO.Container.Application.Docker
       properties:
+        image: kbudde/rabbitmq-exporter
         env:
           - name: RABBIT_URL
-            value: http://rabbitmq:15672
+            value: http://127.0.0.1:15672
           - name: PUBLISH_PORT
             value: "8090"
           - name: RABBIT_EXPORTERS
@@ -100,84 +37,76 @@ topology_template:
         ports:
         - containerPort: 8090
       requirements:
-      - host:
-          node: cq-server
-      artifacts:
-        image:
-          type: tosca.artifacts.Deployment.Image.Container.Docker
-          file: kbudde/rabbitmq-exporter
-          repository: docker_hub
+      - host: cq-server
+
+
+    rabbit:
+      type: tosca.nodes.MiCADO.Container.Pod.Kubernetes
+      requirements:
+      - container: rabbitmq
+      - container: rabbitmq-exporter
       interfaces:
         Kubernetes:
           create:
-            implementation: image
-          configure:
-            inputs:
-              restartPolicy: "Always"
 
-    cqueue-worker:
-      type: tosca.nodes.MiCADO.Container.Application.Docker
+    redis:
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
+        image: redis
+        command:
+        - redis-server
+        args:
+        - --appendonly yes
+        ports:
+        - port: 6379
+      requirements:
+      - host: cq-server
+
+    frontend:
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
+      properties:
+        image: sanyi86/cqueue_frontend
         env:
           - name: BROKER
-            value: amqp://guest:guest@rabbitmq:5672
+            value: amqp://guest:guest@rabbit:5672
           - name: RESULT_BACKEND
             value: redis://redis:6379
-      artifacts:
-        image:
-          type: tosca.artifacts.Deployment.Image.Container.Docker
-          file: sztakilpds/cqueue_worker
-          repository: docker_hub
+        ports:
+        - port: 8080
+          nodePort: 30888
       requirements:
-        - host:
-            node: worker-node
-        - volume:
-            node: docker-binary-host-vol
-            relationship:
-              type: tosca.relationships.AttachesTo
-              properties:
-                location: /usr/bin/docker
-        - volume:
-            node: docker-socket-host-vol
-            relationship:
-              type: tosca.relationships.AttachesTo
-              properties:
-                location: /var/run/docker.sock
-      interfaces:
-        Kubernetes:
-          create:
-            implementation: image
-          configure:
-            inputs:
-              restartPolicy: "Always"
+      - host: cq-server
+
+    cqueue-worker:
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
+      properties:
+        image: sztakilpds/cqueue_worker
+        env:
+          - name: BROKER
+            value: amqp://guest:guest@rabbit:5672
+          - name: RESULT_BACKEND
+            value: redis://redis:6379
+      requirements:
+        - host: worker-node
+        - volume: docker-binary-host-vol
+        - volume: docker-socket-host-vol
 
     docker-binary-host-vol:
-      type: tosca.nodes.MiCADO.Container.Volume
+      type: tosca.nodes.MiCADO.Container.Volume.HostPath
       properties:
-        name: docker-bin
-      interfaces:
-        Kubernetes:
-          create:
-            inputs:
-              hostPath:
-                path: /usr/bin/docker
+        path: /usr/bin/docker
 
     docker-socket-host-vol:
-      type: tosca.nodes.MiCADO.Container.Volume
+      type: tosca.nodes.MiCADO.Container.Volume.HostPath
       properties:
-        name: docker-socket
-      interfaces:
-        Kubernetes:
-          create:
-            inputs:
-              hostPath:
-                path: /var/run/docker.sock
+        path: /var/run/docker.sock
 
+# This template demonstrates abstraction, with 2GHz/2GB VMs on CloudSigma Zurich
+# To change region, overwrite the endpoint property for both nodes below (example: Geneva)
+#       endpoint: https://gva.cloudsigma.com/api/2.0
     worker-node:
-      type: tosca.nodes.MiCADO.CloudSigma.Compute
+      type: tosca.nodes.MiCADO.CloudSigma.Compute.Occo.small
       properties:
-        num_cpus: 2000
-        mem_size: 2147483648
         vnc_password: secret
         libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
         public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
@@ -185,23 +114,10 @@ topology_template:
         - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
           ip_v4_conf:
             conf: dhcp
-      interfaces:
-        Occopus:
-          create:
-            inputs:
-              interface_cloud: cloudsigma
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g. https://zrh.cloudsigma.com/api/2.0)
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
 
     cq-server:
-      type: tosca.nodes.MiCADO.CloudSigma.Compute
+      type: tosca.nodes.MiCADO.CloudSigma.Compute.Occo.small
       properties:
-        num_cpus: 2000
-        mem_size: 2147483648
         vnc_password: secret
         libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
         public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
@@ -209,17 +125,6 @@ topology_template:
         - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
           ip_v4_conf:
             conf: dhcp
-      interfaces:
-        Occopus:
-          create:
-            inputs:
-              interface_cloud: cloudsigma
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g. https://zrh.cloudsigma.com/api/2.0)
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
 
   policies:
     - scalability:

@@ -9,24 +9,13 @@ repositories:
 topology_template:
   node_templates:
     stressng:
-      type: tosca.nodes.MiCADO.Container.Application.Docker
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
+        image: lorel/docker-stress-ng
         args: ['--cpu', '0', '--cpu-method', 'pi', '-l', '20']
         resources:
           requests:
             cpu: "900m"
-      artifacts:
-       image:
-         type: tosca.artifacts.Deployment.Image.Container.Docker
-         file: lorel/docker-stress-ng
-         repository: docker_hub
-      interfaces:
-        Kubernetes:
-          create:
-            implementation: image
-            inputs:
-              strategy:
-                type: Recreate
 
     worker-node:
       type: tosca.nodes.MiCADO.Nova.Compute

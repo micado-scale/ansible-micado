@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.7.3/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/develop/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -9,28 +9,19 @@ repositories:
 topology_template:
   node_templates:
     nginxapp:
-      type: tosca.nodes.MiCADO.Container.Application.Docker
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
-         resources:
-           requests:
-             cpu: "200m"
-         ports:
-           - target: 8080
-             nodePort: 30012
-             type: NodePort
-           - containerPort: 9300
-      artifacts:
-       image:
-         type: tosca.artifacts.Deployment.Image.Container.Docker
-         file: jaydes/nginxapp:1.2
-         repository: docker_hub
-      interfaces:
-        Kubernetes:
-          create:
-            implementation: image
+        image: jaydes/nginxapp:1.2
+        resources:
+          requests:
+            cpu: "200m"
+        ports:
+        - port: 8080
+          nodePort: 30012
+        - containerPort: 9300
 
     worker-node:
-      type: tosca.nodes.MiCADO.CloudSigma.Compute
+      type: tosca.nodes.MiCADO.CloudSigma.Compute.Occo
       properties:
         num_cpus: 2000
         mem_size: 2147483648
@@ -41,12 +32,8 @@ topology_template:
         - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
           ip_v4_conf:
             conf: dhcp
-      interfaces:
-        Occopus:
-          create:
-            inputs:
-              interface_cloud: cloudsigma
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g. https://zrh.cloudsigma.com/api/2.0)
+        # This node runs on Zurich by default, uncomment & edit the below line to change region
+        # endpoint: https://gva.cloudsigma.com/api/2.0
       capabilities:
         host:
           properties:

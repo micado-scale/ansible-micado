@@ -9,138 +9,76 @@ repositories:
 topology_template:
   node_templates:
     nfs-server-pod:
-      type: tosca.nodes.MiCADO.Container.Application.Docker
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
-         name: nfs-server-container
-         securityContext:
-           privileged: True
-         args: ['/exports']
-         ports:
-           - target: 2049
-             clusterIP: 10.96.0.240
-           - target: 111
-             protocol: udp
+        image: itsthenetwork/nfs-server-ubuntu
+        securityContext:
+          privileged: True
+        args: ['/exports']
+        ports:
+          - port: 2049
+            clusterIP: 10.96.0.240
+          - port: 111
+            protocol: UDP
+        labels:
+          tier: nfs
       requirements:
-      - host:
-          node: static-worker
-      artifacts:
-       image:
-         type: tosca.artifacts.Deployment.Image.Container.Docker
-         file: itsthenetwork/nfs-server-ubuntu
-         repository: docker_hub
-      interfaces:
-        Kubernetes:
-          create:
-            implementation: image
-            inputs:
-              kind: Deployment
-              strategy:
-                type: Recreate
-              metadata:
-                labels:
-                  volume: 'nfs'
-          configure:
-            inputs:
-              metadata:
-                labels:
-                  tier: nfs
+      - host: static-worker
 
     wordpress-mysql:
-      type: tosca.nodes.MiCADO.Container.Application.Docker
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
-         name: mysql
-         env:
-         - name: MYSQL_ROOT_PASSWORD
-           value: admin
-         ports:
-         - target: 3306
-           clusterIP: 'None'
-         - containerPort: 3306
-           name: mysql
-      artifacts:
-       image:
-         type: tosca.artifacts.Deployment.Image.Container.Docker
-         file: mysql:5.6
-         repository: docker_hub
+        image: mysql:5.6
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: admin
+        ports:
+        - target: 3306
+          clusterIP: 'None'
+        - containerPort: 3306
+        labels:
+          tier: mysql
       requirements:
-        - volume:
-            node: nfs-volume
-            relationship:
-              type: tosca.relationships.AttachesTo
-              properties:
-                location: /var/lib/mysql
-        - host:
-            node: static-worker
-
-      interfaces:
-        Kubernetes:
-          create:
-            implementation: image
-            inputs:
-              strategy:
-                type: Recreate
-          configure:
-            inputs:
-              metadata:
-                labels:
-                  tier: mysql
+      - host: static-worker
+      - volume:
+          node: nfs-volume
+          relationship:
+            type: tosca.relationships.AttachesTo
+            properties:
+              location: /var/lib/mysql
 
     nfs-volume:
-      type: tosca.nodes.MiCADO.Container.Volume
+      type: tosca.nodes.MiCADO.Container.Volume.NFS
       properties:
-        name: nfs-volume
-      interfaces:
-        Kubernetes:
-          create:
-            inputs:
-              nfs:
-                server: 10.96.0.240
-                path: /
+        server: 10.96.0.240
+        path: /
 
     wordpress:
-      type: tosca.nodes.MiCADO.Container.Application.Docker
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
-         name: wordpress
-         env:
-         - name: WORDPRESS_DB_HOST
-           value: wordpress-mysql
-         - name: WORDPRESS_DB_PASSWORD
-           value: admin
-         resources:
-           requests:
-             cpu: "900m"
-         ports:
-         - target: 80
-           nodePort: 30010
-           type: NodePort
-         - containerPort: 80
-           name: wordpress
-      artifacts:
-       image:
-         type: tosca.artifacts.Deployment.Image.Container.Docker
-         file: wordpress:5.0.3-apache
-         repository: docker_hub
+        image: wordpress:5.0.3-apache
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: wordpress-mysql
+        - name: WORDPRESS_DB_PASSWORD
+          value: admin
+        resources:
+          requests:
+            cpu: "900m"
+        ports:
+        - port: 80
+          nodePort: 30010
+        - containerPort: 80
+        labels:
+          tier: frontend
       requirements:
+        - host: scaling-worker
         - volume:
             node: nfs-volume
             relationship:
               type: tosca.relationships.AttachesTo
               properties:
                 location: /var/www/html
-        - host:
-            node: scaling-worker
-      interfaces:
-        Kubernetes:
-          create:
-            implementation: image
-            inputs:
-              strategy:
-                type: Recreate
-          configure:
-            inputs:
-              metadata:
-                labels:
-                  tier: frontend
 
     scaling-worker:
       type: tosca.nodes.MiCADO.CloudBroker.Compute

@@ -9,30 +9,20 @@ repositories:
 topology_template:
   node_templates:
     stressng:
-      type: tosca.nodes.MiCADO.Container.Application.Docker
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
+        image: lorel/docker-stress-ng
         args: ['--cpu', '0', '--cpu-method', 'pi', '-l', '20']
         resources:
           requests:
             cpu: "900m"
-      artifacts:
-       image:
-         type: tosca.artifacts.Deployment.Image.Container.Docker
-         file: lorel/docker-stress-ng
-         repository: docker_hub
-      interfaces:
-        Kubernetes:
-          create:
-            implementation: image
-            inputs:
-              strategy:
-                type: Recreate
 
     worker-node:
-      type: tosca.nodes.MiCADO.CloudSigma.Compute
+      type: tosca.nodes.MiCADO.CloudSigma.Compute.Occo.small
       properties:
-        num_cpus: 2000
-        mem_size: 2147483648
+        # This node type creates a 2GHz/2GB VM by default, uncomment & edit the below lines to change
+        # num_cpus: 2000
+        # mem_size: 2147483648
         vnc_password: secret
         libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
         public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
@@ -40,17 +30,8 @@ topology_template:
         - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
           ip_v4_conf:
             conf: dhcp
-      interfaces:
-        Occopus:
-          create:
-            inputs:
-              interface_cloud: cloudsigma
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g. https://zrh.cloudsigma.com/api/2.0)
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
+        # This node type points to Zurich by default, uncomment & edit the below line to change region
+        # endpoint: https://gva.cloudsigma.com/api/2.0
 
   policies:
     - monitoring:
