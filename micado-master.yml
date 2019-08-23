@@ -86,21 +86,21 @@
         cadvisor: google/cadvisor:v0.33.0
         credential_manager: micado/credential-manager:0.2.0
         crypto_engine: micado/crypto-engine:1.0
-        dashboard: micado/dashboard:0.3.1
-        grafana: grafana/grafana:6.2.5
+        dashboard: micado/dashboard:dev
+        grafana: grafana/grafana:6.3.3
         iivr: micado/iivr:1.0
         node_exporter: prom/node-exporter:v0.18.1
         occopus: micado/occopus:1.7-rc2
         policykeeper: micado/policykeeper:dev
-        prometheus: prom/prometheus:v2.11.1
+        prometheus: prom/prometheus:v2.12.0
         redis: redis:5-alpine
         securitypolicymanager: micado/security-policy-manager:2.0
         toscasubmitter: micado/toscasubmitter:dev
-        vault: vault:1.2.0
+        vault: vault:1.2.2
         zorp: micado/zorpgpl:6.0.12
 
     - packages:
         docker_ce: "docker-ce=5:19.03.1~3-0~ubuntu-{{ ansible_distribution_release }}"
         docker_ce_cli: "docker-ce-cli=5:19.03.1~3-0~ubuntu-{{ ansible_distribution_release }}"
         containerd_io: containerd.io=1.2.6-3
-        kubernetes_version: 1.15.2-00
+        kubernetes_version: 1.15.3-00
