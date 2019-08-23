@@ -176,10 +176,7 @@ spec:
         - --kube-subnet-mgr
         resources:
           requests:
-            cpu: "100m"
-            memory: "50Mi"
-          limits:
-            cpu: "100m"
+            cpu: "50m"
             memory: "50Mi"
         securityContext:
           privileged: false
@@ -256,10 +253,7 @@ spec:
         - --kube-subnet-mgr
         resources:
           requests:
-            cpu: "100m"
-            memory: "50Mi"
-          limits:
-            cpu: "100m"
+            cpu: "50m"
             memory: "50Mi"
         securityContext:
           privileged: false
@@ -336,10 +330,7 @@ spec:
         - --kube-subnet-mgr
         resources:
           requests:
-            cpu: "100m"
-            memory: "50Mi"
-          limits:
-            cpu: "100m"
+            cpu: "50m"
             memory: "50Mi"
         securityContext:
           privileged: false
@@ -416,10 +407,10 @@ spec:
         - --kube-subnet-mgr
         resources:
           requests:
-            cpu: "100m"
+            cpu: "50m"
             memory: "50Mi"
           limits:
-            cpu: "100m"
+            cpu: "50m"
             memory: "50Mi"
         securityContext:
           privileged: false
@@ -496,10 +487,10 @@ spec:
         - --kube-subnet-mgr
         resources:
           requests:
-            cpu: "100m"
+            cpu: "50m"
             memory: "50Mi"
           limits:
-            cpu: "100m"
+            cpu: "50m"
             memory: "50Mi"
         securityContext:
           privileged: false

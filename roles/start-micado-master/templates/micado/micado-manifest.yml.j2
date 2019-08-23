@@ -14,6 +14,16 @@ metadata:
   labels:
     name: micado-worker
 ---
+# MiCADO Priority ##
+apiVersion: scheduling.k8s.io/v1beta1
+kind: PriorityClass
+metadata:
+  name: micado-priority
+  namespace: micado-worker
+value: 900000000
+globalDefault: false
+description: "Priority class for MiCADO critical pods"
+---
 # Prometheus Service Account ##
 apiVersion: v1
 kind: ServiceAccount
@@ -940,105 +950,3 @@ spec:
   selector:
     name: zorp
     tier: security
----
-## NodeExporter (Worker Nodes) ##
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: node-exporter
-  namespace: micado-worker
-  labels:
-    tier: monitoring
-spec:
-  selector:
-    matchLabels:
-      name: node-exporter
-      tier: monitoring
-  template:
-    metadata:
-      labels:
-        name: node-exporter
-        tier: monitoring
-    spec:
-      containers:
-      - name: node-exporter
-        image: {{docker_images.node_exporter}}
-        ports:
-        - containerPort: 9100
-        volumeMounts:
-        - name: nodex-proc
-          mountPath: /host/proc
-          readOnly: true
-        - name: nodex-sys
-          mountPath: /host/sys
-          readOnly: true
-        args:
-          - '--path.procfs=/host/proc'
-          - '--path.sysfs=/host/sys'
-      volumes:
-      - name: nodex-proc
-        hostPath:
-          path: /proc
-      - name: nodex-sys
-        hostPath:
-          path: /sys
----
-## cAdvisor (Worker Nodes) ##
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: cadvisor
-  namespace: micado-worker
-  labels:
-    tier: monitoring
-spec:
-  selector:
-    matchLabels:
-      name: cadvisor
-      tier: monitoring
-  template:
-    metadata:
-      labels:
-        name: cadvisor
-        tier: monitoring
-    spec:
-      containers:
-      - name: cadvisor
-        image: {{docker_images.cadvisor}}
-        args:
-        - --docker_only=true
-        - --housekeeping_interval=5s
-        - --disable_metrics=tcp,udp,disk
-        - --max_housekeeping_interval=15s
-        ports:
-        - containerPort: 8080
-        volumeMounts:
-        - name: cadvisor-root
-          mountPath: /rootfs
-          readOnly: true
-        - name: cadvisor-run
-          mountPath: /var/run
-        - name: cadvisor-sys
-          mountPath: /sys
-          readOnly: true
-        - name: cadvisor-docker
-          mountPath: /var/lib/docker
-          readOnly: true
-        - name: cadvisor-disk
-          mountPath: /dev/disk
-      volumes:
-      - name: cadvisor-root
-        hostPath:
-          path: /
-      - name: cadvisor-run
-        hostPath:
-          path: /var/run
-      - name: cadvisor-sys
-        hostPath:
-          path: /sys
-      - name: cadvisor-docker
-        hostPath:
-          path: /var/lib/docker
-      - name: cadvisor-disk
-        hostPath:
-          path: /dev/disk

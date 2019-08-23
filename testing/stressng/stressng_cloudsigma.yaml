@@ -34,6 +34,11 @@ topology_template:
         # endpoint: https://gva.cloudsigma.com/api/2.0
 
   policies:
+    - monitoring:
+        type: tosca.policies.Monitoring.MiCADO
+        properties:
+          enable_container_metrics: true
+          enable_node_metrics: true
     - scalability:
         type: tosca.policies.Scaling.MiCADO.VirtualMachine.CPU.stressng
         targets: [ worker-node ]
