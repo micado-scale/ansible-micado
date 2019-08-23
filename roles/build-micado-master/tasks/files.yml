@@ -18,6 +18,8 @@
     - { path: '/var/lib/micado/grafana/provisioning/notifiers', owner: 'root', group: 'root' }
     - { path: '/var/lib/micado/occopus/config/', owner: 'root', group: 'root' }
     - { path: '/var/lib/micado/occopus/data/', owner: 'root', group: 'root' }
+    - { path: '/var/lib/micado/optimizer/config', owner: 'root', group: 'root' }
+    - { path: '/var/lib/micado/optimizer/data', owner: 'root', group: 'root' }
     - { path: '/var/lib/micado/policykeeper/config/', owner: 'root', group: 'root' }
     - { path: '/var/lib/micado/prometheus/config/', owner: 'root', group: 'root' }
     - { path: '/var/lib/micado/prometheus/data/', owner: 'nobody', group: 'nogroup' }
@@ -35,6 +37,7 @@
     - { path: '/var/log/micado/grafana/', owner: 'root', group: 'root' }
     - { path: '/var/log/micado/iivr/', owner: 'root', group: 'root' }
     - { path: '/var/log/micado/occopus/', owner: 'root', group: 'root' }
+    - { path: '/var/log/micado/optimizer/', owner: 'root', group: 'root' }
     - { path: '/var/log/micado/policykeeper/', owner: 'root', group: 'root' }
     - { path: '/var/log/micado/prometheus/', owner: 'root', group: 'root' }
     - { path: '/var/log/micado/redis/', owner: 'root', group: 'root' }
