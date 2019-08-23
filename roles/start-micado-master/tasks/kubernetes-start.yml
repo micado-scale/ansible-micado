@@ -46,6 +46,22 @@
     regexp: 'cgroupDriver: cgroupfs'
     replace: 'cgroupDriver: systemd'
 
+- name: 'Kubernetes: Make node updates less frequent'
+  replace:
+    path: /var/lib/kubelet/config.yaml
+    regexp: 'nodeStatusUpdateFrequency: \d+s'
+    replace: 'nodeStatusUpdateFrequency: 20s'
+
+- name: 'Kubernetes: Lower pod eviction timeout'
+  lineinfile:
+    path: /var/lib/kubelet/config.yaml
+    line: 'podEvictionTimeout: 2m0s'
+
+- name: 'Kubernetes: Extend node monitor grace period'
+  lineinfile:
+    path: /var/lib/kubelet/config.yaml
+    line: 'nodeMonitorGracePeriod: 2m0s'
+
 - name: 'Kubernetes: Restart Kubelet'
   service:
     name: kubelet
