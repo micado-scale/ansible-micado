@@ -40,6 +40,12 @@
     regexp: 'nodefs.available: \d+%'
     replace: 'nodefs.available: 5%'
 
+- name: 'Kubernetes: Change cgroup driver'
+  replace:
+    path: /var/lib/kubelet/config.yaml
+    regexp: 'cgroupDriver: cgroupfs'
+    replace: 'cgroupDriver: systemd'
+
 - name: 'Kubernetes: Restart Kubelet'
   service:
     name: kubelet
