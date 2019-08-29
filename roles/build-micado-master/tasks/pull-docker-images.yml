@@ -22,4 +22,5 @@
 - name: Downloading Image Integrity Verifier container
   docker_image:
       name: "{{docker_images.iivr}}"
+      source: pull
   when: intel_cpu
