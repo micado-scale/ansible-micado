@@ -85,7 +85,7 @@ runcmd:
   - apt-get install -y {{ packages.docker_ce }} {{ packages.docker_ce_cli }} {{ packages.containerd_io }}
   - apt-mark hold docker-ce docker-ce-cli containerd.io
   - systemctl enable docker
-  - sed -i -e "s/-H fd:\/\//-H fd:\/\/ --mtu={{ ansible_default_ipv4.mtu }}/g" /lib/systemd/system/docker.service
+  - sed -i -e "s/-H fd:\/\//-H fd:\/\/ --exec-opt native.cgroupdriver=systemd --mtu={{ ansible_default_ipv4.mtu }}/g" /lib/systemd/system/docker.service
   - systemctl daemon-reload
   - systemctl restart docker.service
 
@@ -103,7 +103,7 @@ runcmd:
 
   - touch /etc/systemd/system/kubelet.service.d/20-labels.conf
   - echo '[Service]' >> /etc/systemd/system/kubelet.service.d/20-labels.conf
-  - echo 'Environment="KUBELET_EXTRA_ARGS=--node-labels=micado.eu/node_type={{ '{{ worker_name }}' }}"' >> /etc/systemd/system/kubelet.service.d/20-labels.conf
+  - echo 'Environment="KUBELET_EXTRA_ARGS=--cgroup-driver=systemd --node-labels=micado.eu/node_type={{ '{{ worker_name }}' }}"' >> /etc/systemd/system/kubelet.service.d/20-labels.conf
   - systemctl daemon-reload
 
   # Install strongSwan
