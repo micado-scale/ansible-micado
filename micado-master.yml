@@ -95,9 +95,9 @@
         policykeeper: micado/policykeeper:dev
         prometheus: prom/prometheus:v2.12.0
         redis: redis:5-alpine
-        securitypolicymanager: micado/security-policy-manager:2.0
+        securitypolicymanager: micado/security-policy-manager:2.1
         toscasubmitter: micado/toscasubmitter:dev
-        vault: vault:1.2.2
+        vault: vault:1.0.3
         zorp: micado/zorpgpl:6.0.12
 
     - packages:

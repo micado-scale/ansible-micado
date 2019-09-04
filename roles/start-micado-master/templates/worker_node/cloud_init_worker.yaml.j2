@@ -18,12 +18,19 @@ write_files:
 
 # This script fix the format of cert bundle, and split it into two separate files and copy them to the correct directory
 # Occopus should do this.
+- path: /tmp/run_split.sh
+  permissions: '755'
+  content: |
+      #!/bin/bash
+      /tmp/split_certs.sh $(< /tmp/tmp_certs)
+
+# This script fix the format of cert bundle, and split it into two separate files and copy them to the correct directory
+# Occopus should do this.
 - path: /tmp/split_certs.sh
   permissions: '755'
   content: |
       #!/bin/bash
-      fmt -w 35 /tmp/tmp_certs |
-      awk 'BEGIN { of="/etc/ipsec.d/private/node.key" } { print >of } /^-----END/ { of="/etc/ipsec.d/certs/node.crt" }'
+      while (( $# )); do if [[ $1 == -----* ]]; then while [[ $1 != *----- ]]; do printf "%s " $1; shift; done; fi; echo $1; shift; done | awk 'BEGIN { of="/etc/ipsec.d/private/node.key" } { print >of } /^-----END/ { of="/etc/ipsec.d/certs/node.crt" }'
 
 # This script fix the format of CA, and copy it to the correct directory
 # Occopus should do this.
@@ -33,6 +40,7 @@ write_files:
       #!/bin/bash
       fmt -w 35 /etc/ipsec.d/cacerts/master.pem |
       awk 'BEGIN { of="/etc/ipsec.d/cacerts/new_master.pem" } { print >of } /^-----END/'
+
 
 - path: /etc/ipsec.conf
   content: |
@@ -45,7 +53,7 @@ write_files:
        leftcert=node.crt
        left=local
        right={{ ansible_default_ipv4.address }}
-       rightid="CN=workernode.micado"
+       rightid="CN=masternode.micado"
        auto=start
 
 - path: /etc/ipsec.secrets
@@ -117,13 +125,14 @@ runcmd:
 
   # These removes the temporary scripts, certs and
 
-  - /tmp/split_certs.sh
+  - /tmp/run_split.sh
   - /tmp/modify_ca.sh
   - rm /etc/ipsec.d/cacerts/master.pem
   - mv /etc/ipsec.d/cacerts/new_master.pem /etc/ipsec.d/cacerts/master.pem
   - rm /tmp/split_certs.sh
   - rm /tmp/tmp_certs
   - rm /tmp/modify_ca.sh
+  - rm /tmp/run_split.sh
 
   # Bring up the iptunnel
 
