@@ -53,7 +53,7 @@ write_files:
        leftcert=node.crt
        left=local
        right={{ ansible_default_ipv4.address }}
-       rightid=%any
+       rightid="CN=masternode.micado"
        auto=start
 
 - path: /etc/ipsec.secrets
