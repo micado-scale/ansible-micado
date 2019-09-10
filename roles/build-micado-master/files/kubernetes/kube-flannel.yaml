@@ -148,6 +148,7 @@ spec:
       hostNetwork: true
       nodeSelector:
         beta.kubernetes.io/arch: amd64
+      priorityClassName: system-node-critical
       tolerations:
       - operator: Exists
         effect: NoSchedule
@@ -225,6 +226,7 @@ spec:
       hostNetwork: true
       nodeSelector:
         beta.kubernetes.io/arch: arm64
+      priorityClassName: system-node-critical
       tolerations:
       - operator: Exists
         effect: NoSchedule
@@ -302,6 +304,7 @@ spec:
       hostNetwork: true
       nodeSelector:
         beta.kubernetes.io/arch: arm
+      priorityClassName: system-node-critical
       tolerations:
       - operator: Exists
         effect: NoSchedule
@@ -379,6 +382,7 @@ spec:
       hostNetwork: true
       nodeSelector:
         beta.kubernetes.io/arch: ppc64le
+      priorityClassName: system-node-critical
       tolerations:
       - operator: Exists
         effect: NoSchedule
@@ -459,6 +463,7 @@ spec:
       hostNetwork: true
       nodeSelector:
         beta.kubernetes.io/arch: s390x
+      priorityClassName: system-node-critical
       tolerations:
       - operator: Exists
         effect: NoSchedule
