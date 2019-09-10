@@ -6,25 +6,14 @@
 ################
 all:
   hosts:
-    micado-master:
+    micado-target:
+      # Host info for running micado playbooks
       #
-      # Host info for building/starting a micado-master node
-      # Usage:   ansible-playbook -i hosts.yml micado-master.yml
+      # Usage A: Builds and starts a MiCADO Master node. Use --tags for only one operation 
+      # ansible-playbook -i hosts.yml micado-master.yml [--tags (build | start)]
       #
-      # (optional) add --tags 'build' to simply prepare a VM (for image & re-use)
-      # (optional) later use --tags 'start' to initialise a prepared VM
-      #
-      ansible_host: localhost
-      ansible_connection: ssh
-      ansible_user: ubuntu
-      ansible_become: True
-      ansible_become_method: sudo
-      ansible_python_interpreter: /usr/bin/python3
-
-    micado-worker:
-      #
-      # Host info for building a micado-worker node
-      # Usage:   ansible-playbook -i hosts.yml build-micado-worker.yml
+      # Usage B: Builds a MiCADO Worker node for later use
+      # ansible-playbook -i hosts.yml build-micado-worker.yml
       #
       ansible_host: localhost
       ansible_connection: ssh
