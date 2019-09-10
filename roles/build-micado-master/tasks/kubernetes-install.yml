@@ -51,3 +51,4 @@
   loop:
     - { src: 'kubernetes/kube-dash.yaml', dest: '/etc/kubernetes/kube-dash.yaml'}
     - { src: 'kubernetes/kube-flannel.yaml', dest: '/etc/kubernetes/kube-flannel.yaml'}
+    - { src: 'kubernetes/kubelet-config.yaml', dest: '/etc/kubernetes/kubelet-config.yaml'}
