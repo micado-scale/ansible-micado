@@ -53,7 +53,6 @@
   loop:
     - { src: 'alertmanager/config.yml', dest: '/var/lib/micado/alertmanager/config/alertmanager.yml', mode: '0644'}
     - { src: 'grafana/grafana.ini', dest: '/var/lib/micado/grafana/config/grafana.ini', mode: '0644'}
-    - { src: 'grafana/data-dashboards-micado.json', dest: '/var/lib/micado/grafana/data/dashboards/micado.json', mode: '0644'}
     - { src: 'grafana/provisioning-dashboards-provider.yaml', dest: '/var/lib/micado/grafana/provisioning/dashboards/provider.yaml', mode: '0644'}
     - { src: 'grafana/provisioning-datasources-prometheus.yaml', dest: '/var/lib/micado/grafana/provisioning/datasources/prometheus.yaml', mode: '0644'}
     - { src: 'iptables/iptables.service', dest: '/etc/systemd/system/iptables.service', mode: '0644'}
@@ -74,10 +73,10 @@
     dest: "{{ item.dest }}"
     mode: 0644
   loop:
-    - { content: 'Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep alertmanager | col1)\n', dest: '/var/log/micado/alertmanager/README'}
-    - { content: 'Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep credman | col1)\n', dest: '/var/log/micado/credman/README'}
-    - { content: 'Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep crypto-engine | col1)\n', dest: '/var/log/micado/crypto_engine/README'}
-    - { content: 'Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep iivr | col1)\n', dest: '/var/log/micado/iivr/README'}
-    - { content: 'Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep micado-dashboard | col1)\n', dest: '/var/log/micado/dashboard/README'}
-    - { content: 'Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep prometheus | col1)\n', dest: '/var/log/micado/prometheus/README'}
-    - { content: 'Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep zorp | col1)\n', dest: '/var/log/micado/zorp/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep alertmanager | col1)\n", dest: '/var/log/micado/alertmanager/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep credman | col1)\n", dest: '/var/log/micado/credman/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep crypto-engine | col1)\n", dest: '/var/log/micado/crypto_engine/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep iivr | col1)\n", dest: '/var/log/micado/iivr/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep micado-dashboard | col1)\n", dest: '/var/log/micado/dashboard/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep prometheus | col1)\n", dest: '/var/log/micado/prometheus/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep zorp | col1)\n", dest: '/var/log/micado/zorp/README'}
