@@ -16,6 +16,7 @@
       - "{{ docker_images.vault }}"
       - "{{ docker_images.securitypolicymanager }}"
       - "{{ docker_images.crypto_engine }}"
+      - "{{ docker_images.iivr }}"
       - "{{ docker_images.zorp }}"
 
 - name: Downloading Image Integrity Verifier container
