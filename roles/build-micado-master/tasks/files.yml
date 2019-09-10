@@ -67,6 +67,7 @@
     - { src: 'vault/vault.hcl', dest: '/var/lib/micado/vault/config/vault.hcl', mode: '0644'}
     - { src: 'zorp/authform.html', dest: '/var/lib/micado/zorp/config/authform.html', mode: '0644'}
     - { src: 'zorp/zorp-entrypoint.sh', dest: '/var/lib/micado/zorp/scripts/docker-entrypoint.sh', mode: '0755'}
+    - { src: 'vault/push_secrets.py', dest: '/var/lib/micado/vault/push_secrets.py', mode: '0755'}
 
 - name: "Copy log README file"
   copy:

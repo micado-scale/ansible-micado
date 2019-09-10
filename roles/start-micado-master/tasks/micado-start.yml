@@ -52,3 +52,10 @@
 
 - name: Restart IPSec
   command: ipsec restart
+
+- name: Get SPM's IP address
+  shell: kubectl describe pod --namespace micado-system $(kubectl get pods --namespace micado-system | grep security-policy | awk '{print $1}' -) | grep IP | sed -E 's/IP:[[:space:]]+//'
+  register: spm_ip
+
+- name: Push secrets into SPM
+  shell: "cat /var/lib/micado/occopus/data/auth_data.yaml | python3 /var/lib/micado/vault/push_secrets.py {{ spm_ip.stdout }}"
