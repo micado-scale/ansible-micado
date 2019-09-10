@@ -53,7 +53,6 @@
   loop:
     - { src: 'alertmanager/config.yml', dest: '/var/lib/micado/alertmanager/config/alertmanager.yml', mode: '0644'}
     - { src: 'grafana/grafana.ini', dest: '/var/lib/micado/grafana/config/grafana.ini', mode: '0644'}
-    - { src: 'grafana/data-dashboards-micado.json', dest: '/var/lib/micado/grafana/data/dashboards/micado.json', mode: '0644'}
     - { src: 'grafana/provisioning-dashboards-provider.yaml', dest: '/var/lib/micado/grafana/provisioning/dashboards/provider.yaml', mode: '0644'}
     - { src: 'grafana/provisioning-datasources-prometheus.yaml', dest: '/var/lib/micado/grafana/provisioning/datasources/prometheus.yaml', mode: '0644'}
     - { src: 'iptables/iptables.service', dest: '/etc/systemd/system/iptables.service', mode: '0644'}

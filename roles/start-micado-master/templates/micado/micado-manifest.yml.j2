@@ -97,6 +97,8 @@ spec:
         env:
         - name: MICADO_FRONTEND_IP
           value: {{ ansible_host }}
+        - name: MICADO_VERSION
+          value: {{ micado_version }}
 ---
 ## Service: MiCADO Dashboard ##
 apiVersion: v1

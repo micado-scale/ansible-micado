@@ -66,6 +66,7 @@
     - cloud_cred_path: ./credentials-cloud-api.yml
     - docker_cred_path: ./credentials-docker-registry.yml
     - micado_cred_path: ./credentials-micado.yml
+    - micado_version: v0.8.0
 
     - disable_worker_updates: True
     - grafana_admin_pwd: secret
