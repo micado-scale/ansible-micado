@@ -33,3 +33,4 @@ logging:
         optimizer:
             propagate: false
             handlers: [console, file]
+
