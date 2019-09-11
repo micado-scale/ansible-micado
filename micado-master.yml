@@ -68,6 +68,7 @@
     - micado_cred_path: ./credentials-micado.yml
     - micado_version: v0.8.0
 
+    - disable_optimizer: True
     - disable_worker_updates: True
     - grafana_admin_pwd: secret
     - web_listening_port: 443

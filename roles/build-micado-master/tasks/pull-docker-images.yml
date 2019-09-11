@@ -24,3 +24,9 @@
       name: "{{docker_images.iivr}}"
       source: pull
   when: intel_cpu
+
+- name: Downloading Optimizer container
+  docker_image:
+      name: "{{docker_images.optimizer}}"
+      source: pull
+  when: not disable_optimizer

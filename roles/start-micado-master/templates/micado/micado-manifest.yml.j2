@@ -99,6 +99,8 @@ spec:
           value: {{ ansible_host }}
         - name: MICADO_VERSION
           value: {{ micado_version }}
+        - name: DISABLE_OPTIMIZER
+          value: "{{ disable_optimizer }}"
 ---
 ## Service: MiCADO Dashboard ##
 apiVersion: v1
@@ -448,6 +450,7 @@ spec:
     name: policykeeper
     tier: scaling
 ---
+{% if not disable_optimizer %}
 ## Optimizer ##
 apiVersion: apps/v1
 kind: Deployment
@@ -477,7 +480,7 @@ spec:
         image: {{docker_images.optimizer}}
         args:
         - --cfg
-        - config/config.yaml
+        - /config/optimizer/optimizer_config.yaml
         - --host
         - 0.0.0.0
         - --port
@@ -510,6 +513,7 @@ spec:
     name: optimizer
     tier: optimizing
 ---
+{% endif %}
 ## Grafana ##
 apiVersion: apps/v1
 kind: Deployment
