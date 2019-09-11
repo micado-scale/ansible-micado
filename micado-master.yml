@@ -1,6 +1,6 @@
 ---
 - name: Deploy MiCADO master
-  hosts: micado-master
+  hosts: micado-target
   gather_facts: False
 
   pre_tasks:

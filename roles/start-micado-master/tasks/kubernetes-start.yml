@@ -5,11 +5,61 @@
   changed_when: k8smember.rc == 1
   failed_when: k8smember.rc not in [0,1]
 
-- name: 'Kubernetes: Initialisation'
-  shell: kubeadm init
+- name: 'Kubernetes: Pre-flight checks'
+  shell: kubeadm init phase preflight
+        --ignore-preflight-errors=NumCPU
+  when: k8smember.rc == 1
+
+- name: 'Kubernetes: Create certificates'
+  shell: kubeadm init phase certs all
+        --apiserver-advertise-address={{ ansible_default_ipv4.address }}
+  when: k8smember.rc == 1
+
+- name: 'Kubernetes: Create kubeconfig'
+  shell: kubeadm init phase kubeconfig all
+        --apiserver-advertise-address={{ ansible_default_ipv4.address }}
+  when: k8smember.rc == 1
+
+- name: 'Kubernetes: Start kubelet'
+  shell: kubeadm init phase kubelet-start
+        --config=/etc/kubernetes/kubelet-config.yaml
+  when: k8smember.rc == 1
+
+- name: 'Kubernetes: Create control-plane manifests'
+  shell: kubeadm init phase control-plane all
         --apiserver-advertise-address={{ ansible_default_ipv4.address }}
         --pod-network-cidr=10.244.0.0/16
-        --ignore-preflight-errors=NumCPU
+  when: k8smember.rc == 1
+
+- name: 'Kubernetes: Create etcd instance'
+  shell: kubeadm init phase etcd local
+  when: k8smember.rc == 1
+
+- name: 'Kubernetes: Upload control-plane certs'
+  shell: kubeadm init phase upload-certs --upload-certs
+  when: k8smember.rc == 1
+
+- name: 'Kubernetes: Mark control-plane master node'
+  shell: kubeadm init phase mark-control-plane
+  when: k8smember.rc == 1
+
+- name: 'Kubernetes: Generate bootstrap tokens'
+  shell: kubeadm init phase bootstrap-token
+  when: k8smember.rc == 1
+
+- name: 'Kubernetes: Upload kubeadm config'
+  shell: kubeadm init phase upload-config kubeadm
+  when: k8smember.rc == 1
+
+- name: 'Kubernetes: Upload kubelet config'
+  shell: kubeadm init phase upload-config kubelet
+        --config=/etc/kubernetes/kubelet-config.yaml
+  when: k8smember.rc == 1
+
+- name: 'Kubernetes: Install kube-proxy and CoreDNS'
+  shell: kubeadm init phase addon all
+        --apiserver-advertise-address={{ ansible_default_ipv4.address }}
+        --pod-network-cidr=10.244.0.0/16
   when: k8smember.rc == 1
 
 - name: 'Kubernetes: Create /root/.kube'
@@ -27,46 +77,6 @@
   lineinfile:
     path: /etc/environment
     line: 'KUBECONFIG=/root/.kube/config'
-
-- name: 'Kubernetes: Lower imagefs eviction limits'
-  replace:
-    path: /var/lib/kubelet/config.yaml
-    regexp: 'imagefs.available: \d+%'
-    replace: 'imagefs.available: 5%'
-
-- name: 'Kubernetes: Lower nodefs eviction limits'
-  replace:
-    path: /var/lib/kubelet/config.yaml
-    regexp: 'nodefs.available: \d+%'
-    replace: 'nodefs.available: 5%'
-
-- name: 'Kubernetes: Change cgroup driver'
-  replace:
-    path: /var/lib/kubelet/config.yaml
-    regexp: 'cgroupDriver: cgroupfs'
-    replace: 'cgroupDriver: systemd'
-
-- name: 'Kubernetes: Make node updates less frequent'
-  replace:
-    path: /var/lib/kubelet/config.yaml
-    regexp: 'nodeStatusUpdateFrequency: \d+s'
-    replace: 'nodeStatusUpdateFrequency: 20s'
-
-- name: 'Kubernetes: Lower pod eviction timeout'
-  lineinfile:
-    path: /var/lib/kubelet/config.yaml
-    line: 'podEvictionTimeout: 2m0s'
-
-- name: 'Kubernetes: Extend node monitor grace period'
-  lineinfile:
-    path: /var/lib/kubelet/config.yaml
-    line: 'nodeMonitorGracePeriod: 2m0s'
-
-- name: 'Kubernetes: Restart Kubelet'
-  service:
-    name: kubelet
-    state: restarted
-    enabled: yes
 
 - name: 'Kubernetes: Create Dashboard'
   shell: kubectl apply -f /etc/kubernetes/kube-dash.yaml

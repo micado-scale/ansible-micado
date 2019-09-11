@@ -1,6 +1,6 @@
 ---
 - name: Build MiCADO worker
-  hosts: micado-worker
+  hosts: micado-target
   gather_facts: False
 
   pre_tasks:

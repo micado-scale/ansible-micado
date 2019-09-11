@@ -111,7 +111,7 @@ runcmd:
 
   - touch /etc/systemd/system/kubelet.service.d/20-labels.conf
   - echo '[Service]' >> /etc/systemd/system/kubelet.service.d/20-labels.conf
-  - echo 'Environment="KUBELET_EXTRA_ARGS=--cgroup-driver=systemd --node-labels=micado.eu/node_type={{ '{{ worker_name }}' }}"' >> /etc/systemd/system/kubelet.service.d/20-labels.conf
+  - echo 'Environment="KUBELET_EXTRA_ARGS=--node-labels=micado.eu/node_type={{ '{{ worker_name }}' }}"' >> /etc/systemd/system/kubelet.service.d/20-labels.conf
   - systemctl daemon-reload
 
   # Install strongSwan
