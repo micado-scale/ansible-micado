@@ -97,6 +97,10 @@ spec:
         env:
         - name: MICADO_FRONTEND_IP
           value: {{ ansible_host }}
+        - name: MICADO_VERSION
+          value: {{ micado_version }}
+        - name: DISABLE_OPTIMIZER
+          value: "{{ disable_optimizer }}"
 ---
 ## Service: MiCADO Dashboard ##
 apiVersion: v1
@@ -446,6 +450,70 @@ spec:
     name: policykeeper
     tier: scaling
 ---
+{% if not disable_optimizer %}
+## Optimizer ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: optimizer
+  namespace: micado-system
+  labels:
+    tier: optimizing
+spec:
+  selector:
+    matchLabels:
+      name: optimizer
+      tier: optimizing
+  template:
+    metadata:
+      labels:
+        name: optimizer
+        tier: optimizing
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: optimizer
+        image: {{docker_images.optimizer}}
+        args:
+        - --cfg
+        - /config/optimizer/optimizer_config.yaml
+        - --host
+        - 0.0.0.0
+        - --port
+        - '12346'
+        volumeMounts:
+        - name: optimizer-config
+          mountPath: /config/optimizer
+        - name: optimizer-log
+          mountPath: /var/log/optimizer
+      volumes:
+      - name: optimizer-config
+        hostPath:
+          path: /var/lib/micado/optimizer/config
+      - name: optimizer-log
+        hostPath:
+          path: /var/log/micado/optimizer
+---
+## Service: Optimizer ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: optimizer
+  namespace: micado-system
+  labels:
+    tier: optimizing
+spec:
+  ports:
+  - port: 12346
+  selector:
+    name: optimizer
+    tier: optimizing
+---
+{% endif %}
 ## Grafana ##
 apiVersion: apps/v1
 kind: Deployment

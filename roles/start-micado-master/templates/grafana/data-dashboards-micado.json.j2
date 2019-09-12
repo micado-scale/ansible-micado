@@ -459,7 +459,7 @@
           "instant": false,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{host}}",
+          "legendFormat": "{% raw %}{{host}}{% endraw %}",
           "metric": "",
           "refId": "C",
           "step": 600
@@ -469,7 +469,7 @@
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{host}}",
+          "legendFormat": "{% raw %}{{host}}{% endraw %}",
           "refId": "A"
         }
       ],
@@ -675,7 +675,7 @@
           "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",node=~\"$node\"}[$interval])) * 100)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{% raw %}{{instance}}{% endraw %}",
           "refId": "A",
           "step": 240
         }
@@ -772,7 +772,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{task_name}}",
+          "legendFormat": "{% raw %}{{task_name}}{% endraw %}",
           "metric": "",
           "refId": "A",
           "step": 240
@@ -861,7 +861,7 @@
           "expr": "node_memory_MemTotal_bytes{node=~\"$node\"} - node_memory_MemAvailable_bytes{node=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{% raw %}{{instance}}{% endraw %}",
           "refId": "A",
           "step": 240
         }
@@ -955,7 +955,7 @@
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{task_name}}",
+          "legendFormat": "{% raw %}{{task_name}}{% endraw %}",
           "refId": "A",
           "step": 240
         }
@@ -1168,7 +1168,7 @@
           "expr": "label_replace(topk($topk, rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~\"$service_name-.*\"}[2m])*100), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{task_name}}",
+          "legendFormat": "{% raw %}{{task_name}}{% endraw %}",
           "refId": "A",
           "step": 240
         }
@@ -1276,7 +1276,7 @@
               "expr": "cadvisor_version_info",
               "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{{instance}} cAdvisor Version: {{cadvisorVersion}}",
+              "legendFormat": "{% raw %}{{instance}} cAdvisor Version: {{cadvisorVersion}}{% endraw %}",
               "refId": "A",
               "step": 240
             },
@@ -1284,7 +1284,7 @@
               "expr": "prometheus_build_info",
               "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{{instance}} Prometheus Version: {{version}}",
+              "legendFormat": "{% raw %}{{instance}} Prometheus Version: {{version}}{% endraw %}",
               "refId": "B",
               "step": 240
             },
@@ -1292,7 +1292,7 @@
               "expr": "node_exporter_build_info",
               "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{{instance}} Node-Exporter Version: {{version}}",
+              "legendFormat": "{% raw %}{{instance}} Node-Exporter Version: {{version}}{% endraw %}",
               "refId": "C",
               "step": 240
             },
@@ -1300,7 +1300,7 @@
               "expr": "cadvisor_version_info",
               "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{{instance}} Docker Version: {{dockerVersion}}",
+              "legendFormat": "{% raw %}{{instance}} Docker Version: {{dockerVersion}}{% endraw %}",
               "refId": "D",
               "step": 240
             },
@@ -1308,7 +1308,7 @@
               "expr": "cadvisor_version_info",
               "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{{instance}} Host OS Version: {{osVersion}}",
+              "legendFormat": "{% raw %}{{instance}} Host OS Version: {{osVersion}}{% endraw %}",
               "refId": "E",
               "step": 240
             },
@@ -1316,7 +1316,7 @@
               "expr": "cadvisor_version_info",
               "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{{instance}} Host Kernel Version: {{kernelVersion}}",
+              "legendFormat": "{% raw %}{{instance}} Host Kernel Version: {{kernelVersion}}{% endraw %}",
               "refId": "F",
               "step": 240
             }
@@ -1338,7 +1338,7 @@
   "style": "dark",
   "tags": [
     "micado",
-    "v0.7.4"
+    "{{ micado_version }}"
   ],
   "templating": {
     "list": [

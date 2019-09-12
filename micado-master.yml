@@ -66,7 +66,9 @@
     - cloud_cred_path: ./credentials-cloud-api.yml
     - docker_cred_path: ./credentials-docker-registry.yml
     - micado_cred_path: ./credentials-micado.yml
+    - micado_version: v0.8.0
 
+    - disable_optimizer: True
     - disable_worker_updates: True
     - grafana_admin_pwd: secret
     - web_listening_port: 443
@@ -82,16 +84,16 @@
     - intel_cpu: false
 
     - docker_images:
-        alertmanager: prom/alertmanager:v0.18.0
+        alertmanager: prom/alertmanager:v0.19.0
         cadvisor: google/cadvisor:v0.33.0
         credential_manager: micado/credential-manager:0.2.0
         crypto_engine: micado/crypto-engine:1.0
         dashboard: micado/dashboard:dev
-        grafana: grafana/grafana:6.3.3
+        grafana: grafana/grafana:6.3.5
         iivr: micado/iivr:1.0
         node_exporter: prom/node-exporter:v0.18.1
-        occopus: micado/occopus:1.7-rc2
-        optimizer: placeholder
+        occopus: micado/occopus:1.7-rc3
+        optimizer: micado/optimizer:latest
         policykeeper: micado/policykeeper:dev
         prometheus: prom/prometheus:v2.12.0
         redis: redis:5-alpine
@@ -101,7 +103,7 @@
         zorp: micado/zorpgpl:6.0.12
 
     - packages:
-        docker_ce: "docker-ce=5:19.03.1~3-0~ubuntu-{{ ansible_distribution_release }}"
-        docker_ce_cli: "docker-ce-cli=5:19.03.1~3-0~ubuntu-{{ ansible_distribution_release }}"
+        docker_ce: "docker-ce=5:19.03.2~3-0~ubuntu-{{ ansible_distribution_release }}"
+        docker_ce_cli: "docker-ce-cli=5:19.03.2~3-0~ubuntu-{{ ansible_distribution_release }}"
         containerd_io: containerd.io=1.2.6-3
         kubernetes_version: 1.15.3-00
