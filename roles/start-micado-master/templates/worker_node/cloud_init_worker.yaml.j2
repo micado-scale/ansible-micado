@@ -72,6 +72,7 @@ write_files:
     {% endraw %}
 
 runcmd:
+  - export DEBIAN_FRONTEND=noninteractive
   - /tmp/wait-updates.sh
   - while [ -z $IP ]; do IP=`ip -oneline -4 addr show scope global | tr -s ' ' | tr '/' ' ' | grep -v dock | grep -v br- | cut -f 4 -d ' ' | sed 's/\./-/g'`; done
   - hostname={{ '{{ worker_name }}' }}-$IP
@@ -86,7 +87,7 @@ runcmd:
   # Docker
 
   - apt-get update
-  - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common wget
+  - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
   - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - apt-get update
