@@ -87,3 +87,6 @@
 - name: 'Kubernetes: Get cluster join command'
   shell: kubeadm token create --ttl 0 --print-join-command
   register: join_command
+
+- name: 'Kubernetes: Set default namespace'
+  shell: kubectl config set-context --current --namespace=default
