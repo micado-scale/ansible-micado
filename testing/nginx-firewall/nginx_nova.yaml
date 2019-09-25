@@ -16,7 +16,7 @@ topology_template:
           requests:
             cpu: "200m"
         ports:
-        - port: 8080
+        - target: 8080
           published: 443
         - containerPort: 9300
         
