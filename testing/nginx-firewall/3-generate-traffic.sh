@@ -24,7 +24,7 @@ if [ -z "$SSL_PASS" ]; then
   exit
 fi
 
-echo "Small HTTP load test for 8 minutes at $MICADO_WORKER:30012... CTRL-C to stop"
-wrk -t1 -c1 -d8m http://$MICADO_WORKER:30012
+echo "Small HTTP load test for 8 minutes at https://$MICADO_WORKER... CTRL-C to stop"
+wrk -t1 -c1 -d8m https://$MICADO_WORKER
 # if necessary, adjust the line above to increase the load test
 # e.g. wrk -t4 -c40 -d8m http://$MICADO_WORKER:30012
