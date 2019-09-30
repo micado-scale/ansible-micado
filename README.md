@@ -7,6 +7,7 @@ MiCADO is an auto-scaling framework for Docker applications. It supports autosca
 MiCADO manual is hosted at https://micado-scale.readthedocs.io .
 
 Manuals for MiCADO versions are as follows, and then is a very basic quick start guide below:
+ - [MiCADO 0.8.0](https://micado-scale.readthedocs.io/en/0.8.0)
  - [MiCADO 0.7.3](https://micado-scale.readthedocs.io/en/0.7.3)
  - [MiCADO 0.7.2-rev1](https://micado-scale.readthedocs.io/en/0.7.2-rev1)
  - [MiCADO 0.7.2](https://micado-scale.readthedocs.io/en/0.7.2)
