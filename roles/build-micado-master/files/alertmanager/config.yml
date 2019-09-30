@@ -6,7 +6,7 @@ global:
 route:
   receiver: 'default'
   group_wait: 0s
-  group_interval: 0s
+  group_interval: 1s
   repeat_interval: 1m
   group_by: [alertname]
 
@@ -14,4 +14,3 @@ receivers:
 - name: 'default'
   webhook_configs:
      - url: http://policykeeper:12345/alerts/fire
-

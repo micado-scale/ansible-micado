@@ -12,10 +12,12 @@ credentials-micado.yml
 # Example
 
 testing/nginx/nginx.yaml
+testing/nginx-firewall/nginx.yaml
 testing/stressng/stressng.yaml
 testing/wordpress/wordpress.yaml
 
 testing/cqueue/_settings
 testing/nginx/_settings
+testing/nginx-firewall/_settings
 testing/stressng/_settings
 testing/wordpress/_settings

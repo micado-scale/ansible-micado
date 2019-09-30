@@ -2,7 +2,6 @@
   "annotations": {
     "list": [
       {
-        "$$hashKey": "object:396",
         "builtIn": 1,
         "datasource": "Prometheus",
         "enable": false,
@@ -21,8 +20,7 @@
   "editable": true,
   "gnetId": 609,
   "graphTooltip": 1,
-  "id": 1,
-  "iteration": 1526374738420,
+  "iteration": 1564405520209,
   "links": [],
   "panels": [
     {
@@ -83,6 +81,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": " worker nodes",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -180,6 +179,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": " containers",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -205,7 +205,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "count(rate(container_last_seen{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name|$service_name-[^-]*-[^-]*\"}[$interval]))",
+          "expr": "count(rate(container_last_seen{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name-.*\"}[$interval]))",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 2,
@@ -276,6 +276,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -296,7 +297,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "time() - node_boot_time{instance=~\"$master:.*\"}",
+          "expr": "time() - min(node_boot_time_seconds{instance=~\"$worker:.*\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -305,7 +306,7 @@
         }
       ],
       "thresholds": "",
-      "title": "Master Node Uptime",
+      "title": "Application Uptime",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -336,7 +337,7 @@
       "hideTimeOverride": false,
       "id": 32,
       "links": [],
-      "minSpan": null,
+      "options": {},
       "pageSize": null,
       "scroll": true,
       "showHeader": true,
@@ -382,6 +383,7 @@
       "targets": [
         {
           "expr": "ALERTS{alertstate=\"firing\"}",
+          "format": "table",
           "intervalFactor": 1,
           "refId": "A",
           "step": 1
@@ -389,7 +391,7 @@
       ],
       "timeShift": null,
       "title": "Alerts Fired In Prometheus",
-      "transform": "timeseries_aggregations",
+      "transform": "table",
       "type": "table"
     },
     {
@@ -440,6 +442,7 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -450,13 +453,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "100 - (avg(irate(node_cpu{mode=\"idle\",node=~\"$node\"}[$interval])) * 100)",
+          "expr": "100 - (avg(irate(node_cpu_seconds_total{mode=\"idle\",node=~\"$node\"}[$interval])) * 100)",
           "format": "time_series",
           "hide": false,
           "instant": false,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{host}}",
+          "legendFormat": "{% raw %}{{host}}{% endraw %}",
           "metric": "",
           "refId": "C",
           "step": 600
@@ -466,11 +469,13 @@
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{host}}",
+          "legendFormat": "{% raw %}{{host}}{% endraw %}",
           "refId": "A"
         }
       ],
+      "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Average Node CPU Usage",
       "tooltip": {
@@ -542,6 +547,7 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "null",
+      "options": {},
       "percentage": false,
       "pointradius": 1,
       "points": false,
@@ -564,7 +570,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(irate(container_cpu_usage_seconds_total{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name|$service_name-[^-]*-[^-]*\"}[$interval]) * 100)",
+          "expr": "avg(irate(container_cpu_usage_seconds_total{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name-.*\"}[$interval]) * 100)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -572,7 +578,9 @@
           "refId": "A"
         }
       ],
+      "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Average Container CPU Usage",
       "tooltip": {
@@ -653,6 +661,7 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "null",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -663,16 +672,17 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "100 - (avg by (instance) (irate(node_cpu{mode=\"idle\",node=~\"$node\"}[$interval])) * 100)",
+          "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",node=~\"$node\"}[$interval])) * 100)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{% raw %}{{instance}}{% endraw %}",
           "refId": "A",
           "step": 240
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "CPU usage per node",
       "tooltip": {
@@ -746,6 +756,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -756,12 +767,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": " label_replace(topk($topk, sum without (cpu) (irate(container_cpu_usage_seconds_total{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name|$service_name-[^-]*-[^-]*\"}[1m])) * 100), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
+          "expr": " label_replace(topk($topk, sum without (cpu) (irate(container_cpu_usage_seconds_total{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name-.*\"}[1m])) * 100), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
           "format": "time_series",
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{task_name}}",
+          "legendFormat": "{% raw %}{{task_name}}{% endraw %}",
           "metric": "",
           "refId": "A",
           "step": 240
@@ -769,6 +780,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "CPU Usage per Container (Stacked)",
       "tooltip": {
@@ -835,6 +847,7 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "null",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -845,16 +858,17 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "node_memory_MemTotal{node=~\"$node\"} - node_memory_Inactive{node=~\"$node\"}",
+          "expr": "node_memory_MemTotal_bytes{node=~\"$node\"} - node_memory_MemAvailable_bytes{node=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{% raw %}{{instance}}{% endraw %}",
           "refId": "A",
           "step": 240
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Memory usage per node",
       "tooltip": {
@@ -926,6 +940,7 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "null as zero",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -936,17 +951,18 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(topk($topk, sum(container_memory_usage_bytes{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name|$service_name-[^-]*-[^-]*\"}) by (name, container_label_io_kubernetes_pod_name)), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
+          "expr": "label_replace(topk($topk, sum(container_memory_usage_bytes{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name-.*\"}) by (name, container_label_io_kubernetes_pod_name)), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{task_name}}",
+          "legendFormat": "{% raw %}{{task_name}}{% endraw %}",
           "refId": "A",
           "step": 240
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Memory Usage per Container (Stacked)",
       "tooltip": {
@@ -955,7 +971,6 @@
         "sort": 2,
         "value_type": "individual"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -1034,8 +1049,8 @@
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "minSpan": null,
       "nullPointMode": "null as zero",
+      "options": {},
       "percentage": false,
       "pointradius": 1,
       "points": false,
@@ -1065,6 +1080,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Network Traffic on Cluster",
       "tooltip": {
@@ -1073,7 +1089,6 @@
         "sort": 0,
         "value_type": "cumulative"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -1139,6 +1154,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1149,16 +1165,17 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(topk($topk, rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~\"$service_name|$service_name-[^-]*-[^-]*\"}[2m])*100), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
+          "expr": "label_replace(topk($topk, rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~\"$service_name-.*\"}[2m])*100), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{task_name}}",
+          "legendFormat": "{% raw %}{{task_name}}{% endraw %}",
           "refId": "A",
           "step": 240
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Received Network Traffic per Container (Stacked)",
       "tooltip": {
@@ -1167,7 +1184,6 @@
         "sort": 2,
         "value_type": "individual"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -1225,12 +1241,13 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 44
+            "y": 39
           },
           "height": "500px",
           "hideTimeOverride": false,
           "id": 18,
           "links": [],
+          "options": {},
           "pageSize": 100,
           "repeat": null,
           "scroll": true,
@@ -1257,43 +1274,49 @@
           "targets": [
             {
               "expr": "cadvisor_version_info",
+              "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{{instance}} cAdvisor Version: {{cadvisorVersion}}",
+              "legendFormat": "{% raw %}{{instance}} cAdvisor Version: {{cadvisorVersion}}{% endraw %}",
               "refId": "A",
               "step": 240
             },
             {
               "expr": "prometheus_build_info",
+              "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{{instance}} Prometheus Version: {{version}}",
+              "legendFormat": "{% raw %}{{instance}} Prometheus Version: {{version}}{% endraw %}",
               "refId": "B",
               "step": 240
             },
             {
               "expr": "node_exporter_build_info",
+              "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{{instance}} Node-Exporter Version: {{version}}",
+              "legendFormat": "{% raw %}{{instance}} Node-Exporter Version: {{version}}{% endraw %}",
               "refId": "C",
               "step": 240
             },
             {
               "expr": "cadvisor_version_info",
+              "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{{instance}} Docker Version: {{dockerVersion}}",
+              "legendFormat": "{% raw %}{{instance}} Docker Version: {{dockerVersion}}{% endraw %}",
               "refId": "D",
               "step": 240
             },
             {
               "expr": "cadvisor_version_info",
+              "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{{instance}} Host OS Version: {{osVersion}}",
+              "legendFormat": "{% raw %}{{instance}} Host OS Version: {{osVersion}}{% endraw %}",
               "refId": "E",
               "step": 240
             },
             {
               "expr": "cadvisor_version_info",
+              "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{{instance}} Host Kernel Version: {{kernelVersion}}",
+              "legendFormat": "{% raw %}{{instance}} Host Kernel Version: {{kernelVersion}}{% endraw %}",
               "refId": "F",
               "step": 240
             }
@@ -1301,7 +1324,7 @@
           "timeFrom": null,
           "timeShift": null,
           "title": "Versions",
-          "transform": "timeseries_aggregations",
+          "transform": "table",
           "type": "table"
         }
       ],
@@ -1311,10 +1334,11 @@
     }
   ],
   "refresh": "10s",
-  "schemaVersion": 16,
+  "schemaVersion": 18,
   "style": "dark",
   "tags": [
-    "micado"
+    "micado",
+    "{{ micado_version }}"
   ],
   "templating": {
     "list": [
@@ -1322,11 +1346,10 @@
         "allValue": null,
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "Prometheus",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Node ID",
@@ -1336,6 +1359,7 @@
         "query": "label_values(node)",
         "refresh": 2,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
@@ -1347,11 +1371,10 @@
         "allValue": null,
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "Prometheus",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Hostnames",
@@ -1361,6 +1384,7 @@
         "query": "query_result(count(up{instance=~\".+\"}) by (instance))",
         "refresh": 2,
         "regex": "/instance=\"([^\"]+)\"/",
+        "skipUrlSync": false,
         "sort": 1,
         "tagValuesQuery": "label_values({host=\"$tag\"},instance)",
         "tags": [],
@@ -1372,18 +1396,22 @@
         "allValue": ".+",
         "current": {
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "Prometheus",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Service",
         "multi": true,
         "name": "service_name",
         "options": [],
-        "query": "query_result(count(container_last_seen{container_label_io_kubernetes_pod_name=~\".+\"}) by (container_label_io_kubernetes_pod_name))",
+        "query": "query_result(count(container_last_seen{container_label_io_kubernetes_container_name=~\".+\"}) by (container_label_io_kubernetes_container_name))",
         "refresh": 2,
-        "regex": "/container_label_io_kubernetes_pod_name=\"(.+?)(?:-[^-]*-[^-]*)?\"/",
+        "regex": "/container_label_io_kubernetes_container_name=\"(?!POD)(.*)\"/",
+        "skipUrlSync": false,
         "sort": 1,
         "tagValuesQuery": "",
         "tags": [],
@@ -1395,7 +1423,6 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "tags": [],
           "text": "1000",
           "value": "1000"
         },
@@ -1439,6 +1466,7 @@
         ],
         "query": "5,10,20,50,100,1000",
         "refresh": 0,
+        "skipUrlSync": false,
         "type": "custom"
       },
       {
@@ -1534,24 +1562,27 @@
         ],
         "query": "1m,2m,3m,5m,7m,10m,30m,1h,6h,12h,1d,7d,14d,30d",
         "refresh": 2,
+        "skipUrlSync": false,
         "type": "interval"
       },
       {
         "allValue": null,
         "current": {
-          "text": "178.22.70.34",
-          "value": "178.22.70.34"
+          "text": "10.244.3.3",
+          "value": "10.244.3.3"
         },
         "datasource": "Prometheus",
+        "definition": "label_values(node_boot_time_seconds, instance)",
         "hide": 2,
         "includeAll": false,
         "label": "MasterNode",
         "multi": true,
-        "name": "master",
+        "name": "worker",
         "options": [],
-        "query": "label_values(node_boot_time, instance)",
+        "query": "label_values(node_boot_time_seconds, instance)",
         "refresh": 1,
         "regex": "/([^:]+):.*/",
+        "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
@@ -1593,5 +1624,5 @@
   "timezone": "browser",
   "title": "MiCADO Grafana Dashboard - Kubernetes Support",
   "uid": "micado",
-  "version": 2
+  "version": 1
 }

@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.7.3/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.0/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -9,24 +9,13 @@ repositories:
 topology_template:
   node_templates:
     stressng:
-      type: tosca.nodes.MiCADO.Container.Application.Docker
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
+        image: lorel/docker-stress-ng
         args: ['--cpu', '0', '--cpu-method', 'pi', '-l', '20']
         resources:
           requests:
             cpu: "900m"
-      artifacts:
-       image:
-         type: tosca.artifacts.Deployment.Image.Container.Docker
-         file: lorel/docker-stress-ng
-         repository: docker_hub
-      interfaces:
-        Kubernetes:
-          create:
-            implementation: image
-            inputs:
-              strategy:
-                type: Recreate
 
     worker-node:
       type: tosca.nodes.MiCADO.CloudBroker.Compute
@@ -48,6 +37,11 @@ topology_template:
             mem_size: 2 GB
 
   policies:
+    - monitoring:
+        type: tosca.policies.Monitoring.MiCADO
+        properties:
+          enable_container_metrics: true
+          enable_node_metrics: true
     - scalability:
         type: tosca.policies.Scaling.MiCADO.VirtualMachine.CPU.stressng
         targets: [ worker-node ]
@@ -108,10 +102,10 @@ policy_types:
         description: pre-define alerts for VM CPU
         default:
         - alert: node_overloaded
-          expr: '(100-(avg(rate(node_cpu{node="{{ NODE_NAME }}", mode="idle"}[60s]))*100)) > {{NODE_TH_MAX}}'
+          expr: '(100-(avg(rate(node_cpu_seconds_total{node="{{ NODE_NAME }}", mode="idle"}[60s]))*100)) > {{NODE_TH_MAX}}'
           for: 1m
         - alert: node_underloaded
-          expr: '(100-(avg(rate(node_cpu{node="{{ NODE_NAME }}", mode="idle"}[60s]))*100)) < {{NODE_TH_MIN}}'
+          expr: '(100-(avg(rate(node_cpu_seconds_total{node="{{ NODE_NAME }}", mode="idle"}[60s]))*100)) < {{NODE_TH_MIN}}'
           for: 1m
         required: true
       scaling_rule:

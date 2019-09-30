@@ -18,12 +18,19 @@ write_files:
 
 # This script fix the format of cert bundle, and split it into two separate files and copy them to the correct directory
 # Occopus should do this.
+- path: /tmp/run_split.sh
+  permissions: '755'
+  content: |
+      #!/bin/bash
+      /tmp/split_certs.sh $(< /tmp/tmp_certs)
+
+# This script fix the format of cert bundle, and split it into two separate files and copy them to the correct directory
+# Occopus should do this.
 - path: /tmp/split_certs.sh
   permissions: '755'
   content: |
       #!/bin/bash
-      fmt -w 35 /tmp/tmp_certs |
-      awk 'BEGIN { of="/etc/ipsec.d/private/node.key" } { print >of } /^-----END/ { of="/etc/ipsec.d/certs/node.crt" }'
+      while (( $# )); do if [[ $1 == -----* ]]; then while [[ $1 != *----- ]]; do printf "%s " $1; shift; done; fi; echo $1; shift; done | awk 'BEGIN { of="/etc/ipsec.d/private/node.key" } { print >of } /^-----END/ { of="/etc/ipsec.d/certs/node.crt" }'
 
 # This script fix the format of CA, and copy it to the correct directory
 # Occopus should do this.
@@ -33,6 +40,7 @@ write_files:
       #!/bin/bash
       fmt -w 35 /etc/ipsec.d/cacerts/master.pem |
       awk 'BEGIN { of="/etc/ipsec.d/cacerts/new_master.pem" } { print >of } /^-----END/'
+
 
 - path: /etc/ipsec.conf
   content: |
@@ -45,7 +53,7 @@ write_files:
        leftcert=node.crt
        left=local
        right={{ ansible_default_ipv4.address }}
-       rightid="CN=workernode.micado"
+       rightid="CN=masternode.micado"
        auto=start
 
 - path: /etc/ipsec.secrets
@@ -64,6 +72,7 @@ write_files:
     {% endraw %}
 
 runcmd:
+  - export DEBIAN_FRONTEND=noninteractive
   - /tmp/wait-updates.sh
   - while [ -z $IP ]; do IP=`ip -oneline -4 addr show scope global | tr -s ' ' | tr '/' ' ' | grep -v dock | grep -v br- | cut -f 4 -d ' ' | sed 's/\./-/g'`; done
   - hostname={{ '{{ worker_name }}' }}-$IP
@@ -78,13 +87,14 @@ runcmd:
   # Docker
 
   - apt-get update
-  - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common wget
+  - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
   - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - apt-get update
-  - apt-get install -y {{ docker_package }}
+  - apt-get install -y {{ packages.docker_ce }} {{ packages.docker_ce_cli }} {{ packages.containerd_io }}
+  - apt-mark hold docker-ce docker-ce-cli containerd.io
   - systemctl enable docker
-  - sed -i -e "s/-H fd:\/\//-H fd:\/\/ --mtu={{ ansible_default_ipv4.mtu }}/g" /lib/systemd/system/docker.service
+  - sed -i -e "s/-H fd:\/\//-H fd:\/\/ --exec-opt native.cgroupdriver=systemd --mtu={{ ansible_default_ipv4.mtu }}/g" /lib/systemd/system/docker.service
   - systemctl daemon-reload
   - systemctl restart docker.service
 
@@ -95,7 +105,7 @@ runcmd:
   - touch /etc/apt/sources.list.d/kubernetes.list
   - bash -c 'echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list'
   - apt-get update
-  - apt-get install -y kubelet={{ kubernetes_version }} kubeadm={{ kubernetes_version }} kubectl={{ kubernetes_version }}
+  - apt-get install -y kubelet={{ packages.kubernetes_version }} kubeadm={{ packages.kubernetes_version }} kubectl={{ packages.kubernetes_version }}
   - apt-mark hold kubelet kubeadm kubectl
 
   # Auto-label k8s nodes
@@ -116,13 +126,14 @@ runcmd:
 
   # These removes the temporary scripts, certs and
 
-  - /tmp/split_certs.sh
+  - /tmp/run_split.sh
   - /tmp/modify_ca.sh
   - rm /etc/ipsec.d/cacerts/master.pem
   - mv /etc/ipsec.d/cacerts/new_master.pem /etc/ipsec.d/cacerts/master.pem
   - rm /tmp/split_certs.sh
   - rm /tmp/tmp_certs
   - rm /tmp/modify_ca.sh
+  - rm /tmp/run_split.sh
 
   # Bring up the iptunnel
 

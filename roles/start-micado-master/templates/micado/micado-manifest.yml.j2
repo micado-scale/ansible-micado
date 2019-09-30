@@ -14,6 +14,16 @@ metadata:
   labels:
     name: micado-worker
 ---
+# MiCADO Priority ##
+apiVersion: scheduling.k8s.io/v1beta1
+kind: PriorityClass
+metadata:
+  name: micado-priority
+  namespace: micado-worker
+value: 900000000
+globalDefault: false
+description: "Priority class for MiCADO critical pods"
+---
 # Prometheus Service Account ##
 apiVersion: v1
 kind: ServiceAccount
@@ -87,6 +97,10 @@ spec:
         env:
         - name: MICADO_FRONTEND_IP
           value: {{ ansible_host }}
+        - name: MICADO_VERSION
+          value: {{ micado_version }}
+        - name: DISABLE_OPTIMIZER
+          value: "{{ disable_optimizer }}"
 ---
 ## Service: MiCADO Dashboard ##
 apiVersion: v1
@@ -205,6 +219,8 @@ spec:
         - name: LOG_DIR
           value: /var/log/occopus
         volumeMounts:
+        - name: occopus-config
+          mountPath: /root/.occopus/
         - name: occopus-data
           mountPath: /var/lib/micado/occopus/data
         - name: occopus-submitter
@@ -212,6 +228,9 @@ spec:
         - name: occopus-log
           mountPath: /var/log/occopus
       volumes:
+      - name: occopus-config
+        hostPath:
+          path: /var/lib/micado/occopus/config
       - name: occopus-data
         hostPath:
           path: /var/lib/micado/occopus/data
@@ -431,6 +450,70 @@ spec:
     name: policykeeper
     tier: scaling
 ---
+{% if not disable_optimizer %}
+## Optimizer ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: optimizer
+  namespace: micado-system
+  labels:
+    tier: optimizing
+spec:
+  selector:
+    matchLabels:
+      name: optimizer
+      tier: optimizing
+  template:
+    metadata:
+      labels:
+        name: optimizer
+        tier: optimizing
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: optimizer
+        image: {{docker_images.optimizer}}
+        args:
+        - --cfg
+        - /config/optimizer/optimizer_config.yaml
+        - --host
+        - 0.0.0.0
+        - --port
+        - '12346'
+        volumeMounts:
+        - name: optimizer-config
+          mountPath: /config/optimizer
+        - name: optimizer-log
+          mountPath: /var/log/optimizer
+      volumes:
+      - name: optimizer-config
+        hostPath:
+          path: /var/lib/micado/optimizer/config
+      - name: optimizer-log
+        hostPath:
+          path: /var/log/micado/optimizer
+---
+## Service: Optimizer ##
+apiVersion: v1
+kind: Service
+metadata:
+  name: optimizer
+  namespace: micado-system
+  labels:
+    tier: optimizing
+spec:
+  ports:
+  - port: 12346
+  selector:
+    name: optimizer
+    tier: optimizing
+---
+{% endif %}
 ## Grafana ##
 apiVersion: apps/v1
 kind: Deployment
@@ -643,7 +726,7 @@ spec:
     name: credman
     tier: security
 ---
-{% if docker_iivr %}
+{% if intel_cpu %}
 ## Image Intergrity Verifier ##
 apiVersion: apps/v1
 kind: Deployment
@@ -935,105 +1018,3 @@ spec:
   selector:
     name: zorp
     tier: security
----
-## NodeExporter (Worker Nodes) ##
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: node-exporter
-  namespace: micado-worker
-  labels:
-    tier: monitoring
-spec:
-  selector:
-    matchLabels:
-      name: node-exporter
-      tier: monitoring
-  template:
-    metadata:
-      labels:
-        name: node-exporter
-        tier: monitoring
-    spec:
-      containers:
-      - name: node-exporter
-        image: {{docker_images.node_exporter}}
-        ports:
-        - containerPort: 9100
-        volumeMounts:
-        - name: nodex-proc
-          mountPath: /host/proc
-          readOnly: true
-        - name: nodex-sys
-          mountPath: /host/sys
-          readOnly: true
-        args:
-          - '--path.procfs=/host/proc'
-          - '--path.sysfs=/host/sys'
-      volumes:
-      - name: nodex-proc
-        hostPath:
-          path: /proc
-      - name: nodex-sys
-        hostPath:
-          path: /sys
----
-## cAdvisor (Worker Nodes) ##
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: cadvisor
-  namespace: micado-worker
-  labels:
-    tier: monitoring
-spec:
-  selector:
-    matchLabels:
-      name: cadvisor
-      tier: monitoring
-  template:
-    metadata:
-      labels:
-        name: cadvisor
-        tier: monitoring
-    spec:
-      containers:
-      - name: cadvisor
-        image: {{docker_images.cadvisor}}
-        args:
-        - --docker_only=true
-        - --housekeeping_interval=5s
-        - --disable_metrics=tcp,udp,disk
-        - --max_housekeeping_interval=15s
-        ports:
-        - containerPort: 8080
-        volumeMounts:
-        - name: cadvisor-root
-          mountPath: /rootfs
-          readOnly: true
-        - name: cadvisor-run
-          mountPath: /var/run
-        - name: cadvisor-sys
-          mountPath: /sys
-          readOnly: true
-        - name: cadvisor-docker
-          mountPath: /var/lib/docker
-          readOnly: true
-        - name: cadvisor-disk
-          mountPath: /dev/disk
-      volumes:
-      - name: cadvisor-root
-        hostPath:
-          path: /
-      - name: cadvisor-run
-        hostPath:
-          path: /var/run
-      - name: cadvisor-sys
-        hostPath:
-          path: /sys
-      - name: cadvisor-docker
-        hostPath:
-          path: /var/lib/docker
-      - name: cadvisor-disk
-        hostPath:
-          path: /dev/disk

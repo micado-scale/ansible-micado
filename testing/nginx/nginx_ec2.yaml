@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.7.3/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.0/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -9,25 +9,16 @@ repositories:
 topology_template:
   node_templates:
     nginxapp:
-      type: tosca.nodes.MiCADO.Container.Application.Docker
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
-         resources:
-           requests:
-             cpu: "200m"
-         ports:
-           - target: 8080
-             nodePort: 30012
-             type: NodePort
-           - containerPort: 9300
-      artifacts:
-       image:
-         type: tosca.artifacts.Deployment.Image.Container.Docker
-         file: jaydes/nginxapp:1.2
-         repository: docker_hub
-      interfaces:
-        Kubernetes:
-          create:
-            implementation: image
+        image: jaydes/nginxapp:1.2
+        resources:
+          requests:
+            cpu: "200m"
+        ports:
+        - port: 8080
+          nodePort: 30012
+        - containerPort: 9300
 
     worker-node:
       type: tosca.nodes.MiCADO.EC2.Compute

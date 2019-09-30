@@ -1,57 +1,32 @@
 ---
-- name: 'Downloading docker image: Redis'
+- name: Downloading docker images
   docker_image:
-      name: "{{docker_images.redis}}"
+      name: "{{ item }}"
+      source: pull
+  loop:
+      - "{{ docker_images.redis }}"
+      - "{{ docker_images.prometheus }}"
+      - "{{ docker_images.alertmanager }}"
+      - "{{ docker_images.grafana }}"
+      - "{{ docker_images.policykeeper }}"
+      - "{{ docker_images.occopus }}"
+      - "{{ docker_images.dashboard }}"
+      - "{{ docker_images.toscasubmitter }}"
+      - "{{ docker_images.credential_manager }}"
+      - "{{ docker_images.vault }}"
+      - "{{ docker_images.securitypolicymanager }}"
+      - "{{ docker_images.crypto_engine }}"
+      - "{{ docker_images.iivr }}"
+      - "{{ docker_images.zorp }}"
 
-- name: 'Downloading docker image: Prometheus'
-  docker_image:
-      name: "{{docker_images.prometheus}}"
-
-- name: 'Downloading docker image: Alertmanager'
-  docker_image:
-      name: "{{docker_images.alertmanager}}"
-
-- name: 'Downloading docker image: Grafana'
-  docker_image:
-      name: "{{docker_images.grafana}}"
-
-- name: 'Downloading docker image: Policykeeper'
-  docker_image:
-      name: "{{docker_images.policykeeper}}"
-
-- name: 'Downloading docker image: Occopus'
-  docker_image:
-      name: "{{docker_images.occopus}}"
-
-- name: 'Downloading docker image: Dashboard'
-  docker_image:
-      name: "{{docker_images.dashboard}}"
-
-- name: 'Downloading docker image: ToscaSubmitter'
-  docker_image:
-      name: "{{docker_images.toscasubmitter}}"
-
-- name: 'Downloading docker image: Credential Manager'
-  docker_image:
-      name: "{{docker_images.credential_manager}}"
-
-- name: 'Downloading docker image: Vault'
-  docker_image:
-      name: "{{docker_images.vault}}"
-
-- name: 'Downloading docker image: Security Policy Manager'
-  docker_image:
-      name: "{{docker_images.securitypolicymanager}}"
-
-- name: 'Downloading docker image: Crypto Engine'
-  docker_image:
-      name: "{{docker_images.crypto_engine}}"
-
-- name: 'Downloading docker image: Image Integrity Verifier'
+- name: Downloading Image Integrity Verifier container
   docker_image:
       name: "{{docker_images.iivr}}"
-  when: docker_iivr
+      source: pull
+  when: intel_cpu
 
-- name: 'Downloading docker image: Zorp'
+- name: Downloading Optimizer container
   docker_image:
-      name: "{{docker_images.zorp}}"
+      name: "{{docker_images.optimizer}}"
+      source: pull
+  when: not disable_optimizer
