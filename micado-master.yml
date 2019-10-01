@@ -66,7 +66,7 @@
     - cloud_cred_path: ./credentials-cloud-api.yml
     - docker_cred_path: ./credentials-docker-registry.yml
     - micado_cred_path: ./credentials-micado.yml
-    - micado_version: v0.8.0
+    - micado_version: v0.8.1-alpha
 
     - disable_optimizer: True
     - disable_worker_updates: True
@@ -76,6 +76,9 @@
 
     - master_hostname: micado-master
     - worker_hostname: micado-worker
+
+    - enable_occopus: False
+    - enable_terraform: True
 
     ##################################################################################
     ##### Please do not edit under this line unless you know what you are doing. #####
@@ -98,6 +101,7 @@
         prometheus: prom/prometheus:v2.12.0
         redis: redis:5-alpine
         securitypolicymanager: micado/security-policy-manager:2.1
+        terraform: hashicorp/terraform:0.12.9
         toscasubmitter: micado/toscasubmitter:v0.8.0
         vault: vault:1.0.3
         zorp: micado/zorpgpl:6.0.12

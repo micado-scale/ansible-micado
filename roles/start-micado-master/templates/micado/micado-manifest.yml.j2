@@ -117,6 +117,7 @@ spec:
     name: micado-dashboard
     tier: frontend
 ---
+{% if enable_occopus %}
 ## Redis for Occopus ##
 apiVersion: apps/v1
 kind: Deployment
@@ -256,6 +257,51 @@ spec:
     name: occopus
     tier: cloud-orchestration
 ---
+{% endif %}
+{% if enable_terraform %}
+## Terraform ##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: terraform
+  namespace: micado-system
+  labels:
+    tier: cloud-orchestration
+spec:
+  selector:
+    matchLabels:
+      name: terraform
+      tier: cloud-orchestration
+  template:
+    metadata:
+      labels:
+        name: terraform
+        tier: cloud-orchestration
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
+      containers:
+      - name: terraform
+        image: {{docker_images.terraform}}
+        tty: true
+        command: ["/bin/sh"]
+        volumeMounts:
+        - name: submitter-out
+          mountPath: /etc/micado/output
+        - name: submitter-sys
+          mountPath: /etc/micado/system
+      volumes:
+      - name: submitter-out
+        hostPath:
+          path: /var/lib/micado/toscasubmitter/output
+      - name: submitter-sys
+        hostPath:
+          path: /var/lib/micado/toscasubmitter/system
+---
+{% endif %}
 ## Prometheus ##
 apiVersion: apps/v1
 kind: Deployment

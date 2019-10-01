@@ -9,7 +9,6 @@
       - "{{ docker_images.alertmanager }}"
       - "{{ docker_images.grafana }}"
       - "{{ docker_images.policykeeper }}"
-      - "{{ docker_images.occopus }}"
       - "{{ docker_images.dashboard }}"
       - "{{ docker_images.toscasubmitter }}"
       - "{{ docker_images.credential_manager }}"
@@ -30,3 +29,15 @@
       name: "{{docker_images.optimizer}}"
       source: pull
   when: not disable_optimizer
+
+- name: Downloading Occopus container
+  docker_image:
+      name: "{{docker_images.occopus}}"
+      source: pull
+  when: enable_occopus
+
+- name: Downloading Terraform container
+  docker_image:
+      name: "{{docker_images.terraform}}"
+      source: pull
+  when: enable_terraform
