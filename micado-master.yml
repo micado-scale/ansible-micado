@@ -97,12 +97,12 @@
         node_exporter: prom/node-exporter:v0.18.1
         occopus: micado/occopus:1.7-rc3
         optimizer: micado/optimizer:v0.8.0
-        policykeeper: micado/policykeeper:v0.8.0
+        policykeeper: jaydes/policykeeper:tf
         prometheus: prom/prometheus:v2.12.0
         redis: redis:5-alpine
         securitypolicymanager: micado/security-policy-manager:2.1
         terraform: hashicorp/terraform:0.12.9
-        toscasubmitter: micado/toscasubmitter:v0.8.0
+        toscasubmitter: resmiac1989/submitter:tf
         vault: vault:1.0.3
         zorp: micado/zorpgpl:6.0.12
 

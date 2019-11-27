@@ -52,7 +52,7 @@
   when: enable_occopus
 
 - name: Copy CA to terraform directory
-  command: /bin/cp /etc/ipsec.d/cacerts/master.pem /var/lib/micado/terraform/data/
+  command: /bin/cp /etc/ipsec.d/cacerts/master.pem /var/lib/micado/toscasubmitter/system/
   when: enable_terraform
 
 - name: Restart IPSec

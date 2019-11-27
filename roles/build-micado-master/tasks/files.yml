@@ -69,6 +69,16 @@
     - { path: '/var/log/micado/terraform/', owner: 'root', group: 'root' }
   when: enable_terraform
 
+- name: Copy terraform template files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { src: 'terraform/azure_lvm.tf', dest: '/var/lib/micado/toscasubmitter/system/azure_lvm.tf', mode: '0644'}
+    - { src: 'terraform/azure_wvm.tf', dest: '/var/lib/micado/toscasubmitter/system/azure_wvm.tf', mode: '0644'}
+  when: enable_terraform
+
 - name: Copy components config file
   copy:
     src: "{{ item.src }}"

@@ -62,8 +62,9 @@ write_files:
     {% endraw %}
 
 - path: /etc/ipsec.d/cacerts/master.pem
-  content: |
-    ${master_ca_cert}
+  content: | {% raw %}
+    {{ master_pem|indent(4) }}
+    {% endraw %}
 
 runcmd:
 {% if disable_worker_updates %}
@@ -109,7 +110,7 @@ runcmd:
 
   - touch /etc/systemd/system/kubelet.service.d/20-labels.conf
   - echo '[Service]' >> /etc/systemd/system/kubelet.service.d/20-labels.conf
-  - echo 'Environment="KUBELET_EXTRA_ARGS=--node-labels=micado.eu/node_type=${worker_name}"' >> /etc/systemd/system/kubelet.service.d/20-labels.conf
+  - echo 'Environment="KUBELET_EXTRA_ARGS=--node-labels=micado.eu/node_type={{ '{{ worker_name }}' }}"' >> /etc/systemd/system/kubelet.service.d/20-labels.conf
   - systemctl daemon-reload
 
   # Install strongSwan

@@ -290,16 +290,11 @@ spec:
         command: ["/bin/sh"]
         volumeMounts:
         - name: submitter-out
-          mountPath: /etc/micado/output
-        - name: submitter-sys
-          mountPath: /etc/micado/system
+          mountPath: /var/lib/micado/terraform/submitter
       volumes:
       - name: submitter-out
         hostPath:
           path: /var/lib/micado/toscasubmitter/output
-      - name: submitter-sys
-        hostPath:
-          path: /var/lib/micado/toscasubmitter/system
 ---
 {% endif %}
 ## Prometheus ##
@@ -467,6 +462,8 @@ spec:
           mountPath: /var/log/policykeeper
         - name: pk-kube-config
           mountPath: /root/.kube
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
       volumes:
       - name: policykeeper-config
         hostPath:
@@ -480,6 +477,9 @@ spec:
       - name: pk-kube-config
         hostPath:
           path: /root/.kube
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
 ---
 ## Service: PolicyKeeper ##
 apiVersion: v1
