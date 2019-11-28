@@ -117,7 +117,7 @@ resource "azurerm_virtual_machine" "myterraformvm" {
 
     provisioner "remote-exec" {
         connection {
-          host     = "${azurerm_public_ip.windows_pip.ip_address}"
+          host     = "${data.azurerm_public_ip.windows_pip.ip_address}"
           type     = "winrm"
           port     = 5985
           https    = false
