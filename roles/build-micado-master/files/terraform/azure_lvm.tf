@@ -84,7 +84,7 @@ resource "azurerm_virtual_machine" "myterraformvm" {
         os_profile {
         computer_name  = "myvm"
         admin_username = "azureuser"
-        custom_data    = "${file("${path.module}/cloud-init.yaml")}"
+        custom_data    = "${file("${path.module}/terrainit.yaml")}"
     }
 
     os_profile_linux_config {
