@@ -464,6 +464,8 @@ spec:
           mountPath: /root/.kube
         - name: docker-socket
           mountPath: /var/run/docker.sock
+        - name: submitter-vol
+          mountPath: /submitter
       volumes:
       - name: policykeeper-config
         hostPath:
@@ -480,6 +482,9 @@ spec:
       - name: docker-socket
         hostPath:
           path: /var/run/docker.sock
+      - name: submitter-vol
+        hostPath:
+          path: /submitter
 ---
 ## Service: PolicyKeeper ##
 apiVersion: v1
