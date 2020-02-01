@@ -288,6 +288,11 @@ spec:
         image: {{docker_images.terraform}}
         tty: true
         command: ["/bin/sh"]
+        env:
+        - name: TF_INPUT
+          value: "false"
+        - name: TF_IN_AUTOMATION
+          value: "true"
         volumeMounts:
         - name: submitter-out
           mountPath: /var/lib/micado/terraform/submitter
