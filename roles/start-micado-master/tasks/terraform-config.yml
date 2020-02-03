@@ -1,0 +1,8 @@
+---
+- name: 'Terraform: config templates'
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { src: 'user_data/auth_data.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/auth_data.yaml'}
+    - { src: 'worker_node/cloud_init_worker_tf.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/cloud_init_worker_tf.yaml'}
