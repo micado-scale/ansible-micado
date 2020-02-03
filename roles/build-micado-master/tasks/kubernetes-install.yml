@@ -33,9 +33,9 @@
     name: "{{ item }}"
     selection: hold
   loop:
-    - kubelet
-    - kubeadm
-    - kubectl
+  - kubelet
+  - kubeadm
+  - kubectl
 
 - name: 'K8s: CNI plugin fix'
   shell: sysctl net.bridge.bridge-nf-call-iptables=1
@@ -49,6 +49,6 @@
     dest: "{{ item.dest }}"
     mode: 0644
   loop:
-    - { src: 'kubernetes/kube-dash.yaml', dest: '/etc/kubernetes/kube-dash.yaml'}
-    - { src: 'kubernetes/kube-flannel.yaml', dest: '/etc/kubernetes/kube-flannel.yaml'}
-    - { src: 'kubernetes/kubelet-config.yaml', dest: '/etc/kubernetes/kubelet-config.yaml'}
+  - { src: 'kubernetes/kube-dash.yaml', dest: '/etc/kubernetes/kube-dash.yaml'}
+  - { src: 'kubernetes/kube-flannel.yaml', dest: '/etc/kubernetes/kube-flannel.yaml'}
+  - { src: 'kubernetes/kubelet-config.yaml', dest: '/etc/kubernetes/kubelet-config.yaml'}

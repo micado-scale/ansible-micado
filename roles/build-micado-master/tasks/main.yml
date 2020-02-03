@@ -8,8 +8,17 @@
 
 - include: kubernetes-install.yml
 
-- include: other-install.yml
+- include: python-install.yml
 
-- include: files.yml
+- include: micado-core-install.yml
 
-- include: pull-docker-images.yml
+- include: micado-security-install.yml
+
+- include: optimizer-install.yml
+  when: not disable_optimizer
+
+- include: occopus-install.yml
+  when: enable_occopus
+
+- include: terraform-install.yml
+  when: enable_terraform
