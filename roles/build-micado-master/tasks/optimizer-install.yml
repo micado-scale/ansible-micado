@@ -1,5 +1,5 @@
 ---
-- name: 'Optimizer: Create directories'
+- name: '(Optimizer) Create directories'
   file:
     path: "{{ item.path }}"
     owner: "{{ item.owner }}"
@@ -11,7 +11,7 @@
   # Logs
   - { path: '/var/log/micado/optimizer/', owner: 'root', group: 'root' }
 
-- name: 'Optimizer: Copy config file'
+- name: '(Optimizer) Copy config file'
   copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
@@ -19,7 +19,7 @@
   loop:
   - { src: 'optimizer/optimizer_config.yaml', dest: '/var/lib/micado/optimizer/config/optimizer_config.yaml', mode: '0644'}
 
-- name: 'Optimizer: Downloading container'
+- name: '(Optimizer) Downloading container'
   docker_image:
     name: "{{docker_images.optimizer}}"
     source: pull

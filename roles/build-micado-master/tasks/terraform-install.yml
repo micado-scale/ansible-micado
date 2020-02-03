@@ -1,5 +1,5 @@
 ---
-- name: Create Terraform directories
+- name: '(Terraform) Create directories'
   file:
     path: "{{ item.path }}"
     owner: "{{ item.owner }}"
@@ -12,13 +12,13 @@
   # Logs
   - { path: '/var/log/micado/terraform/', owner: 'root', group: 'root' }
 
-- name: Copy Terraform log README file
+- name: '(Terraform) Copy log README file'
   copy:
     content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep terraform | col1)\n"
     dest: "/var/log/micado/terraform/README"
     mode: 0644
 
-- name: Downloading Terraform image
+- name: '(Terraform) Downloading docker image'
   docker_image:
     name: "{{ item }}"
     source: pull

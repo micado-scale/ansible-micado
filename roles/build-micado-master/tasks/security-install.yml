@@ -1,10 +1,10 @@
 ---
-- name: 'MiCADO Security: Install strongSwan'
+- name: '(MiCADO Security) Install strongSwan'
   apt:
     name: strongswan
     state: present
     
-- name: 'MiCADO Security: Create directories'
+- name: '(MiCADO Security) Create directories'
   file:
     path: "{{ item.path }}"
     owner: "{{ item.owner }}"
@@ -25,7 +25,7 @@
     - { path: '/var/log/micado/zorp/', owner: 'root', group: 'root' }
     - { path: '/var/log/micado/vault/', owner: 'root', group: 'root' }
 
-- name: 'MiCADO Security: Copy config files'
+- name: '(MiCADO Security) Copy config files'
   copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
@@ -35,7 +35,7 @@
     - { src: 'zorp/authform.html', dest: '/var/lib/micado/zorp/config/authform.html', mode: '0644'}
     - { src: 'zorp/zorp-entrypoint.sh', dest: '/var/lib/micado/zorp/scripts/docker-entrypoint.sh', mode: '0755'}
 
-- name: "MiCADO Security - Copy log README files"
+- name: "(MiCADO Security) Copy log README files"
   copy:
     content: "{{ item.content }}"
     dest: "{{ item.dest }}"
@@ -46,7 +46,7 @@
     - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep iivr | col1)\n", dest: '/var/log/micado/iivr/README'}
     - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep zorp | col1)\n", dest: '/var/log/micado/zorp/README'}
 
-- name: 'MiCADO Security: Downloading docker images'
+- name: '(MiCADO Security) Downloading docker images'
   docker_image:
     name: "{{ item }}"
     source: pull
@@ -57,7 +57,7 @@
   - "{{ docker_images.crypto_engine }}"
   - "{{ docker_images.zorp }}"
 
-- name: 'MiCADO Security: Downloading Image Integrity Verifier container'
+- name: '(MiCADO Security) Downloading Image Integrity Verifier container'
   docker_image:
     name: "{{ docker_images.iivr }}"
     source: pull

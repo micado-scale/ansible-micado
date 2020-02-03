@@ -10,9 +10,9 @@
 
 - include: python-install.yml
 
-- include: micado-core-install.yml
+- include: core-install.yml
 
-- include: micado-security-install.yml
+- include: security-install.yml
 
 - include: optimizer-install.yml
   when: not disable_optimizer

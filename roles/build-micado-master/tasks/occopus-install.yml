@@ -1,5 +1,5 @@
 ---
-- name: 'Occopus: Create directories'
+- name: '(Occopus) Create directories'
   file:
     path: "{{ item.path }}"
     owner: "{{ item.owner }}"
@@ -14,13 +14,13 @@
   - { path: '/var/log/micado/occopus/', owner: 'root', group: 'root' }
   - { path: '/var/log/micado/redis/', owner: 'root', group: 'root' }
 
-- name: 'Occopus: Copy config file'
+- name: '(Occopus) Copy config file'
   copy:
     src: "occopus/occopus_config.yaml"
     dest: "/var/lib/micado/occopus/config/occopus_config.yaml"
     mode: "0775"
 
-- name: 'Occopus: Downloading docker images'
+- name: '(Occopus) Downloading docker images'
   docker_image:
     name: "{{ item }}"
     source: pull

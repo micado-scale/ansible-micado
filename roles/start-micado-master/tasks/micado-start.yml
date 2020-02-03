@@ -1,17 +1,17 @@
 ---
-- name: Enable packet filtering
+- name: (MiCADO Core) Enable packet filtering
   service:
     name: iptables
     state: restarted
     enabled: yes
 
-- name: Enable IPv6 packet filtering
+- name: (MiCADO Core) Enable IPv6 packet filtering
   service:
     name: ip6tables
     state: restarted
     enabled: yes
 
-- name: Enable and start MiCADO systemd service
+- name: (MiCADO Core) Enable and start MiCADO systemd service
   service:
     name: micado
     state: restarted
