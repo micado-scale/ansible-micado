@@ -1,6 +1,8 @@
 ---
 - name: 'K8s: Turn off swap'
-  shell: swapoff -a
+  command: swapoff -a
+  tags:
+  - skip_ansible_lint
 
 - name: 'K8s: Disable swap permanently'
   replace:

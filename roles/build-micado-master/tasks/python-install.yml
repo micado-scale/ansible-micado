@@ -5,11 +5,14 @@
     - python-setuptools
     - python3-pip
     state: present
+    update_cache: yes
 
 - name: '(Python) Installing packages'
   pip:
     name:
     - docker
+    - kubernetes
+    - openshift
     - requests
     - click
     - terminaltables

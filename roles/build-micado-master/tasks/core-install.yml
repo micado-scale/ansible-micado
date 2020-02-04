@@ -52,9 +52,12 @@
     dest: "{{ item.dest }}"
     mode: 0644
   loop:
-  - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep alertmanager | col1)\n", dest: '/var/log/micado/alertmanager/README'}
-  - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep micado-dashboard | col1)\n", dest: '/var/log/micado/dashboard/README'}
-  - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep prometheus | col1)\n", dest: '/var/log/micado/prometheus/README'}
+  - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep alertmanager | col1)\n",
+      dest: '/var/log/micado/alertmanager/README'}
+  - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep micado-dashboard | col1)\n",
+      dest: '/var/log/micado/dashboard/README'}
+  - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep prometheus | col1)\n",
+      dest: '/var/log/micado/prometheus/README'}
 
 - name: '(MiCADO Core) Downloading docker images'
   docker_image:

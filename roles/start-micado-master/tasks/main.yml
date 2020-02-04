@@ -1,9 +1,9 @@
 ---
+- include: load-vars.yml
+
 - include: set-hostname.yml
 
 - include: kubernetes-start.yml
-
-- include: load-vars.yml
 
 - include: core-config.yml
 

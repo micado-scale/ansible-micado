@@ -1,22 +1,33 @@
 ---
 - name: (MiCADO Security) Wait for SPM running state
-  shell: "i=0 ; while [ `kubectl get -n micado-system pod | grep security-policy-manager | grep 1/1 | wc -l` -eq 0 ] && [ $i -lt 110 ] ; do echo -e 'Security policy manager is not healthy yet!' ;  sleep 1 ; ((i++)) ; done ; if [ $i -eq 20 ] ; then exit 1 ; fi ; exit 0"
-  args:
-    executable: /bin/bash
-  register: output
-  changed_when: output.stdout != ""
+  k8s:
+    kind: Deployment
+    name: security-policy-manager
+    namespace: micado-system
+    wait: yes
+    wait_condition:
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+  register: spm_running
 
 - name: (MiCADO Security) Get CA for IPSEC (master) (shell)
-  shell: /usr/bin/docker exec $(docker ps -f label=io.kubernetes.container.name=security-policy-manager -q) /bin/bash -c 'curl -X GET http://127.0.0.1:5003/v1.0/nodecerts/ca' > /etc/ipsec.d/cacerts/master.pem
+  shell: /usr/bin/docker exec $(docker ps -f label=io.kubernetes.container.name=security-policy-manager -q)
+      /bin/bash -c 'curl -X GET http://127.0.0.1:5003/v1.0/nodecerts/ca' > /etc/ipsec.d/cacerts/master.pem
+  when: spm_running |bool
 
 - name: (MiCADO Security) Get CRT and KEY for IPSEC (master) (shell)
-  shell: /usr/bin/docker exec $(docker ps -f label=io.kubernetes.container.name=security-policy-manager -q) /bin/bash -c 'curl -X POST -F 'cert_common_name=masternode.micado' http://127.0.0.1:5003/v1.0/nodecerts' > /tmp/tmp_certs
+  shell: /usr/bin/docker exec $(docker ps -f label=io.kubernetes.container.name=security-policy-manager -q)
+      /bin/bash -c 'curl -X POST -F 'cert_common_name=masternode.micado' http://127.0.0.1:5003/v1.0/nodecerts' > /tmp/tmp_certs
+  when: spm_running |bool
 
 - name: (MiCADO Security) Split PEM IPSec (key)
   command: /usr/bin/openssl pkey -in /tmp/tmp_certs -out /etc/ipsec.d/private/master.key
+  when: spm_running |bool
 
 - name: (MiCADO Security) Split PEM IPSEC (cert)
   command: /usr/bin/openssl x509 -in /tmp/tmp_certs -out /etc/ipsec.d/certs/master.crt
+  when: spm_running |bool
 
 - name: (MiCADO Security) Put cert into secrets
   lineinfile:
@@ -39,3 +50,4 @@
 
 - name: (MiCADO Security) Restart IPSec
   command: ipsec restart
+  when: spm_running |bool

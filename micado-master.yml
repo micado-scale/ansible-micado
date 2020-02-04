@@ -4,44 +4,47 @@
   gather_facts: False
 
   pre_tasks:
-    - name: Ensure that python3 installed
+    - name: (System) Ensure that python3 installed
       raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
       register: output
-      changed_when: output.stdout != ""
+      changed_when: not output.stdout
       tags:
       - build
       - start
 
-    - name: Turn back gather_fact
+    - name: (System) Turn back gather_fact
       setup:
       tags:
       - build
       - start
 
-    - name: Check system requirements
+    - name: (System) Check system requirements
       assert:
         that:
           "{{ item.that }}"
         msg: >
           "{{ item.msg }}"
       loop:
-        - { that: "ansible_os_family == 'Debian' and ansible_distribution_version == '16.04' or ansible_distribution_version == '18.04'", msg: 'The required OS is Ubuntu 16.04 or 18.04' }
+        - { that: "ansible_os_family == 'Debian' and ansible_distribution_version == '16.04' or ansible_distribution_version == '18.04'",
+            msg: 'The required OS is Ubuntu 16.04 or 18.04' }
         - { that: "ansible_memtotal_mb >= 2950", msg: 'The minimum required memory size is 3 GB' }
-        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first >= 14000000000", msg: 'The minimum required disk size is 15 GB' }
-        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_available') | list | first >= 5400000000", msg: 'The minimum required free disk size is 5 GB' }
+        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first >= 14000000000",
+            msg: 'The minimum required disk size is 15 GB' }
+        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_available') | list | first >= 5400000000",
+            msg: 'The minimum required free disk size is 5 GB' }
       tags:
       - build
       - start
 
-    - name: Waiting for automatic security updates to finish
+    - name: (System) Waiting for automatic security updates to finish
       script: pre-task/wait-updates.sh
       register: outputsh
-      changed_when: outputsh.stdout != ""
+      changed_when: not outputsh.stdout
       tags:
       - build
       - start
 
-    - name: "Check the CPU manufacture (Intel)"
+    - name: "(System) Check the CPU manufacture (Intel)"
       set_fact:
          intel_cpu: true
       when: "ansible_processor | select('match', '.*Intel') | list | length > 0"

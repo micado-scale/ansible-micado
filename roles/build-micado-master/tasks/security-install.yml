@@ -3,7 +3,7 @@
   apt:
     name: strongswan
     state: present
-    
+
 - name: '(MiCADO Security) Create directories'
   file:
     path: "{{ item.path }}"
@@ -41,10 +41,14 @@
     dest: "{{ item.dest }}"
     mode: 0644
   loop:
-    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep credman | col1)\n", dest: '/var/log/micado/credman/README'}
-    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep crypto-engine | col1)\n", dest: '/var/log/micado/crypto_engine/README'}
-    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep iivr | col1)\n", dest: '/var/log/micado/iivr/README'}
-    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep zorp | col1)\n", dest: '/var/log/micado/zorp/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep credman | col1)\n",
+        dest: '/var/log/micado/credman/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep crypto-engine | col1)\n",
+        dest: '/var/log/micado/crypto_engine/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep iivr | col1)\n",
+        dest: '/var/log/micado/iivr/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep zorp | col1)\n",
+        dest: '/var/log/micado/zorp/README'}
 
 - name: '(MiCADO Security) Downloading docker images'
   docker_image:

@@ -1,63 +1,63 @@
 ---
 - name: '(Kubernetes) Check if initialised'
-  shell: kubeadm token list
+  command: kubeadm token list
   register: k8smember
   changed_when: k8smember.rc == 1
   failed_when: k8smember.rc not in [0,1]
 
 - name: '(Kubernetes) Pre-flight checks'
-  shell: kubeadm init phase preflight
+  command: kubeadm init phase preflight
         --ignore-preflight-errors=NumCPU
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Create certificates'
-  shell: kubeadm init phase certs all
+  command: kubeadm init phase certs all
         --apiserver-advertise-address={{ ansible_default_ipv4.address }}
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Create kubeconfig'
-  shell: kubeadm init phase kubeconfig all
+  command: kubeadm init phase kubeconfig all
         --apiserver-advertise-address={{ ansible_default_ipv4.address }}
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Start kubelet'
-  shell: kubeadm init phase kubelet-start
+  command: kubeadm init phase kubelet-start
         --config=/etc/kubernetes/kubelet-config.yaml
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Create control-plane manifests'
-  shell: kubeadm init phase control-plane all
+  command: kubeadm init phase control-plane all
         --apiserver-advertise-address={{ ansible_default_ipv4.address }}
         --pod-network-cidr=10.244.0.0/16
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Create etcd instance'
-  shell: kubeadm init phase etcd local
+  command: kubeadm init phase etcd local
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Upload control-plane certs'
-  shell: kubeadm init phase upload-certs --upload-certs
+  command: kubeadm init phase upload-certs --upload-certs
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Mark control-plane master node'
-  shell: kubeadm init phase mark-control-plane
+  command: kubeadm init phase mark-control-plane
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Generate bootstrap tokens'
-  shell: kubeadm init phase bootstrap-token
+  command: kubeadm init phase bootstrap-token
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Upload kubeadm config'
-  shell: kubeadm init phase upload-config kubeadm
+  command: kubeadm init phase upload-config kubeadm
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Upload kubelet config'
-  shell: kubeadm init phase upload-config kubelet
+  command: kubeadm init phase upload-config kubelet
         --config=/etc/kubernetes/kubelet-config.yaml
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Install kube-proxy and CoreDNS'
-  shell: kubeadm init phase addon all
+  command: kubeadm init phase addon all
         --apiserver-advertise-address={{ ansible_default_ipv4.address }}
         --pod-network-cidr=10.244.0.0/16
   when: k8smember.rc == 1
@@ -72,6 +72,7 @@
     remote_src: yes
     src: /etc/kubernetes/admin.conf
     dest: /root/.kube/config
+  when: k8smember.rcc == 1
 
 - name: '(Kubernetes) Add kube/config to ENV'
   lineinfile:
@@ -79,14 +80,25 @@
     line: 'KUBECONFIG=/root/.kube/config'
 
 - name: '(Kubernetes) Create Dashboard'
-  shell: kubectl apply -f /etc/kubernetes/kube-dash.yaml
+  k8s:
+    src: /etc/kubernetes/kube-dash.yaml
+    apply: yes
 
 - name: '(Kubernetes) Create Flannel-CNI'
-  shell: kubectl apply -f /etc/kubernetes/kube-flannel.yaml
+  k8s:
+    src: /etc/kubernetes/kube-flannel.yaml
+    apply: yes
 
 - name: '(Kubernetes) Get cluster join command'
-  shell: kubeadm token create --ttl 0 --print-join-command
+  command: kubeadm token create --ttl 0 --print-join-command
   register: join_command
+  changed_when: False
+
+- name: '(Kubernetes) Get current context namespace'
+  command: kubectl config get-contexts --no-headers
+  register: contexts
+  changed_when: False
 
 - name: '(Kubernetes) Set default namespace'
-  shell: kubectl config set-context --current --namespace=default
+  command: kubectl config set-context --current --namespace=default
+  when: "'default' not in contexts.stdout_lines[0]"

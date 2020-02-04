@@ -1,6 +1,7 @@
 ---
 - name: '(Kubernetes) Turn off swap'
-  shell: swapoff -a
+  command: swapoff -a
+  changed_when: False
 
 - name: '(Kubernetes) Disable swap permanently'
   replace:
@@ -37,11 +38,19 @@
   - kubeadm
   - kubectl
 
-- name: '(Kubernetes) CNI plugin fix'
-  shell: sysctl net.bridge.bridge-nf-call-iptables=1
+- name: (Kubernetes) Find config images
+  command: kubeadm config images list
+  register: k8s_config
+  changed_when: False
 
-- name: '(Kubernetes) Pull config images'
-  shell: kubeadm config images pull
+- name: (Kubernetes) Check for config images locally
+  docker_image_info:
+    name: "{{ k8s_config.stdout_lines }}"
+  register: k8s_images
+
+- name: (Kubernetes) Pull config images
+  command: kubeadm config images pull
+  when: k8s_images.images | length < 7
 
 - name: '(Kubernetes) Copy Kubernetes Dashboard and flannel manifest'
   copy:

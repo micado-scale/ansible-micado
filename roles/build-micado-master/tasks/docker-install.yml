@@ -41,19 +41,10 @@
     dest: /lib/systemd/system/docker.service
     regexp: '^ExecStart=/usr/bin/dockerd[.]?'
     line: "ExecStart=/usr/bin/dockerd -H fd:// --exec-opt native.cgroupdriver=systemd --mtu={{ ansible_default_ipv4.mtu }}"
-  register: docker_service
+  notify: (Docker) Restart service
 
 - name: '(Docker) Copy log options'
   copy:
     src: 'docker/daemon.json'
     dest: '/etc/docker/daemon.json'
     mode: 0644
-
-- name: '(Docker) Restart service'
-  systemd:
-    daemon_reload: yes
-    name: docker
-    state: restarted
-    enabled: yes
-    masked: no
-  when: docker_service.changed
