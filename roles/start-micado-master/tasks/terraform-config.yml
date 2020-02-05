@@ -6,3 +6,15 @@
   loop:
     - { src: 'user_data/auth_data.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/auth_data.yaml'}
     - { src: 'worker_node/cloud_init_worker_tf.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/cloud_init_worker_tf.yaml'}
+
+- name: (Terraform) Checking the existence of GCE credentials
+  stat: path={{ gce_cred_path }}
+  delegate_to: localhost
+  register: gce
+  changed_when: False
+
+- name: (Terraform) Copy GCE credentials file
+  copy:
+    src: "{{ gce_cred_path }}"
+    dest: "/var/lib/micado/toscasubmitter/system/gce_auth.json"
+  when: gce.stat.exists

@@ -67,6 +67,7 @@
     ######################################################################
 
     - cloud_cred_path: ./credentials-cloud-api.yml
+    - gce_cred_path: ./credentials-gce.json
     - docker_cred_path: ./credentials-docker-registry.yml
     - micado_cred_path: ./credentials-micado.yml
     - micado_version: v0.8.1-alpha
