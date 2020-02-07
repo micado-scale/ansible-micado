@@ -1,6 +1,6 @@
 ---
 - name: '(Kubernetes) Check if initialised'
-  command: kubeadm token list
+  command: kubectl get po
   register: k8smember
   changed_when: k8smember.rc == 1
   failed_when: k8smember.rc not in [0,1]
@@ -72,7 +72,7 @@
     remote_src: yes
     src: /etc/kubernetes/admin.conf
     dest: /root/.kube/config
-  when: k8smember.rcc == 1
+  when: k8smember.rc == 1
 
 - name: '(Kubernetes) Add kube/config to ENV'
   lineinfile:
