@@ -14,20 +14,20 @@
 - name: (MiCADO Security) Get CA for IPSEC (master) (shell)
   shell: /usr/bin/docker exec $(docker ps -f label=io.kubernetes.container.name=security-policy-manager -q)
       /bin/bash -c 'curl -X GET http://127.0.0.1:5003/v1.0/nodecerts/ca' > /etc/ipsec.d/cacerts/master.pem
-  when: spm_running |bool
+  when: spm_running is succeeded
 
 - name: (MiCADO Security) Get CRT and KEY for IPSEC (master) (shell)
   shell: /usr/bin/docker exec $(docker ps -f label=io.kubernetes.container.name=security-policy-manager -q)
       /bin/bash -c 'curl -X POST -F 'cert_common_name=masternode.micado' http://127.0.0.1:5003/v1.0/nodecerts' > /tmp/tmp_certs
-  when: spm_running |bool
+  when: spm_running is succeeded
 
 - name: (MiCADO Security) Split PEM IPSec (key)
   command: /usr/bin/openssl pkey -in /tmp/tmp_certs -out /etc/ipsec.d/private/master.key
-  when: spm_running |bool
+  when: spm_running is succeeded
 
 - name: (MiCADO Security) Split PEM IPSEC (cert)
   command: /usr/bin/openssl x509 -in /tmp/tmp_certs -out /etc/ipsec.d/certs/master.crt
-  when: spm_running |bool
+  when: spm_running is succeeded
 
 - name: (MiCADO Security) Put cert into secrets
   lineinfile:
@@ -50,4 +50,4 @@
 
 - name: (MiCADO Security) Restart IPSec
   command: ipsec restart
-  when: spm_running |bool
+  when: spm_running is succeeded
