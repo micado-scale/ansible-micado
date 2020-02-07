@@ -42,3 +42,6 @@
     regexp: '^ExecStart=/usr/bin/dockerd[.]?'
     line: "ExecStart=/usr/bin/dockerd -H fd:// --exec-opt native.cgroupdriver=systemd --mtu={{ ansible_default_ipv4.mtu }}"
   notify: (Docker) Restart service
+
+- name: (Docker) Flush handlers to restart Docker service
+  meta: flush_handlers

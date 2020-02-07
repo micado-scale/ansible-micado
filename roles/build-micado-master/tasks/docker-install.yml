@@ -48,3 +48,6 @@
     src: 'docker/daemon.json'
     dest: '/etc/docker/daemon.json'
     mode: 0644
+
+- name: (Docker) Flush handlers to restart Docker service
+  meta: flush_handlers
