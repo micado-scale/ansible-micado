@@ -15,7 +15,7 @@ metadata:
     name: micado-worker
 ---
 # MiCADO Priority ##
-apiVersion: scheduling.k8s.io/v1beta1
+apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
 metadata:
   name: micado-priority
@@ -32,7 +32,7 @@ metadata:
   namespace: micado-system
 ---
 # Prometheus Cluster Role ##
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: prometheus
@@ -53,7 +53,7 @@ rules:
   verbs: ["get"]
 ---
 # Prometheus Cluster Role Binding ##
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: prometheus
