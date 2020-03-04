@@ -101,7 +101,7 @@
         node_exporter: prom/node-exporter:v0.18.1
         occopus: micado/occopus:1.7-rc3
         optimizer: micado/optimizer:v0.8.0
-        policykeeper: jaydes/policykeeper:tf
+        policykeeper: micado/policykeeper:tf
         prometheus: prom/prometheus:v2.16.0
         redis: redis:5-alpine
         securitypolicymanager: micado/security-policy-manager:2.1
