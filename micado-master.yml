@@ -4,44 +4,47 @@
   gather_facts: False
 
   pre_tasks:
-    - name: Ensure that python3 installed
+    - name: (System) Ensure that python3 installed
       raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
       register: output
-      changed_when: output.stdout != ""
+      changed_when: not output.stdout
       tags:
       - build
       - start
 
-    - name: Turn back gather_fact
+    - name: (System) Turn back gather_fact
       setup:
       tags:
       - build
       - start
 
-    - name: Check system requirements
+    - name: (System) Check system requirements
       assert:
         that:
           "{{ item.that }}"
         msg: >
           "{{ item.msg }}"
       loop:
-        - { that: "ansible_os_family == 'Debian' and ansible_distribution_version == '16.04' or ansible_distribution_version == '18.04'", msg: 'The required OS is Ubuntu 16.04 or 18.04' }
+        - { that: "ansible_os_family == 'Debian' and ansible_distribution_version == '16.04' or ansible_distribution_version == '18.04'",
+            msg: 'The required OS is Ubuntu 16.04 or 18.04' }
         - { that: "ansible_memtotal_mb >= 2950", msg: 'The minimum required memory size is 3 GB' }
-        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first >= 14000000000", msg: 'The minimum required disk size is 15 GB' }
-        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_available') | list | first >= 5400000000", msg: 'The minimum required free disk size is 5 GB' }
+        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first >= 14000000000",
+            msg: 'The minimum required disk size is 15 GB' }
+        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_available') | list | first >= 5400000000",
+            msg: 'The minimum required free disk size is 5 GB' }
       tags:
       - build
       - start
 
-    - name: Waiting for automatic security updates to finish
+    - name: (System) Waiting for automatic security updates to finish
       script: pre-task/wait-updates.sh
       register: outputsh
-      changed_when: outputsh.stdout != ""
+      changed_when: not outputsh.stdout
       tags:
       - build
       - start
 
-    - name: "Check the CPU manufacture (Intel)"
+    - name: "(System) Check the CPU manufacture (Intel)"
       set_fact:
          intel_cpu: true
       when: "ansible_processor | select('match', '.*Intel') | list | length > 0"
@@ -64,9 +67,10 @@
     ######################################################################
 
     - cloud_cred_path: ./credentials-cloud-api.yml
+    - gce_cred_path: ./credentials-gce.json
     - docker_cred_path: ./credentials-docker-registry.yml
     - micado_cred_path: ./credentials-micado.yml
-    - micado_version: v0.8.0
+    - micado_version: v0.8.1-beta
 
     - disable_optimizer: True
     - disable_worker_updates: True
@@ -77,6 +81,9 @@
     - master_hostname: micado-master
     - worker_hostname: micado-worker
 
+    - enable_occopus: False
+    - enable_terraform: True
+
     ##################################################################################
     ##### Please do not edit under this line unless you know what you are doing. #####
     ##################################################################################
@@ -84,26 +91,27 @@
     - intel_cpu: false
 
     - docker_images:
-        alertmanager: prom/alertmanager:v0.19.0
-        cadvisor: google/cadvisor:v0.33.0
+        alertmanager: prom/alertmanager:v0.20.0
+        cadvisor: gcr.io/google-containers/cadvisor:v0.34.0
         credential_manager: micado/credential-manager:0.2.0
         crypto_engine: micado/crypto-engine:1.0
         dashboard: micado/dashboard:0.4.0
-        grafana: grafana/grafana:6.3.5
+        grafana: grafana/grafana:6.6.2
         iivr: micado/iivr:1.0
         node_exporter: prom/node-exporter:v0.18.1
         occopus: micado/occopus:1.7-rc3
         optimizer: micado/optimizer:v0.8.0
-        policykeeper: micado/policykeeper:v0.8.0
-        prometheus: prom/prometheus:v2.12.0
+        policykeeper: jaydes/policykeeper:tf
+        prometheus: prom/prometheus:v2.16.0
         redis: redis:5-alpine
         securitypolicymanager: micado/security-policy-manager:2.1
-        toscasubmitter: micado/toscasubmitter:v0.8.0
+        terraform: hashicorp/terraform:0.12.21
+        toscasubmitter: micado/toscasubmitter:tf
         vault: vault:1.0.3
         zorp: micado/zorpgpl:6.0.12
 
     - packages:
-        docker_ce: "docker-ce=5:19.03.2~3-0~ubuntu-{{ ansible_distribution_release }}"
-        docker_ce_cli: "docker-ce-cli=5:19.03.2~3-0~ubuntu-{{ ansible_distribution_release }}"
-        containerd_io: containerd.io=1.2.6-3
-        kubernetes_version: 1.15.3-00
+        docker_ce: "docker-ce=5:19.03.6~3-0~ubuntu-{{ ansible_distribution_release }}"
+        docker_ce_cli: "docker-ce-cli=5:19.03.6~3-0~ubuntu-{{ ansible_distribution_release }}"
+        containerd_io: containerd.io=1.2.10-3
+        kubernetes_version: 1.17.3-00

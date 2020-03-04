@@ -63,12 +63,7 @@ write_files:
 
 - path: /etc/ipsec.d/cacerts/master.pem
   content: | {% raw %}
-      {{ '{{' }}cmd('cat /var/lib/micado/occopus/data/master.pem'){{ '}}' }}
-    {% endraw %}
-
-- path: /tmp/tmp_certs
-  content: | {% raw %}
-      {{ '{{' }}cmd('curl -X POST http://10.97.170.199:5003/v1.0/nodecerts'){{ '}}' }}
+    {{ master_pem|indent(4) }}
     {% endraw %}
 
 runcmd:
@@ -127,8 +122,8 @@ runcmd:
 
   - {{ join_command.stdout }}
 
-  # These removes the temporary scripts, certs and
-
+  # Certificates management
+  - curl --connect-timeout 30 --retry 10 -X POST http://10.97.170.199:5003/v1.0/nodecerts > /tmp/tmp_certs
   - /tmp/run_split.sh
   - /tmp/modify_ca.sh
   - rm /etc/ipsec.d/cacerts/master.pem

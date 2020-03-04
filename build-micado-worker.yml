@@ -4,29 +4,31 @@
   gather_facts: False
 
   pre_tasks:
-    - name: Ensure that python3 installed
+    - name: (System) Ensure that python3 installed
       raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
       register: output
-      changed_when: output.stdout != ""
+      changed_when: not output.stdout
 
-    - name: Turn back gather_fact
+    - name: (System) Turn back gather_fact
       setup:
 
-    - name: Check system requirements
+    - name: (System) Check requirements
       assert:
         that:
           "{{ item.that }}"
         msg: >
           "{{ item.msg }}"
       loop:
-        - { that: "ansible_os_family == 'Debian' and ansible_distribution_version == '16.04' or ansible_distribution_version == '18.04'", msg: 'The required OS is Ubuntu 16.04 or 18.04' }
+        - { that: "ansible_os_family == 'Debian' and ansible_distribution_version == '16.04' or ansible_distribution_version == '18.04'",
+            msg: 'The required OS is Ubuntu 16.04 or 18.04' }
         - { that: "ansible_memtotal_mb >= 1950", msg: 'The minimum required memory size is 2 GB' }
-        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first >= 7000000000", msg: 'The minimum required disk size is 8 GB' }
+        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first >= 7000000000",
+            msg: 'The minimum required disk size is 8 GB' }
 
-    - name: "Waiting for automatic security updates to finish"
+    - name: (System) Waiting for automatic security updates to finish
       script: pre-task/wait-updates.sh
       register: outputsh
-      changed_when: outputsh.stdout != ""
+      changed_when: not outputsh.stdout
 
   roles:
     - micado-worker
@@ -38,11 +40,11 @@
     ##################################################################################
 
     - docker_images:
-        cadvisor: google/cadvisor:v0.33.0
-        node_exporter: prom/node-exporter:v0.15.2
+        cadvisor: gcr.io/google-containers/cadvisor:v0.34.0
+        node_exporter: prom/node-exporter:v0.18.1
 
     - packages:
-        docker_ce: "docker-ce=5:19.03.2~3-0~ubuntu-{{ ansible_distribution_release }}"
-        docker_ce_cli: "docker-ce-cli=5:19.03.2~3-0~ubuntu-{{ ansible_distribution_release }}"
-        containerd_io: containerd.io=1.2.6-3
-        kubernetes_version: 1.15.3-00
+        docker_ce: "docker-ce=5:19.03.6~3-0~ubuntu-{{ ansible_distribution_release }}"
+        docker_ce_cli: "docker-ce-cli=5:19.03.6~3-0~ubuntu-{{ ansible_distribution_release }}"
+        containerd_io: containerd.io=1.2.10-3
+        kubernetes_version: 1.17.3-00

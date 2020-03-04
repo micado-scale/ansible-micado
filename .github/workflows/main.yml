@@ -1,0 +1,17 @@
+name: Ansible Playbook Linting
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run ansible-lint
+      uses: ansible/ansible-lint-action@master
+      with:
+        targets: |
+          micado-master.yml
+          build-micado-worker.yml
