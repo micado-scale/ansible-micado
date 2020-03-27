@@ -1,8 +1,5 @@
 #cloud-config
-apt_upgrade: false
-apt_update: false
 manage_etc_hosts: false
-package_update: false
 package_upgrade: false
 
 write_files:
@@ -71,6 +68,14 @@ write_files:
       {{ '{{' }}cmd('curl -X POST http://10.97.170.199:5003/v1.0/nodecerts'){{ '}}' }}
     {% endraw %}
 
+packages:
+- apt-transport-https
+- ca-certificates
+- curl
+- software-properties-common
+
+final_message: "MiCADO Worker configured after $UPTIME seconds"
+
 runcmd:
 {% if disable_worker_updates %}
   - sed -i 's/APT::Periodic::Unattended-Upgrade "1";/APT::Periodic::Unattended-Upgrade "0";/g' /etc/apt/apt.conf.d/20auto-upgrades
@@ -88,8 +93,6 @@ runcmd:
   - resolvconf -u
 
   # Add Docker & K8s repositories
-  - apt-get update
-  - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
   - DISTCODE="$(lsb_release -cs)"
   - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $DISTCODE stable"
@@ -112,6 +115,8 @@ runcmd:
   - apt-get install -y kubelet={{ packages.kubernetes_version }} kubeadm={{ packages.kubernetes_version }} kubectl={{ packages.kubernetes_version }}
   - apt-mark hold kubelet kubeadm kubectl
 
+  # Placeholder for ADT insert
+  - echo micado runcmd placeholder
 
   # Auto-label k8s nodes
   - touch /etc/systemd/system/kubelet.service.d/20-labels.conf
