@@ -99,7 +99,7 @@
         grafana: grafana/grafana:6.6.2
         iivr: micado/iivr:1.0
         node_exporter: prom/node-exporter:v0.18.1
-        occopus: micado/occopus:1.7-rc3
+        occopus: micado/occopus:1.7-rc4
         optimizer: micado/optimizer:v0.8.0
         policykeeper: micado/policykeeper:tf
         prometheus: prom/prometheus:v2.16.0
