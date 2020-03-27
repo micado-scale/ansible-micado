@@ -1,10 +1,12 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
+
+description: ADT for stressng on OpenStack Nova
 
 topology_template:
   node_templates:
@@ -18,26 +20,23 @@ topology_template:
             cpu: "900m"
 
     worker-node:
-      type: tosca.nodes.MiCADO.EC2.Compute
+      type: tosca.nodes.MiCADO.Nova.Compute
       properties:
-        region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
-        image_id: ADD_YOUR_IMAGE_ID_HERE (e.g. ami-061a2d878e5754b62)
-        instance_type: ADD_YOUR_INSTANCE_TYPE_HERE (e.g. t2.small)
-        key_name: -OPTIONAL- ADD_YOUR_KEY_NAME_HERE (e.g. my_ssh_key)
-        security_group_ids:
-          - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
+        image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
+        flavor_name: ADD_YOUR_FLAVOUR_ID_HERE (e.g. 3)
+        project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
+        network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
+        key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
+        security_groups:
+          - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
       interfaces:
+        # TERRAFORM: Change to Terraform and provide network_name in the inputs below
         Occopus:
           create:
             inputs:
-              interface_cloud: ec2
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com )
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
-
+              #network_name: ADD_YOUR_NETWORK_NAME (e.g. default-net)
+              endpoint: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
+      
   policies:
     - monitoring:
         type: tosca.policies.Monitoring.MiCADO

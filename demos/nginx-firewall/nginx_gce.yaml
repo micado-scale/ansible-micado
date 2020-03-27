@@ -1,10 +1,12 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
+
+description: ADT for NGINX on GCE
 
 topology_template:
   node_templates:
@@ -21,25 +23,19 @@ topology_template:
         - containerPort: 9300
 
     worker-node:
-      type: tosca.nodes.MiCADO.CloudSigma.Compute.Occo
+      type: tosca.nodes.MiCADO.GCE.Compute
       properties:
-        num_cpus: 2000
-        mem_size: 2147483648
-        vnc_password: secret
-        libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
-        public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
-        nics:
-        - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
-          ip_v4_conf:
-            conf: dhcp
-        # This node runs on Zurich by default, uncomment & edit the below line to change region
-        # endpoint: https://gva.cloudsigma.com/api/2.0
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
-
+        region: <REGION_NAME> (e.g. us-west1)
+        zone: <ZONE_NAME> (e.g. us-west1-a)
+        project: <PROJECT_NAME> (e.g causal-apple-22)
+        machine_type: <VM_TYPE_NAME> (e.g. n1-standard-2)
+        image: <VM_IMAGE_NAME> (e.g ubuntu-os-cloud/ubuntu-1804-lts)
+        network: <NETWORK_NAME> (e.g default)
+        ssh-keys: <SSH_KEY_NAME> (e.g. ssh-rsa AAAB3N...)
+      interfaces:
+        Terraform:
+          create:
+      
   outputs:
     ports:
       value: { get_attribute: [ nginxapp, port ]}

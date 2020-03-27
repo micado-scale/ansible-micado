@@ -1,10 +1,24 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
+
+description: ADT for WordPress on CloudSigma
+
+dsl_definitions:
+  compute_properties: &compute_properties
+    vnc_password: ADD_VNC_PASSWORD_HERE (e.g. secret)
+    libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
+    public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
+    nics:
+    - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
+      ip_v4_conf:
+        conf: dhcp
+    # Overwrite the endpoint property here if required (example: Geneva)
+    #endpoint: https://gva.cloudsigma.com/api/2.0
 
 topology_template:
   node_templates:
@@ -80,53 +94,15 @@ topology_template:
               properties:
                 location: /var/www/html
 
+    # These compute nodes are predefined in micado-types.yaml which sets defaults for
+    # size, orchestrator, capabilities, and adds NFS server dependencies to cloud-init
     scaling-worker:
-      type: tosca.nodes.MiCADO.CloudBroker.Compute
-      properties:
-        deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
-        instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
-        key_pair_id: ADD_YOUR_ID_HERE (e.g. d865f75f-d32b-4444-9fbb-3332bcedeb75)
-        opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
-        context:
-          append: yes
-          cloud_config: |
-            runcmd:
-            - apt-get install -y nfs-kernel-server nfs-common
-      interfaces:
-        Occopus:
-          create:
-            inputs:
-              interface_cloud: cloudbroker
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://cola-prototype.cloudbroker.com )
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
-
+        type: tosca.nodes.MiCADO.CloudSigma.Compute.Occo.small.NFS
+        properties: *compute_properties
+        
     static-worker:
-      type: tosca.nodes.MiCADO.CloudBroker.Compute
-      properties:
-        deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
-        instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
-        key_pair_id: ADD_YOUR_ID_HERE (e.g. d865f75f-d32b-4444-9fbb-3332bcedeb75)
-        opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
-        context:
-          append: yes
-          cloud_config: |
-            runcmd:
-            - apt-get install -y nfs-kernel-server nfs-common
-      interfaces:
-        Occopus:
-          create:
-            inputs:
-              interface_cloud: cloudbroker
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://cola-prototype.cloudbroker.com )
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
+        type: tosca.nodes.MiCADO.CloudSigma.Compute.Occo.small.NFS
+        properties: *compute_properties
 
   outputs:
     ports:

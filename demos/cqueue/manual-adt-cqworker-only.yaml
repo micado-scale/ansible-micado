@@ -1,10 +1,12 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
+
+description: ADT for cqueue on OpenStack Nova
 
 topology_template:
   node_templates:
@@ -80,14 +82,8 @@ topology_template:
         Occopus:
           create:
             inputs:
-              interface_cloud: cloudsigma
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g. https://zrh.cloudsigma.com/api/2.0)
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 1 GB
-
+              endpoint: ADD_YOUR_ENDPOINT (e.g. https://zrh.cloudsigma.com/api/2.0)
+      
   policies:
     - scalability:
         type: tosca.policies.Scaling.MiCADO

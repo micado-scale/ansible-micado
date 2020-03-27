@@ -1,10 +1,27 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/add-terraform/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
+
+description: ADT for cqueue on CloudSigma
+
+dsl_definitions:
+  compute_properties: &compute_properties
+    num_cpus: 2000
+    mem_size: 2147483648
+    vnc_password: secret
+    libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
+    public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
+    nics:
+    - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
+      ip_v4_conf:
+        conf: dhcp
+  
+  occopus_properties: &occopus_properties
+    endpoint: https://zrh.cloudsigma.com/api/2.0
 
 topology_template:
   node_templates:
@@ -38,7 +55,6 @@ topology_template:
         - containerPort: 8090
       requirements:
       - host: cq-server
-
 
     rabbit:
       type: tosca.nodes.MiCADO.Container.Pod.Kubernetes
@@ -101,26 +117,21 @@ topology_template:
       properties:
         path: /var/run/docker.sock
 
-# These abstracted tosca nodes default to eu-west-2
-# overwrite the region_name property to change region
-# also see how to provide an ssh key
-#       region_name: us-east-1
-#       key_name: my_ssh_key
     worker-node:
-      type: tosca.nodes.MiCADO.EC2.Compute.Terra
-      properties:
-        image_id: ADD_YOUR_IMAGE_ID_HERE (e.g. ami-061a2d878e5754b62)
-        instance_type: t2.small
-        security_group_ids:
-          - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
+      type: tosca.nodes.MiCADO.CloudSigma.Compute
+      properties: *compute_properties
+      interfaces:
+        Occopus:
+          create:
+            inputs: *occopus_properties
 
     cq-server:
-      type: tosca.nodes.MiCADO.EC2.Compute.Terra
-      properties:
-        image_id: ADD_YOUR_IMAGE_ID_HERE (e.g. ami-061a2d878e5754b62)
-        instance_type: t2.medium
-        security_group_ids:
-          - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
+      type: tosca.nodes.MiCADO.CloudSigma.Compute
+      properties: *compute_properties
+      interfaces:
+        Occopus:
+          create:
+            inputs: *occopus_properties
 
   policies:
     - scalability:

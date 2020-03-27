@@ -1,10 +1,34 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
+
+description: ADT for WordPress on OpenStack Nova
+
+dsl_definitions:
+  compute_properties: &compute_properties
+    image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
+    flavor_name: ADD_YOUR_FLAVOUR_ID_HERE (e.g. 3)
+    project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
+    network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
+    key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
+    security_groups:
+      - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
+    context:
+      insert: true
+      cloud_config: |
+        runcmd:
+        - apt-get install -y nfs-kernel-server nfs-common
+
+  occopus_properties: &occopus_properties
+    endpoint: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
+
+  terraform_properties: &terraform_properties
+    endpoint: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
+    network_name: ADD_YOUR_NETWORK_NAME (e.g. default-net)
 
 topology_template:
   node_templates:
@@ -80,32 +104,24 @@ topology_template:
               properties:
                 location: /var/www/html
 
-# This template demonstrates abstraction, with 2GHz/2GB VMs on CloudSigma Zurich
-# The required NFS dependencies are also installed via contextualisation by default
-# To change region, overwrite the endpoint property for both nodes below (example: Geneva)
-#       endpoint: https://gva.cloudsigma.com/api/2.0
     scaling-worker:
-      type: tosca.nodes.MiCADO.CloudSigma.Occo.small.NFS
-      properties:
-        vnc_password: secret
-        libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
-        public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
-        nics:
-        - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
-          ip_v4_conf:
-            conf: dhcp
-
+      type: tosca.nodes.MiCADO.Nova.Compute
+      properties: *compute_properties
+      interfaces:
+        # TERRAFORM: Change to Terraform / *terraform_properties
+        Occopus:
+          create:
+            inputs: *occopus_properties
+      
     static-worker:
-      type: tosca.nodes.MiCADO.CloudSigma.Occo.small.NFS
-      properties:
-        vnc_password: secret
-        libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
-        public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
-        nics:
-        - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
-          ip_v4_conf:
-            conf: dhcp
-
+      type: tosca.nodes.MiCADO.Nova.Compute
+      properties: *compute_properties
+      interfaces:
+        # TERRAFORM: Change to Terraform / *terraform_properties
+        Occopus:
+          create:
+            inputs: *occopus_properties
+      
   outputs:
     ports:
       value: { get_attribute: [ wordpress, port ]}

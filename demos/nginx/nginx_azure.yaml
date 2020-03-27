@@ -1,10 +1,12 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
+
+description: ADT for NGINX on Azure
 
 topology_template:
   node_templates:
@@ -21,24 +23,19 @@ topology_template:
         - containerPort: 9300
 
     worker-node:
-      type: tosca.nodes.MiCADO.CloudBroker.Compute
+      type: tosca.nodes.MiCADO.Azure.Compute
       properties:
-        deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
-        instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
-        key_pair_id: ADD_YOUR_ID_HERE (e.g. d865f75f-d32b-4444-9fbb-3332bcedeb75)
-        opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
+        resource_group: <RESOURCE_GROUP_NAME> (e.g. test-rg)
+        virtual_network: <VIRTUAL_NETWORK_NAME> (e.g. test-rg-vnet)
+        subnet: <SUBNET_NAME> (e.g. default)
+        network_security_group: (e.g. micado-worker-nsg)
+        image_sku: <UBUNTU_VERSION> (e.g. 18.04-LTS)
+        public_key: <PUBLIC_SSH_KEY> (e.g. ssh-rsa AAAB3N...)
+        size: <VM_SIZE> (e.g. Standard_B1ms)
       interfaces:
-        Occopus:
+        Terraform:
           create:
-            inputs:
-              interface_cloud: cloudbroker
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://cola-prototype.cloudbroker.com )
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
-
+      
   outputs:
     ports:
       value: { get_attribute: [ nginxapp, port ]}

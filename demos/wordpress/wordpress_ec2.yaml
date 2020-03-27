@@ -1,10 +1,29 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
+
+description: ADT for WordPress on EC2
+
+dsl_definitions:
+  compute_properties: &compute_properties
+    region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
+    image_id: ADD_YOUR_IMAGE_ID_HERE (e.g. ami-061a2d878e5754b62)
+    instance_type: ADD_INSTANCE_TYPE_HERE (e.g. t2.small)
+    security_group_ids:
+      - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
+    key_name: -OPTIONAL- ADD_YOUR_KEY_NAME_HERE (e.g. my_ssh_key)
+    context:
+      insert: true
+      cloud_config: |
+        runcmd:
+        - apt-get install -y nfs-kernel-server nfs-common
+
+  endpoint_properties: &endpoint_properties
+    endpoint: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com)
 
 topology_template:
   node_templates:
@@ -82,56 +101,22 @@ topology_template:
 
     scaling-worker:
       type: tosca.nodes.MiCADO.EC2.Compute
-      properties:
-        region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
-        image_id: ADD_YOUR_IMAGE_ID_HERE (e.g. ami-061a2d878e5754b62)
-        instance_type: t2.small
-        key_name: -OPTIONAL- ADD_YOUR_KEY_NAME_HERE (e.g. my_ssh_key)
-        context:
-          append: yes
-          cloud_config: |
-            runcmd:
-            - apt-get install -y nfs-kernel-server nfs-common
-        security_group_ids:
-          - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
+      properties: *compute_properties
       interfaces:
+        # TERRAFORM: Change key to Terraform
         Occopus:
           create:
-            inputs:
-              interface_cloud: ec2
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com )
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
-
+            inputs: *endpoint_properties
+      
     static-worker:
       type: tosca.nodes.MiCADO.EC2.Compute
-      properties:
-        region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
-        image_id: ADD_YOUR_IMAGE_ID_HERE (e.g. ami-061a2d878e5754b62)
-        instance_type: t2.medium
-        key_name: -OPTIONAL- ADD_YOUR_KEY_NAME_HERE (e.g. my_ssh_key)
-        context:
-          append: yes
-          cloud_config: |
-            runcmd:
-            - apt-get install -y nfs-kernel-server nfs-common
-        security_group_ids:
-          - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
+      properties: *compute_properties
       interfaces:
+        # TERRAFORM: Change key to Terraform
         Occopus:
           create:
-            inputs:
-              interface_cloud: ec2
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com )
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
-
+            inputs: *endpoint_properties
+      
   outputs:
     ports:
       value: { get_attribute: [ wordpress, port ]}

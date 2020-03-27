@@ -1,10 +1,27 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
+
+description: ADT for WordPress on CloudBroker
+
+dsl_definitions:
+  compute_properties: &compute_properties
+    deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
+    instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
+    key_pair_id: ADD_YOUR_ID_HERE (e.g. d865f75f-d32b-4444-9fbb-3332bcedeb75)
+    opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
+    context:
+      insert: true
+      cloud_config: |
+        runcmd:
+        - apt-get install -y nfs-kernel-server nfs-common
+
+  occopus_properties: &occopus_properties
+    endpoint: ADD_YOUR_ENDPOINT (e.g https://cola-prototype.cloudbroker.com)
 
 topology_template:
   node_templates:
@@ -81,59 +98,21 @@ topology_template:
                 location: /var/www/html
 
     scaling-worker:
-      type: tosca.nodes.MiCADO.Nova.Compute
-      properties:
-        image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
-        flavor_name: ADD_YOUR_FLAVOUR_ID_HERE (e.g. 3)
-        project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
-        network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
-        key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
-        context:
-          append: yes
-          cloud_config: |
-            runcmd:
-            - apt-get install -y nfs-kernel-server nfs-common
-        security_groups:
-          - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
+      type: tosca.nodes.MiCADO.CloudBroker.Compute
+      properties: *compute_properties
       interfaces:
         Occopus:
           create:
-            inputs:
-              interface_cloud: nova
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
-
+            inputs: *occopus_properties
+      
     static-worker:
-      type: tosca.nodes.MiCADO.Nova.Compute
-      properties:
-        image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
-        flavor_name: ADD_YOUR_FLAVOUR_ID_HERE (e.g. 3)
-        project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
-        network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
-        key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
-        context:
-          append: yes
-          cloud_config: |
-            runcmd:
-            - apt-get install -y nfs-kernel-server nfs-common
-        security_groups:
-          - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
+      type: tosca.nodes.MiCADO.CloudBroker.Compute
+      properties: *compute_properties
       interfaces:
         Occopus:
           create:
-            inputs:
-              interface_cloud: nova
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
-
+            inputs: *occopus_properties
+      
   outputs:
     ports:
       value: { get_attribute: [ wordpress, port ]}

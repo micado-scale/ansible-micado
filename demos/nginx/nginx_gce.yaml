@@ -1,10 +1,12 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
+
+description: ADT for NGINX on GCE
 
 topology_template:
   node_templates:
@@ -21,26 +23,19 @@ topology_template:
         - containerPort: 9300
 
     worker-node:
-      type: tosca.nodes.MiCADO.EC2.Compute
+      type: tosca.nodes.MiCADO.GCE.Compute
       properties:
-        region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
-        image_id: ADD_YOUR_IMAGE_ID_HERE (e.g. ami-061a2d878e5754b62)
-        instance_type: ADD_YOUR_INSTANCE_TYPE_HERE (e.g. t2.small)
-        key_name: -OPTIONAL- ADD_YOUR_SSH_KEY_NAME_HERE (e.g. my_ssh_key)
-        security_group_ids:
-          - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
+        region: <REGION_NAME> (e.g. us-west1)
+        zone: <ZONE_NAME> (e.g. us-west1-a)
+        project: <PROJECT_NAME> (e.g causal-apple-22)
+        machine_type: <VM_TYPE_NAME> (e.g. n1-standard-2)
+        image: <VM_IMAGE_NAME> (e.g ubuntu-os-cloud/ubuntu-1804-lts)
+        network: <NETWORK_NAME> (e.g default)
+        ssh-keys: <SSH_KEY_NAME> (e.g. ssh-rsa AAAB3N...)
       interfaces:
-        Occopus:
+        Terraform:
           create:
-            inputs:
-              interface_cloud: ec2
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com )
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
-
+      
   outputs:
     ports:
       value: { get_attribute: [ nginxapp, port ]}

@@ -1,10 +1,12 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
+
+description: ADT for NGINX on EC2
 
 topology_template:
   node_templates:
@@ -21,25 +23,21 @@ topology_template:
         - containerPort: 9300
 
     worker-node:
-      type: tosca.nodes.MiCADO.CloudSigma.Compute.Occo
+      type: tosca.nodes.MiCADO.EC2.Compute
       properties:
-        num_cpus: 2000
-        mem_size: 2147483648
-        vnc_password: secret
-        libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
-        public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
-        nics:
-        - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
-          ip_v4_conf:
-            conf: dhcp
-        # This node runs on Zurich by default, uncomment & edit the below line to change region
-        # endpoint: https://gva.cloudsigma.com/api/2.0
-      capabilities:
-        host:
-          properties:
-            num_cpus: 2
-            mem_size: 2 GB
-
+        region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
+        image_id: ADD_YOUR_IMAGE_ID_HERE (e.g. ami-061a2d878e5754b62)
+        instance_type: ADD_YOUR_INSTANCE_TYPE_HERE (e.g. t2.small)
+        key_name: -OPTIONAL- ADD_YOUR_SSH_KEY_NAME_HERE (e.g. my_ssh_key)
+        security_group_ids:
+          - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
+      interfaces:
+        # TERRAFORM: Change key to Terraform
+        Occopus:
+          create:
+            inputs:
+              endpoint: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com )
+      
   outputs:
     ports:
       value: { get_attribute: [ nginxapp, port ]}
