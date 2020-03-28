@@ -16,11 +16,6 @@ dsl_definitions:
     security_group_ids:
       - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
     key_name: -OPTIONAL- ADD_YOUR_KEY_NAME_HERE (e.g. my_ssh_key)
-    context:
-      insert: true
-      cloud_config: |
-        runcmd:
-        - apt-get install -y nfs-kernel-server nfs-common
 
   endpoint_properties: &endpoint_properties
     endpoint: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com)
