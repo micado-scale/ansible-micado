@@ -1,0 +1,180 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
+
+repositories:
+  docker_hub: https://hub.docker.com/
+
+description: ADT for cqueue on EC2
+
+dsl_definitions:
+  compute_properties: &compute_properties
+    region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
+    image_id: ADD_YOUR_IMAGE_ID_HERE (e.g. ami-061a2d878e5754b62)
+    instance_type: ADD_INSTANCE_TYPE_HERE (e.g. t2.small)
+    security_group_ids:
+      - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
+    key_name: -OPTIONAL- ADD_YOUR_KEY_NAME_HERE (e.g. my_ssh_key)
+
+  endpoint_properties: &endpoint_properties
+    endpoint: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com)
+
+topology_template:
+  node_templates:
+    rabbitmq:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+        image: rabbitmq:3-management
+        env:
+          - name: RABBITMQ_DEFAULT_USER
+            value: guest
+          - name: RABBITMQ_DEFAULT_PASS
+            value: guest
+        ports:
+        - port: 15672
+        - port: 5672
+      requirements:
+      - host: cq-server
+
+    rabbitmq-exporter:
+      type: tosca.nodes.MiCADO.Container.Application.Docker
+      properties:
+        image: kbudde/rabbitmq-exporter
+        env:
+          - name: RABBIT_URL
+            value: http://127.0.0.1:15672
+          - name: PUBLISH_PORT
+            value: "8090"
+          - name: RABBIT_EXPORTERS
+            value: queue
+        ports:
+        - containerPort: 8090
+      requirements:
+      - host: cq-server
+
+    rabbit:
+      type: tosca.nodes.MiCADO.Container.Pod.Kubernetes
+      requirements:
+      - container: rabbitmq
+      - container: rabbitmq-exporter
+      interfaces:
+        Kubernetes:
+          create:
+
+    redis:
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
+      properties:
+        image: redis
+        command:
+        - redis-server
+        args:
+        - --appendonly yes
+        ports:
+        - port: 6379
+      requirements:
+      - host: cq-server
+
+    frontend:
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
+      properties:
+        image: sanyi86/cqueue_frontend
+        env:
+          - name: BROKER
+            value: amqp://guest:guest@rabbit:5672
+          - name: RESULT_BACKEND
+            value: redis://redis:6379
+        ports:
+        - port: 8080
+          nodePort: 30888
+      requirements:
+      - host: cq-server
+
+    cqueue-worker:
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
+      properties:
+        image: sztakilpds/cqueue_worker
+        env:
+          - name: BROKER
+            value: amqp://guest:guest@rabbit:5672
+          - name: RESULT_BACKEND
+            value: redis://redis:6379
+      requirements:
+        - host: worker-node
+        - volume: docker-binary-host-vol
+        - volume: docker-socket-host-vol
+
+    docker-binary-host-vol:
+      type: tosca.nodes.MiCADO.Container.Volume.HostPath
+      properties:
+        path: /usr/bin/docker
+
+    docker-socket-host-vol:
+      type: tosca.nodes.MiCADO.Container.Volume.HostPath
+      properties:
+        path: /var/run/docker.sock
+
+    worker-node:
+      type: tosca.nodes.MiCADO.EC2.Compute
+      properties: *compute_properties
+      interfaces:
+        # TERRAFORM: Change key to Terraform
+        Occopus:
+          create:
+            inputs: *endpoint_properties
+      
+    cq-server:
+      type: tosca.nodes.MiCADO.EC2.Compute
+      properties: *compute_properties
+      interfaces:
+        # TERRAFORM: Change key to Terraform
+        Occopus:
+          create:
+            inputs: *endpoint_properties
+      
+  policies:
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO
+        targets: [ worker-node ]
+        properties:
+          sources:
+          - 'rabbitmq-exporter:8090'
+          constants:
+            AET: 30
+            DEADLINE: 1530270216
+            MAXNODES: 2
+            MAXCONTAINERS: 10
+          queries:
+            REMAININGTIME: '{{DEADLINE}}-time()'
+            ITEMS: 'rabbitmq_queue_messages_persistent{queue="machinery_tasks"}'
+          min_instances: 1
+          max_instances: '{{MAXNODES}}'
+          scaling_rule: |
+            reqnodes=0
+            if ITEMS>0:
+              reqconts = ceil(AET/(REMAININGTIME/ITEMS)) if REMAININGTIME>0 else MAXCONTAINERS
+              reqnodes = ceil(reqconts/5)
+              if reqnodes<m_node_count-1:
+                m_node_count-=1
+              if reqnodes>m_node_count:
+                m_node_count+=1
+            else:
+              m_node_count = 0
+            print "Number of required nodes:",reqnodes
+            print "Number of requested nodes:",m_node_count
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO
+        targets: [ cqueue-worker ]
+        properties:
+          min_instances: 1
+          max_instances: '{{MAXCONTAINERS}}'
+          scaling_rule: |
+            print "Length of queue:",ITEMS
+            required_count = 0
+            if ITEMS>0:
+              required_count = ceil(AET/(REMAININGTIME/ITEMS)) if REMAININGTIME>0 else MAXCONTAINERS
+              m_container_count = min([required_count, len(m_nodes) * 5])
+            else:
+              m_container_count = 0
+            print "Number of required containers:",required_count
+            print "Number of requested containers:",m_container_count

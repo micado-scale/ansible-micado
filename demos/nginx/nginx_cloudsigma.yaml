@@ -1,0 +1,93 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
+
+repositories:
+  docker_hub: https://hub.docker.com/
+
+description: ADT for NGINX on CloudSigma
+
+topology_template:
+  node_templates:
+    nginxapp:
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
+      properties:
+        image: jaydes/nginxapp:1.2
+        resources:
+          requests:
+            cpu: "200m"
+        ports:
+        - port: 8080
+          nodePort: 30012
+        - containerPort: 9300
+
+    worker-node:
+      type: tosca.nodes.MiCADO.CloudSigma.Compute.Occo
+      properties:
+        num_cpus: 2000
+        mem_size: 2147483648
+        vnc_password: secret
+        libdrive_id: ADD_YOUR_LIBRARY_DRIVE_ID_HERE (e.g. 0d2dc532-39f5-4db3-9a15-ff440a7f6ff0)
+        public_key_id: ADD_YOUR_PUBLIC_KEY_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
+        nics:
+        - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
+          ip_v4_conf:
+            conf: dhcp
+        # This node runs on Zurich by default, uncomment & edit the below line to change region
+        # endpoint: https://gva.cloudsigma.com/api/2.0
+      
+  outputs:
+    ports:
+      value: { get_attribute: [ nginxapp, port ]}
+
+  policies:
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO
+        targets: [ worker-node ]
+        properties:
+          sources:
+            - "nginxapp:9300"
+          constants:
+            MAXNODES: 2
+            MAXCONTAINERS: 8
+            CONTSPERNODE: 4
+            maxRPCth: 4
+            minRPCth: 1
+            minNodeScaleInterval: 90
+            minContScaleInterval: 60
+          queries:
+            REQUESTSPERCONT: 'avg(rate(nginx_connections_accepted[60s]))'
+            TIME: 'time()'
+          min_instances: 1
+          max_instances: '{{MAXNODES}}'
+          scaling_rule: |
+            if m_userdata is None:
+              m_userdata = {'container_count': 1, 'time': TIME }
+            if len(m_nodes)==m_node_count and m_time_since_node_count_changed>minNodeScaleInterval and TIME-m_userdata['time']>minContScaleInterval:
+              if REQUESTSPERCONT>maxRPCth:
+                if m_userdata['container_count']==m_node_count*CONTSPERNODE:
+                  m_node_count+=1
+              elif REQUESTSPERCONT<minRPCth:
+                if m_userdata['container_count']==(m_node_count-1)*CONTSPERNODE:
+                  m_node_count-=1
+
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO
+        targets: [ nginxapp ]
+        properties:
+          min_instances: 1
+          max_instances: '{{MAXCONTAINERS}}'
+          scaling_rule: |
+            if m_userdata is None:
+              m_userdata = {'container_count': 1, 'time': TIME }
+            if len(m_nodes)==m_node_count and TIME-m_userdata['time']>minContScaleInterval:
+              if REQUESTSPERCONT>maxRPCth:
+                if m_container_count<m_node_count*CONTSPERNODE:
+                  m_container_count+=1
+                  m_userdata['container_count'] = m_container_count
+                  m_userdata['time'] = TIME
+              elif REQUESTSPERCONT<minRPCth and m_container_count>1:
+                  m_container_count-=1
+                  m_userdata['container_count'] = m_container_count
+                  m_userdata['time'] = TIME

@@ -70,7 +70,7 @@
     - gce_cred_path: ./credentials-gce.json
     - docker_cred_path: ./credentials-docker-registry.yml
     - micado_cred_path: ./credentials-micado.yml
-    - micado_version: v0.8.1-beta
+    - micado_version: v0.8.1
 
     - disable_optimizer: True
     - disable_worker_updates: True
@@ -81,8 +81,9 @@
     - master_hostname: micado-master
     - worker_hostname: micado-worker
 
-    - enable_occopus: False
-    - enable_terraform: True
+    # At least one cloud orchestrator must be enabled
+    - enable_occopus: True
+    - enable_terraform: False
 
     ##################################################################################
     ##### Please do not edit under this line unless you know what you are doing. #####
@@ -101,17 +102,17 @@
         node_exporter: prom/node-exporter:v0.18.1
         occopus: micado/occopus:1.7-rc4
         optimizer: micado/optimizer:v0.8.0
-        policykeeper: micado/policykeeper:tf
+        policykeeper: micado/policykeeper:v0.8.1
         prometheus: prom/prometheus:v2.16.0
         redis: redis:5-alpine
         securitypolicymanager: micado/security-policy-manager:2.1
         terraform: hashicorp/terraform:0.12.21
-        toscasubmitter: micado/toscasubmitter:tf
+        toscasubmitter: micado/toscasubmitter:v0.8.1
         vault: vault:1.0.3
         zorp: micado/zorpgpl:6.0.12
 
     - packages:
-        docker_ce: "docker-ce=5:19.03.6~3-0~ubuntu-{{ ansible_distribution_release }}"
-        docker_ce_cli: "docker-ce-cli=5:19.03.6~3-0~ubuntu-{{ ansible_distribution_release }}"
+        docker_ce: "docker-ce=5:19.03.8~3-0~ubuntu-{{ ansible_distribution_release }}"
+        docker_ce_cli: "docker-ce-cli=5:19.03.8~3-0~ubuntu-{{ ansible_distribution_release }}"
         containerd_io: containerd.io=1.2.10-3
-        kubernetes_version: 1.17.3-00
+        kubernetes_version: 1.18.0-00
