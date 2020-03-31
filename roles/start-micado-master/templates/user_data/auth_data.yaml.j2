@@ -1,2 +1,2 @@
 resource:
-  {{ config.resource | to_nice_yaml | indent(2) }}
+  {{ config.resource | default([]) | to_nice_yaml | indent(2) }}
