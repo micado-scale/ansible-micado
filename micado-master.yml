@@ -11,6 +11,7 @@
       changed_when: False
       tags:
       - start
+      - update-auth
 
     - name: (Ansible) Checking the existence of gce credentials file
       stat: path={{ gce_cred_path }}
@@ -19,13 +20,24 @@
       changed_when: False
       tags:
       - start
+      - update-auth
 
-    - name: (Ansible) Check for cloud credentials file
-      assert:
-        that: cloud_cred_file.stat.exists or (gce_cred_file.stat.exists and enable_terraform)
-        msg: |
-          Either {{ cloud_cred_path }} or {{ gce_cred_path }} must exist,
-          and Terraform must be enabled if only GCE credentials are defined
+    - name: (Ansible) Credential check for cloud orchestrators
+      fail:
+        msg: Occopus/Terraform is enabled but matching credential not file found...
+      when: >
+        (enable_occopus and not cloud_cred_file.stat.exists) or
+        (enable_terraform and not cloud_cred_file.stat.exists and not gce_cred_file.stat.exists)
+      tags:
+      - start
+
+    - name: (Ansible) Check for cloud orchestrators
+      pause:
+        prompt: >
+          You are deploying MiCADO without a cloud orchestrator...
+          Press 'Ctrl-C' to abort...
+        seconds: 10
+      when: not enable_occopus and not enable_terraform
       tags:
       - start
 

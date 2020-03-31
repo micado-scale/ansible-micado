@@ -1,4 +1,10 @@
 ---
+- name: '(Ansible) Load the security settings from the playbook'
+  include_vars:
+    file: "{{ micado_cred_path  }}"
+    name: security
+  when: security_cred_file.stat.exists
+
 - name: '(MiCADO Security) Copy config templates'
   template:
     src: "{{ item.src }}"

@@ -1,14 +1,7 @@
 ---
-- name: '(Terraform) Add config templates'
+- name: '(Terraform) Copy cloudinit template'
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
   loop:
-    - { src: 'user_data/auth_data.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/auth_data.yaml'}
     - { src: 'worker_node/cloud_init_worker_tf.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/cloud_init_worker_tf.yaml'}
-
-- name: (Terraform) Copy GCE credentials file
-  copy:
-    src: "{{ gce_cred_path }}"
-    dest: "/var/lib/micado/toscasubmitter/system/gce_auth.json"
-  when: gce_cred_file.stat.exists
