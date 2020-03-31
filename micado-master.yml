@@ -4,6 +4,51 @@
   gather_facts: False
 
   pre_tasks:
+    - name: (Ansible) Checking the existence of cloud credentials file
+      stat: path={{ cloud_cred_path }}
+      delegate_to: localhost
+      register: cloud_cred_file
+      changed_when: False
+      tags:
+      - start
+      - update-auth
+
+    - name: (Ansible) Checking the existence of gce credentials file
+      stat: path={{ gce_cred_path }}
+      delegate_to: localhost
+      register: gce_cred_file
+      changed_when: False
+      tags:
+      - start
+      - update-auth
+
+    - name: (Ansible) Credential check for cloud orchestrators
+      fail:
+        msg: Occopus/Terraform is enabled but matching credential not file found...
+      when: >
+        (enable_occopus and not cloud_cred_file.stat.exists) or
+        (enable_terraform and not cloud_cred_file.stat.exists and not gce_cred_file.stat.exists)
+      tags:
+      - start
+
+    - name: (Ansible) Check for cloud orchestrators
+      pause:
+        prompt: >
+          You are deploying MiCADO without a cloud orchestrator...
+          Press 'Ctrl-C' to abort...
+        seconds: 10
+      when: not enable_occopus and not enable_terraform
+      tags:
+      - start
+
+    - name: (Ansible) Checking the existence of security settings file
+      stat: path={{ micado_cred_path }}
+      delegate_to: localhost
+      register: security_cred_file
+      changed_when: False
+      tags:
+      - start
+
     - name: (System) Ensure that python3 installed
       raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
       register: output
@@ -114,5 +159,5 @@
     - packages:
         docker_ce: "docker-ce=5:19.03.8~3-0~ubuntu-{{ ansible_distribution_release }}"
         docker_ce_cli: "docker-ce-cli=5:19.03.8~3-0~ubuntu-{{ ansible_distribution_release }}"
-        containerd_io: containerd.io=1.2.10-3
+        containerd_io: containerd.io=1.2.13-1
         kubernetes_version: 1.18.0-00

@@ -1,9 +1,11 @@
 ---
-- include: load-vars.yml
-
 - include: set-hostname.yml
 
 - include: kubernetes-start.yml
+
+- include: load-auth.yml
+  tags:
+  - update-auth
 
 - include: core-config.yml
 

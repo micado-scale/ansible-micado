@@ -210,7 +210,7 @@ spec:
         args:
         - occopus-rest-service
         - --auth_data_path
-        - /var/lib/micado/occopus/data/auth_data.yaml
+        - /var/lib/micado/occopus/auth/auth_data.yaml
         - --host
         - 0.0.0.0
         - --parallelize
@@ -226,6 +226,8 @@ spec:
           mountPath: /var/lib/micado/occopus/data
         - name: occopus-submitter
           mountPath: /var/lib/micado/occopus/submitter
+        - name: occopus-auth
+          mountPath: /var/lib/micado/occopus/auth
         - name: occopus-log
           mountPath: /var/log/occopus
       volumes:
@@ -238,6 +240,9 @@ spec:
       - name: occopus-submitter
         hostPath:
           path: /var/lib/micado/toscasubmitter/output
+      - name: occopus-auth
+        secret:
+          secretName: cloud-credentials
       - name: occopus-log
         hostPath:
           path: /var/log/micado/occopus
@@ -689,6 +694,14 @@ spec:
           mountPath: /var/lib/submitter/system
         - name: submitter-log
           mountPath: /var/log/submitter
+{% if cloud_cred_file.stat.exists %}
+        - name: submitter-auth-data
+          mountPath: /var/lib/submitter/auth
+{% endif %}
+{% if gce_cred_file.stat.exists %}
+        - name: submitter-gce-auth
+          mountPath: /var/lib/submitter/gce-auth
+{% endif %}
       volumes:
       - name: docker-socket
         hostPath:
@@ -711,6 +724,16 @@ spec:
       - name: submitter-log
         hostPath:
           path: /var/log/micado/toscasubmitter
+{% if cloud_cred_file.stat.exists %}
+      - name: submitter-auth-data
+        secret:
+          secretName: cloud-credentials
+{% endif %}
+{% if gce_cred_file.stat.exists %}
+      - name: submitter-gce-auth
+        secret:
+          secretName: gce-credentials
+{% endif %}
 ---
 ## Service: TOSCA Submitter ##
 apiVersion: v1
