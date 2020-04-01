@@ -109,9 +109,65 @@ metadata:
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
 rules:
-  # Make Dashboard read-only
+  # Make skippable Dashboard read-only, hide secrets
   - apiGroups: ["*"]
-    resources: ["*"]
+    resources:
+      - events
+      - configmaps
+      - endpoints
+      - namespaces
+      - namespaces/status
+      - nodes
+      - nodes/status
+      - persistentvolumeclaims
+      - persistentvolumeclaims/status
+      - persistentvolumes
+      - persistentvolumes/status
+      - pods
+      - pods/log
+      - pods/status
+      - podtemplates
+      - replicationcontrollers
+      - replicationcontrollers/status
+      - resourcequotas
+      - resourcequotas/status
+      - serviceaccounts
+      - serviceaccounts/token
+      - services
+      - services/status
+      - customresourcedefinitions
+      - customresourcedefinitions/status
+      - apiservices
+      - apiservices/status
+      - daemonsets
+      - daemonsets/status
+      - deployments
+      - deployments/status
+      - replicasets
+      - replicasets/status
+      - statefulsets
+      - statefulsets/status
+      - daemonsets
+      - daemonsets/status
+      - horizontalpodautoscalers
+      - horizontalpodautoscalers/status
+      - jobs
+      - jobs/status
+      - cronjobs
+      - cronjobs/status
+      - ingresses
+      - ingresses/status
+      - networkpolicies
+      - podsecuritypolicies
+      - clusterrolebindings
+      - clusterroles
+      - rolebindings
+      - roles
+      - priorityclasses
+      - storageclasses
+      - volumeattachments
+      - volumeattachments/status
+      - storageclasses
     verbs: ["get", "list", "watch"]
 
 ---
@@ -169,7 +225,7 @@ spec:
     spec:
       containers:
         - name: kubernetes-dashboard
-          image: kubernetesui/dashboard:v2.0.0-rc5
+          image: kubernetesui/dashboard:v2.0.0-rc7
           ports:
             - containerPort: 9090
               protocol: TCP
@@ -177,6 +233,7 @@ spec:
             - --namespace=kube-system
             - --enable-insecure-login
             - --enable-skip-login
+            - --metrics-provider=none
           volumeMounts:
             - mountPath: /tmp
               name: tmp-volume
