@@ -1,0 +1,53 @@
+---
+- name: (MiCADO Security) Wait for SPM running state
+  k8s:
+    kind: Deployment
+    name: security-policy-manager
+    namespace: micado-system
+    wait: yes
+    wait_condition:
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+  register: spm_running
+
+- name: (MiCADO Security) Get CA for IPSEC (master) (shell)
+  shell: /usr/bin/docker exec $(docker ps -f label=io.kubernetes.container.name=security-policy-manager -q)
+      /bin/bash -c 'curl -X GET http://127.0.0.1:5003/v1.0/nodecerts/ca' > /etc/ipsec.d/cacerts/master.pem
+  when: spm_running is succeeded
+
+- name: (MiCADO Security) Get CRT and KEY for IPSEC (master) (shell)
+  shell: /usr/bin/docker exec $(docker ps -f label=io.kubernetes.container.name=security-policy-manager -q)
+      /bin/bash -c 'curl -X POST -F 'cert_common_name=masternode.micado' http://127.0.0.1:5003/v1.0/nodecerts' > /tmp/tmp_certs
+  when: spm_running is succeeded
+
+- name: (MiCADO Security) Split PEM IPSec (key)
+  command: /usr/bin/openssl pkey -in /tmp/tmp_certs -out /etc/ipsec.d/private/master.key
+  when: spm_running is succeeded
+
+- name: (MiCADO Security) Split PEM IPSEC (cert)
+  command: /usr/bin/openssl x509 -in /tmp/tmp_certs -out /etc/ipsec.d/certs/master.crt
+  when: spm_running is succeeded
+
+- name: (MiCADO Security) Put cert into secrets
+  lineinfile:
+    path: /etc/ipsec.secrets
+    line: ": RSA 'master.key'"
+
+- name: (MiCADO Security) Remove temporary cert bundle
+  file:
+    path: /tmp/tmp_certs
+    state: absent
+
+  # This copy the Master's CA to the occopus directory because occopus will read this file and put it into the cloud-init template.
+- name: (MiCADO Security) Copy CA to occopus directory
+  command: /bin/cp /etc/ipsec.d/cacerts/master.pem /var/lib/micado/occopus/data/
+  when: enable_occopus
+
+- name: (MiCADO Security) Copy CA to terraform directory
+  command: /bin/cp /etc/ipsec.d/cacerts/master.pem /var/lib/micado/toscasubmitter/system/
+  when: enable_terraform
+
+- name: (MiCADO Security) Restart IPSec
+  command: ipsec restart
+  when: spm_running is succeeded

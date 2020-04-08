@@ -1,9 +1,9 @@
 galaxy_info:
-  author:
-    - Mark Emodi
-    - Jay Deslauriers
-    - Attila Farkas
-    - Gregoire Gesmier
+  author: |
+    Mark Emodi
+    Jay Deslauriers
+    Attila Farkas
+    Gregoire Gesmier
   description: Start MiCADO master
   company:
     - MTA SZTAKI

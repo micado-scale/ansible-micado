@@ -11,6 +11,10 @@ occopus_endpoint: 'http://occopus:5000'
 occopus_infra_name: 'micado_worker_infra'
 occopus_worker_name: 'worker'
 
+# Terraform options
+terraform_path: '/var/lib/micado/terraform/submitter'
+terraform_container_name: 'terraform'
+
 optimizer_endpoint: 'http://optimizer:12346'
 
 optimizer_vars_prefix_init: 'm_opt_init_'
@@ -62,6 +66,9 @@ logging:
             handlers: [console, file]
         pk_prometheus:
             propagate: true
+            handlers: [console, file]
+        pk_terraform:
+            propagate: false
             handlers: [console, file]
         pk_optimizer:
             propagate: false

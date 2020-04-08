@@ -1,8 +1,5 @@
 #cloud-config
-apt_upgrade: false
-apt_update: false
 manage_etc_hosts: false
-package_update: false
 package_upgrade: false
 
 write_files:
@@ -71,7 +68,18 @@ write_files:
       {{ '{{' }}cmd('curl -X POST http://10.97.170.199:5003/v1.0/nodecerts'){{ '}}' }}
     {% endraw %}
 
+packages:
+- apt-transport-https
+- ca-certificates
+- curl
+- software-properties-common
+
+final_message: "MiCADO Worker configured after $UPTIME seconds"
+
 runcmd:
+{% if disable_worker_updates %}
+  - sed -i 's/APT::Periodic::Unattended-Upgrade "1";/APT::Periodic::Unattended-Upgrade "0";/g' /etc/apt/apt.conf.d/20auto-upgrades
+{% endif %}
   - export DEBIAN_FRONTEND=noninteractive
   - /tmp/wait-updates.sh
   - while [ -z $IP ]; do IP=`ip -oneline -4 addr show scope global | tr -s ' ' | tr '/' ' ' | grep -v dock | grep -v br- | cut -f 4 -d ' ' | sed 's/\./-/g'`; done
@@ -84,48 +92,46 @@ runcmd:
   - echo nameserver 8.8.8.8 >> /etc/resolvconf/resolv.conf.d/head
   - resolvconf -u
 
-  # Docker
-
-  - apt-get update
-  - apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common
+  # Add Docker & K8s repositories
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-  - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - DISTCODE="$(lsb_release -cs)"
+  - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $DISTCODE stable"
+
+  - curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+  - touch /etc/apt/sources.list.d/kubernetes.list
+  - bash -c 'echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list'
   - apt-get update
-  - apt-get install -y {{ packages.docker_ce }} {{ packages.docker_ce_cli }} {{ packages.containerd_io }}
+
+  # Install Docker
+  - apt-get install -y {{ packages.docker_ce | regex_replace('ubuntu.*$', 'ubuntu')}}-$DISTCODE {{ packages.docker_ce_cli | regex_replace('ubuntu.*$', 'ubuntu')}}-$DISTCODE {{ packages.containerd_io }}
   - apt-mark hold docker-ce docker-ce-cli containerd.io
   - systemctl enable docker
   - sed -i -e "s/-H fd:\/\//-H fd:\/\/ --exec-opt native.cgroupdriver=systemd --mtu={{ ansible_default_ipv4.mtu }}/g" /lib/systemd/system/docker.service
   - systemctl daemon-reload
   - systemctl restart docker.service
 
-  # K8s
-
+  # Install K8s
   - swapoff -a
-  - curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-  - touch /etc/apt/sources.list.d/kubernetes.list
-  - bash -c 'echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list'
-  - apt-get update
   - apt-get install -y kubelet={{ packages.kubernetes_version }} kubeadm={{ packages.kubernetes_version }} kubectl={{ packages.kubernetes_version }}
   - apt-mark hold kubelet kubeadm kubectl
 
-  # Auto-label k8s nodes
+  # Placeholder for ADT insert
+  - echo micado runcmd placeholder
 
+  # Auto-label k8s nodes
   - touch /etc/systemd/system/kubelet.service.d/20-labels.conf
   - echo '[Service]' >> /etc/systemd/system/kubelet.service.d/20-labels.conf
   - echo 'Environment="KUBELET_EXTRA_ARGS=--node-labels=micado.eu/node_type={{ '{{ worker_name }}' }}"' >> /etc/systemd/system/kubelet.service.d/20-labels.conf
   - systemctl daemon-reload
 
   # Install strongSwan
-
   - apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y strongswan
   - systemctl enable strongswan
 
   # Connect to cluster
-
   - {{ join_command.stdout }}
 
-  # These removes the temporary scripts, certs and
-
+  # These removes the temporary scripts, certs
   - /tmp/run_split.sh
   - /tmp/modify_ca.sh
   - rm /etc/ipsec.d/cacerts/master.pem
@@ -136,5 +142,4 @@ runcmd:
   - rm /tmp/run_split.sh
 
   # Bring up the iptunnel
-
   - ipsec restart

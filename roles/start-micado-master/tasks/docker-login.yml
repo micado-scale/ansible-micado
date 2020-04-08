@@ -1,24 +1,21 @@
 ---
-- name: Checking the existence of Docker credentials
-  local_action: stat path={{ docker_cred_path }}
+- name: (Docker login) Checking the existence of Docker credentials
+  stat: path={{ docker_cred_path }}
+  delegate_to: localhost
   register: f
+  changed_when: False
 
-- debug:
-    msg: Docker credentials found, performing login...
-  when: f.stat.exists
-
-- debug:
-    msg: No Docker credentials found, skipping login...
-  when: f.stat.exists == False
-
-- name: Get Docker credentials
+- name: (Docker login) Get Docker credentials
   include_vars: "{{ docker_cred_path }}"
   when: f.stat.exists
-  
-- name: Store Docker Registry Key
-  command: "kubectl create secret docker-registry dockerloginkey --docker-server={{ DOCKER_REPO }} --docker-username={{ DOCKER_USER }} --docker-password={{ DOCKER_PASS }}"
+
+- name: (Docker login) Store Docker Registry Key
+  command: kubectl create secret docker-registry dockerloginkey
+        --docker-server={{ DOCKER_REPO }}
+        --docker-username={{ DOCKER_USER }}
+        --docker-password={{ DOCKER_PASS }}
   when: f.stat.exists
 
-- name: Update Service Account with Registry Key
+- name: (Docker login) Update Service Account with Registry Key
   command: "kubectl patch serviceaccount default -p '{\"imagePullSecrets\": [{\"name\": \"dockerloginkey\"}]}'"
   when: f.stat.exists
