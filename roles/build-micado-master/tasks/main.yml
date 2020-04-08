@@ -1,15 +1,24 @@
 ---
-- name: Ensure Google DNS server
+- name: (System) Ensure Google DNS server
   lineinfile:
     path: /etc/resolv.conf
     line: 'nameserver 8.8.8.8'
+
+- include: python-install.yml
 
 - include: docker-install.yml
 
 - include: kubernetes-install.yml
 
-- include: other-install.yml
+- include: core-install.yml
 
-- include: files.yml
+- include: security-install.yml
 
-- include: pull-docker-images.yml
+- include: optimizer-install.yml
+  when: not disable_optimizer
+
+- include: occopus-install.yml
+  when: enable_occopus
+
+- include: terraform-install.yml
+  when: enable_terraform

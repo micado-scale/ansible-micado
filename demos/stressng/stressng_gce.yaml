@@ -1,0 +1,119 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.9.0/micado_types.yaml
+
+repositories:
+  docker_hub: https://hub.docker.com/
+
+description: ADT for stressng on GCE
+
+topology_template:
+  node_templates:
+    stressng:
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
+      properties:
+        image: lorel/docker-stress-ng
+        args: ['--cpu', '0', '--cpu-method', 'pi', '-l', '20']
+        resources:
+          requests:
+            cpu: "900m"
+
+    worker-node:
+      type: tosca.nodes.MiCADO.GCE.Compute
+      properties:
+        region: <REGION_NAME> (e.g. us-west1)
+        zone: <ZONE_NAME> (e.g. us-west1-a)
+        project: <PROJECT_NAME> (e.g causal-apple-22)
+        machine_type: <VM_TYPE_NAME> (e.g. n1-standard-2)
+        image: <VM_IMAGE_NAME> (e.g ubuntu-os-cloud/ubuntu-1804-lts)
+        network: <NETWORK_NAME> (e.g default)
+        ssh-keys: <SSH_KEY_NAME> (e.g. ssh-rsa AAAB3N...)
+      interfaces:
+        Terraform:
+          create:
+      
+  policies:
+    - monitoring:
+        type: tosca.policies.Monitoring.MiCADO
+        properties:
+          enable_container_metrics: true
+          enable_node_metrics: true
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO.VirtualMachine.CPU.stressng
+        targets: [ worker-node ]
+        properties:
+          constants:
+            NODE_NAME: 'worker-node'
+            NODE_TH_MAX: '60'
+            NODE_TH_MIN: '25'
+          min_instances: 1
+          max_instances: 3
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO.Container.CPU.stressng
+        targets: [ stressng ]
+        properties:
+          constants:
+            SERVICE_NAME: 'stressng'
+            SERVICE_FULL_NAME: 'stressng'
+            SERVICE_TH_MAX: '60'
+            SERVICE_TH_MIN: '25'
+          min_instances: 1
+          max_instances: 3
+
+policy_types:
+  tosca.policies.Scaling.MiCADO.Container.CPU.stressng:
+    derived_from: tosca.policies.Scaling.MiCADO
+    description: base MiCADO policy defining data sources, constants, queries, alerts, limits and rules
+    properties:
+      alerts:
+        type: list
+        description: pre-define alerts for container CPU
+        default:
+        - alert: service_overloaded
+          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[60s]))*100 > {{SERVICE_TH_MAX}}'
+          for: 30s
+        - alert: service_underloaded
+          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[60s]))*100 < {{SERVICE_TH_MIN}}'
+          for: 30s
+        required: true
+      scaling_rule:
+        type: string
+        description: pre-define scaling rule for container CPU
+        default: |
+          if len(m_nodes) == m_node_count:
+            if service_overloaded and m_node_count > m_container_count:
+              m_container_count+=1
+            if service_underloaded:
+              m_container_count-=1
+          else:
+            print('Transient phase, skipping update of containers...')
+        required: true
+
+  tosca.policies.Scaling.MiCADO.VirtualMachine.CPU.stressng:
+    derived_from: tosca.policies.Scaling.MiCADO
+    description: base MiCADO policy defining data sources, constants, queries, alerts, limits and rules
+    properties:
+      alerts:
+        type: list
+        description: pre-define alerts for VM CPU
+        default:
+        - alert: node_overloaded
+          expr: '(100-(avg(rate(node_cpu_seconds_total{node="{{ NODE_NAME }}", mode="idle"}[60s]))*100)) > {{NODE_TH_MAX}}'
+          for: 1m
+        - alert: node_underloaded
+          expr: '(100-(avg(rate(node_cpu_seconds_total{node="{{ NODE_NAME }}", mode="idle"}[60s]))*100)) < {{NODE_TH_MIN}}'
+          for: 1m
+        required: true
+      scaling_rule:
+        type: string
+        description: pre-define scaling rule for VM CPU
+        default: |
+          if len(m_nodes) <= m_node_count and m_time_since_node_count_changed > 60:
+            if node_overloaded:
+              m_node_count+=1
+            if node_underloaded:
+              m_node_count-=1
+          else:
+            print('Transient phase, skipping update of nodes...')
+        required: true

@@ -1,0 +1,113 @@
+main_config:
+  dry_run: False
+logging:
+    version: 1
+    root:
+        level: INFO
+        handlers: [console, file]
+    formatters:
+        simpleFormatter:
+            format: "%(asctime)s %(name)s %(levelname)s %(message)s"
+    handlers:
+        console:
+            class: logging.StreamHandler
+            formatter: simpleFormatter
+            level: INFO
+            stream: ext://sys.stdout
+        file:
+            class : logging.handlers.RotatingFileHandler
+            formatter: simpleFormatter
+            mode: a
+            level: INFO
+            filename: /var/log/submitter/submitter.log
+            maxBytes: 52428800
+            backupCount: 3
+
+step:
+  translate:
+    - SecurityPolicyManagerAdaptor
+    - KubernetesAdaptor
+{% if enable_terraform %}
+    - TerraformAdaptor
+{% endif %}
+{% if enable_occopus %}
+    - OccopusAdaptor
+{% endif %}
+    - PkAdaptor
+  execute:
+    - SecurityPolicyManagerAdaptor
+{% if enable_terraform %}
+    - TerraformAdaptor
+{% endif %}
+{% if enable_occopus %}
+    - OccopusAdaptor
+{% endif %}
+    - KubernetesAdaptor
+    - PkAdaptor
+  update:
+    - SecurityPolicyManagerAdaptor
+{% if enable_terraform %}
+    - TerraformAdaptor
+{% endif %}
+{% if enable_occopus %}
+    - OccopusAdaptor
+{% endif %}
+    - KubernetesAdaptor
+    - PkAdaptor
+  undeploy:
+    - PkAdaptor
+    - KubernetesAdaptor
+{% if enable_terraform %}
+    - TerraformAdaptor
+{% endif %}
+{% if enable_occopus %}
+    - OccopusAdaptor
+{% endif %}
+    - SecurityPolicyManagerAdaptor
+  cleanup:
+    - KubernetesAdaptor
+{% if enable_terraform %}
+    - TerraformAdaptor
+{% endif %}
+{% if enable_occopus %}
+    - OccopusAdaptor
+{% endif %}
+    - PkAdaptor
+    - SecurityPolicyManagerAdaptor
+
+adaptor_config:
+  KubernetesAdaptor:
+    types:
+      - "tosca.nodes.MiCADO.Container.Application.Docker"
+      - "tosca.policies.Security.MiCADO.Network.*"
+    endoint: "endpoint"
+    volume: "./files/output_configs/"
+
+{% if enable_occopus %}
+  OccopusAdaptor:
+    types:
+      - "tosca.nodes.MiCADO.Compute.*"
+    endoint: "endpoint"
+    volume: "./files/output_configs/"
+{% endif %}
+
+{% if enable_terraform %}
+  TerraformAdaptor:
+    types:
+      - "tosca.nodes.MiCADO.Compute.*"
+    endoint: "endpoint"
+    volume: "./files/output_configs/"
+{% endif %}
+
+  PkAdaptor:
+    types:
+      - "tosca.policies.Scaling.MiCADO"
+    endpoint: "policykeeper:12345"
+    volume: "./files/output_configs/"
+
+  SecurityPolicyManagerAdaptor:
+    types:
+      - "tosca.policies.Security.MiCADO.Secret.KubernetesSecretDistribution"
+    endoint: "endpoint"
+    volume: "./files/output_configs/"
+

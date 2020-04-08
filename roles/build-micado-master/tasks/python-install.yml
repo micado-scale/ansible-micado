@@ -1,0 +1,20 @@
+---
+- name: '(Python) Install pip package manager'
+  apt:
+    name:
+    - python3-pip
+    state: present
+    update_cache: yes
+
+- name: '(Python) Installing packages'
+  pip:
+    name:
+    - setuptools<45
+    - pip
+    - docker
+    - kubernetes
+    - openshift
+    - requests
+    - click
+    - terminaltables
+    state: present

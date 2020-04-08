@@ -3,9 +3,23 @@
 
 - include: kubernetes-start.yml
 
-- include: files.yml
+- include: load-auth.yml
+  tags:
+  - update-auth
+
+- include: core-config.yml
+
+- include: security-config.yml
+
+- include: occopus-config.yml
+  when: enable_occopus
+
+- include: terraform-config.yml
+  when: enable_terraform
 
 - include: micado-start.yml
+
+- include: security-start.yml
 
 - include: docker-login.yml
   when: docker_cred_path is defined
