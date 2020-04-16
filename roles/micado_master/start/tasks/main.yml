@@ -3,6 +3,8 @@
 
 - include: kubernetes-start.yml
 
+- include: edge-start.yml
+
 - include: core-config.yml
 
 - include: security-config.yml
