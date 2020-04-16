@@ -15,4 +15,13 @@
   command: /etc/kubernetes/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm init
         --kube-config /root/.kube/config
         --kubeedge-version="{{ packages.kube_edge }}"
+  register: keadm
   when: not etc_edge.stat.exists
+
+- name: (KubeEdge) Print keadm stdout
+  debug:
+    msg: "{{ keadm.stdout }}"
+
+- name: (KubeEdge) Print keadm stderr
+  debug:
+    msg: "{{ keadm.stderr }}"
