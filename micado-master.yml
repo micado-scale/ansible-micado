@@ -19,3 +19,30 @@
     - role: micado_master/start
       tags:
       - start
+
+- name: Setup KubeEdge (Cloud-core)
+  hosts: micado-target
+  
+  roles:
+    - role: micado-edge-start
+      tags:
+      - edge
+
+- name: Setup KubeEdge (Edge-core)
+  hosts: edgenodes
+  serial: 1
+  gather_facts: True
+
+  pre_tasks:
+  - name: (Ansible) Include pre-tasks
+    include_tasks: "{{ task_item }}"
+    loop: "{{ query('fileglob', \"pre-task/[0-9][0-9]*.yml\")|sort }}"
+    loop_control:
+      loop_var: task_item
+    tags:
+    - always
+
+  roles:
+    - role: micado-edge-join
+      tags:
+      - edge

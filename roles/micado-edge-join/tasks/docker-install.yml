@@ -1,0 +1,47 @@
+---
+- name: 'Docker: Installing dependencies'
+  apt:
+    name:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - software-properties-common
+    state: present
+
+- name: 'Docker: Adding APT key'
+  apt_key:
+    url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
+    state: present
+
+- name: 'Docker: Adding APT repository'
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+    state: present
+
+- name: 'Docker: Installing APT package'
+  apt:
+    name:
+    - "{{ packages.docker_ce }}"
+    - "{{ packages.docker_ce_cli }}"
+    - "{{ packages.containerd_io }}"
+    state: present
+    update_cache: yes
+
+- name: 'Docker: prevent package from being upgraded'
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+
+      #- name: 'Docker: Replace ExecStart for systemd'
+      #lineinfile:
+      # dest: /lib/systemd/system/docker.service
+      #regexp: '^ExecStart=/usr/bin/dockerd[.]?'
+      #line: "ExecStart=/usr/bin/dockerd -H fd:// --exec-opt native.cgroupdriver=systemd --mtu={{ ansible_default_ipv4.mtu }}"
+      #notify: (Docker) Restart service
+
+- name: (Docker) Flush handlers to restart Docker service
+  meta: flush_handlers

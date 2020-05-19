@@ -1,0 +1,11 @@
+---
+- name: Fetch required certificates (certs.tgz)
+  fetch:
+    src: /etc/kubeedge/certs.tgz
+    dest: ./certs.tgz
+    flat: yes
+- name: Fetch required certificates (rootCA.crt)
+  fetch:
+    src: /etc/kubeedge/ca/rootCA.crt
+    dest: ./rootCA.crt
+    flat: yes
