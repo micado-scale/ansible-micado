@@ -3,8 +3,6 @@
 
 - include: kubernetes-start.yml
 
-- include: edge-start.yml
-
 - include: load-auth.yml
   tags:
   - update-auth
