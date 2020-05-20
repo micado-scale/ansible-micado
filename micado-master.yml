@@ -195,7 +195,7 @@
      - join
 
 - name: Deploy MiCADO Edge connectivity dependencies
-  hosts: edge-nodes
+  hosts: edgenodes
   serial: 1
   gather_facts: True
 
