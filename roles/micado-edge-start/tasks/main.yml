@@ -1,0 +1,4 @@
+---
+- include: cloud-core-start.yml
+
+- include: certs-fetch.yml
