@@ -1,0 +1,186 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - https://raw.githubusercontent.com/micado-scale/tosca/v0.9.0/micado_types.yaml
+
+repositories:
+  docker_hub: https://hub.docker.com/
+
+description: ADT for NGINX on OCI
+
+topology_template:
+  node_templates:
+    nginxapp:
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
+      properties:
+        image: jaydes/nginxapp:1.2
+        resources:
+          requests:
+            cpu: "200m"
+        ports:
+        - target: 8080
+          published: 443
+        - containerPort: 9300
+
+    worker-node:
+      type: tosca.nodes.MiCADO.OCI.Compute
+      properties:
+        region: <REGION_NAME> (e.g. uk-london-1)
+        availability_domain: <AVAILABILITY_DOMAIN> (e.g. lVvK:UK-LONDON-1-AD-1)
+        compartment_id: <COMPARTMENT_OCID> (e.g ocid1.tenancy.oc1..aaa)
+        shape: <VM_TYPE_NAME> (e.g. VM.Standard.E2.1)
+        source_id: <VM_IMAGE_OCID> (e.g ocid1.image.oc1.uk-london-1.aaa)
+        subnet_id: <SUBNET_OCID> (e.g ocid1.subnet.oc1.uk-london-1.aaa)
+        network_security_group: <NETWORK_SECURITY_GROUP_OCID> (e.g ocid1.networksecuritygroup.oc1.uk-london-1.aaa)
+        ssh-keys: <SSH_KEY_NAME> (e.g. ssh-rsa AAAB3N...)
+      interfaces:
+        Terraform:
+          create:
+      
+  outputs:
+    ports:
+      value: { get_attribute: [ nginxapp, port ]}
+
+  policies:
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO
+        targets: [ worker-node ]
+        properties:
+          sources:
+            - "nginxapp:9300"
+          constants:
+            MAXNODES: 2
+            MAXCONTAINERS: 8
+            CONTSPERNODE: 4
+            maxRPCth: 4
+            minRPCth: 1
+            minNodeScaleInterval: 90
+            minContScaleInterval: 60
+          queries:
+            REQUESTSPERCONT: 'avg(rate(nginx_connections_accepted[60s]))'
+            TIME: 'time()'
+          min_instances: 1
+          max_instances: '{{MAXNODES}}'
+          scaling_rule: |
+            if m_userdata is None:
+              m_userdata = {'container_count': 1, 'time': TIME }
+            if len(m_nodes)==m_node_count and m_time_since_node_count_changed>minNodeScaleInterval and TIME-m_userdata['time']>minContScaleInterval:
+              if REQUESTSPERCONT>maxRPCth:
+                if m_userdata['container_count']==m_node_count*CONTSPERNODE:
+                  m_node_count+=1
+              elif REQUESTSPERCONT<minRPCth:
+                if m_userdata['container_count']==(m_node_count-1)*CONTSPERNODE:
+                  m_node_count-=1
+
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO
+        targets: [ nginxapp ]
+        properties:
+          min_instances: 1
+          max_instances: '{{MAXCONTAINERS}}'
+          scaling_rule: |
+            if m_userdata is None:
+              m_userdata = {'container_count': 1, 'time': TIME }
+            if len(m_nodes)==m_node_count and TIME-m_userdata['time']>minContScaleInterval:
+              if REQUESTSPERCONT>maxRPCth:
+                if m_container_count<m_node_count*CONTSPERNODE:
+                  m_container_count+=1
+                  m_userdata['container_count'] = m_container_count
+                  m_userdata['time'] = TIME
+              elif REQUESTSPERCONT<minRPCth and m_container_count>1:
+                  m_container_count-=1
+                  m_userdata['container_count'] = m_container_count
+                  m_userdata['time'] = TIME
+    - network:
+        type: tosca.policies.Security.MiCADO.Network.HttpProxy
+        targets: [ nginxapp ]
+        properties:
+          encryption: true
+          encryption_key: |
+            -----BEGIN PRIVATE KEY-----
+            MIIJRAIBADANBgkqhkiG9w0BAQEFAASCCS4wggkqAgEAAoICAQC/6qDAvuUpMHz3
+            Q/eAzIqdI4e6wgL+tD5TTH8qqOL9KBhb5nZdWkMWm/4673mLVLmhJyE/B3aFrqzH
+            hFrc3uyWuZeYj83Ylh8SvAm1FIlK75gAhmdxwr5cK/2OD13W3A0b12oQSzz+sbA5
+            fYUE6R4Bkkt636fqWqaZwp+RnP4FaqZJvVtBEpQntM6DoH1YHuGmHsaZSh/RFZE5
+            tTe2JG4xtkFj6hqcYf6WsPzuBcZQHIASi562CAurAZbwFf3hVmUQjan15Gpl7M0V
+            bYxaHwv7UTJpq9NEKmZa5L1LcKzGTZj0pAaXWixRdy5kRvIV25jRGMHLFkFvzQDM
+            I0rU1mrGLagEZ6gfF92NWmwMkln4LX5geRMgCcBK17z8ukKwNEEhEh9Yo4ZoLZeA
+            1Lgbr1zHmEZbSsea5kibyOsl8glmuL/w9Oy8E8XOTJdPDxxw81qOM87dwRjZLXIO
+            qT8aARa1GGlvVLZ96eIVNHLB9jNDUnIxR3b93GL5hqWDl8ZY5MQHlzssWNiiCkPL
+            n+FMLE7f0Gn85huhQ4w3qjrXhWKlzBaiKvomid3HVU8UfAMJPPx3DOti9DZit7gF
+            uHSKRJ2I8aqArhl7WVynzuiqFdBu1f2Goj3SrT/sVFRFjsUzHegcCVGY9I3EYM6G
+            rOCnhp6Jy9ZBVjuvTcsKVQTBVBn8xQIDAQABAoICAG7DO4QCqL/c/EK5N19eraGD
+            oBJpZtEZtd7dh4dXcaoqOeTQXgAC2DV0UoYxMDT58SjRLJ7z77O33IBKIybWgjV7
+            Z8LlPCiEe+qUHAYmlBZrsY6cA5fkjXkk6nHS7JXU6rvm15AP3GQiqVKE3wC2ilrd
+            1DJWYtMe/og/i1i/AtydcNueLcygrGE+OPI+7hitug3mNTjDTxmdGPP1YvH8lJyc
+            U6EWu8UFyamu/EtjidEyobgSXMcyXYmUoUhvaNdkxW+IU09XRREOWk7Dqv1YbdHe
+            Svox8Pyme+x5l8aygQTyRBTtleBEas+ZuWymhZGX69rCLxbHAX1FE/C9bbLpDTXS
+            yGt/o1kAa8h1yKXYzXicR3p2urPyqr5fH/c7WWWzsXwJnLda0FP+w5nap5+X2Kzs
+            kQ5bf/J4dGu78lbmwgV6hO2uVjUOB83wujgAq/g+eOUCs3s4mlA4TKVdxLqZd7xf
+            2DmurODsGntArToCn6KYGPy37L8qt0ZLsWtu3K4W0o/N/+7u3YUiqtiSKf+YrS5r
+            /KPVqGkBENUCAaN1NWUfa7uMQiGufRiZsT0PvxcbdYIDD++6aOX/rXgRrAU9hLIL
+            yBkb87mICXDRhrUEBH3KxBuorrLfp07WkCHofkCxmHWy/OSvs4MCzQ+HfC4BOZHE
+            x4XFz1uimzrZHyoNsbgBAoIBAQDyKdNxlRNq9oawUvU+aE/o8cKsDza3hlbkcp52
+            kp19uT/qDvJB6/6dRndEvFh83C7u8T0TXCqs2wmG9g7Wp7jhAfg6K1VZnirKHHEx
+            J3e9txWhJmLboO2ynWikHHvhtTNq8Vr02Y4ok4xvsMg5LlNVT31MF58HVLNAx8gD
+            H6f0+ZnSw/PFKbL7kZIp9ZedMEFLxpdbRsst8JJG9a8Ar5WZcCCghPKBWt/GZn+r
+            XgLMCGuskW3Coq0YaqXzhlDdyDe9NMtemf1ogAg/07t+cjFbTLK2tQ7J9L5teFJF
+            92+sshh0S0pcaPFX01dRUmkr2xc/3HfuHSx7cH6L6XnaXsyZAoIBAQDK4dSkif+8
+            5aqbQTA5m1b7xvCMHS3jIO5Anx34o0mi4aeUMAOtWtqEdh9y85JA2VzZbWjaMUzB
+            nIqRBdspEvoaYQCc10DL75I70agwcqOWxJWf66Jy96S/giWEM1icqGXLprBEUA15
+            bsFUS1MUWElGzal4taFhdzOgdBnKveLVy+ZmXNGZqdEq9dSNujRTCjZjbSTgg9f4
+            Mc36SoktCDfodxvNLklcxSFyr67MVsrrBSvp+eJ/YT46PkTrPOeviZ/t5MggMj5L
+            X3y5J/Jqy9GEpAGIRQFMzvrNhqr+8rye9MX+zrOnJAxHP4A4Y91X5Yny5couzGqo
+            1O6gNowLhQENAoIBAQCgEQOBZU9zeUZoED2opZyEViEeR+QcBQE0eYrCx4CwVJ2p
+            oX2CE3K2FJjLZ096ILQpHm4HePmATjwK6GPAgRaULBAeqvv8g66273vmSLc+QGFc
+            ppnboJDdamx7ZZSBCZvWCXjctVzg9z5xqUF/gl502ljwzgBBATyHCkbrwaXsKHwD
+            s6BS55A19u/NKlev//B5HOh43d95GzYlD0pAws64oEQAtj/xPtcBNkkXRcnFgZ9i
+            brJFX+/YXs4YnOSg5DHrr5TpkBHPXCmXvuWE3AhB1/2dBSqkVVD13P1M4BQB66p8
+            XDPnxzoXmktyJm38HhJNFPZ0/vWjFiWfZ5EyxUypAoIBAQCjDl2Y4FBpwSwdG4dm
+            xTJjqMAr3EfFA/J4fWnZK2NDRZkpwG00JpD5ZPZhrOEevZOiLAzZUEYgVXAInmxF
+            1rqr+MpFQ7sQLLua2CYUyg4wXk7i+L7XJ7GBOVhtp9bQEYe+5XlFbhFmR12aIe/j
+            qhE6lpBeM5xAeU1E6ArSp0poCjhijLboiVNS88ChJ8Zl9w8/WbkJuO0azOx+/OjD
+            CJfmfdQaU9kidk0rn4cdM6RivwVMR0mCluUsal95sLmEm1euGvG87qSib1wOc8yh
+            iK4brLSOkOc6lB9+j31e6jguiQuYfwhkjNRRbvfeWmTK//CfB5A3jJMsnfYrTavA
+            lmUBAoIBAQDeMe/oTPFnqHdBeVjPYRJlI9vvBXh/FQzge2/QAwTlPpqdQfBkUgtE
+            HmvDlZLgy8tYRxKtcnHJbRGhQGVjA5HNng0gRId6MDRyJcHE+gMX3YEQnbnpMIXb
+            jngZ0O83ydFiKRVEkMKQbKREnjXY6gLqi2TOqPq/LNvNzg6wRYXgc/ErTkGvGwsz
+            HWwaNe+AEzAOYsnSUEVl96ZOzJQPi99DFH56Y2eU/+goMoiW1vj5frzOFLXnVmbn
+            ien5b8dHeirttqOIVpUHgnzIG5ae5YsXvw0dGXfSD720dJTRyZYbhr93+HB/4Q5U
+            S8hc/f5su1zke+PVyObI/rQTQWrK6njM
+            -----END PRIVATE KEY-----
+          encryption_cert: |
+            -----BEGIN CERTIFICATE-----
+            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
+            FtRKOTCUFoTH9tGykMK6
+            -----END CERTIFICATE-----
+          encryption_offload: true
+          target_ports:
+            - 443
+
