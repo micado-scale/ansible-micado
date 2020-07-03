@@ -34,8 +34,6 @@ topology_template:
         ports:
         - port: 15672
         - port: 5672
-      requirements:
-      - host: cq-server
 
     rabbitmq-exporter:
       type: tosca.nodes.MiCADO.Container.Application.Docker
@@ -50,12 +48,11 @@ topology_template:
             value: queue
         ports:
         - containerPort: 8090
-      requirements:
-      - host: cq-server
 
     rabbit:
-      type: tosca.nodes.MiCADO.Container.Pod.Kubernetes
+      type: tosca.nodes.MiCADO.Container.Application.Pod
       requirements:
+      - host: cq-server
       - container: rabbitmq
       - container: rabbitmq-exporter
       interfaces:
