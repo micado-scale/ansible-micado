@@ -1,7 +1,7 @@
-tosca_definitions_version: tosca_simple_yaml_1_0
+tosca_definitions_version: tosca_simple_yaml_1_2
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.9.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/develop/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -52,8 +52,9 @@ topology_template:
         Kubernetes:
           create:
             inputs:
-              hostPath:
-                path: /usr/bin/docker
+              spec:
+                hostPath:
+                  path: /usr/bin/docker
 
     docker-socket-host-vol:
       type: tosca.nodes.MiCADO.Container.Volume
@@ -63,8 +64,9 @@ topology_template:
         Kubernetes:
           create:
             inputs:
-              hostPath:
-                path: /var/run/docker.sock
+              spec:
+                hostPath:
+                  path: /var/run/docker.sock
 
     worker-node:
       type: tosca.nodes.MiCADO.CloudSigma.Compute
