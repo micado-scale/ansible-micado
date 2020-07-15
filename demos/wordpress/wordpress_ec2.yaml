@@ -15,7 +15,7 @@ dsl_definitions:
     instance_type: ADD_INSTANCE_TYPE_HERE (e.g. t2.small)
     security_group_ids:
       - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
-    key_name: -OPTIONAL- ADD_YOUR_KEY_NAME_HERE (e.g. my_ssh_key)
+    key_name: (OPTIONAL) ADD_YOUR_KEY_NAME_HERE (e.g. my_ssh_key)
     context:
       insert: true
       cloud_config: |
