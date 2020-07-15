@@ -70,8 +70,8 @@
         msg: >
           "{{ item.msg }}"
       loop:
-        - { that: "ansible_os_family == 'Debian' and ansible_distribution_version == '16.04' or ansible_distribution_version == '18.04'",
-            msg: 'The required OS is Ubuntu 16.04 or 18.04' }
+        - { that: "ansible_os_family == 'Debian' and ansible_distribution_version == '16.04' or ansible_distribution_version == '18.04' or ansible_distribution_version == '20.04'",
+            msg: 'The required OS is Ubuntu, supported versions are 16.04, 18.04 or 20.04' }
         - { that: "ansible_memtotal_mb >= 2950", msg: 'The minimum required memory size is 3 GB' }
         - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first >= 14000000000",
             msg: 'The minimum required disk size is 15 GB' }
