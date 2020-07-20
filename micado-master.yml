@@ -22,6 +22,15 @@
       - start
       - update-auth
 
+    - name: (Ansible) Checking the existence of OCI private key file
+      stat: path={{ oci_key_path }}
+      delegate_to: localhost
+      register: oci_key_file
+      changed_when: False
+      tags:
+      - start
+      - update-auth
+
     - name: (Ansible) Credential check for cloud orchestrators
       fail:
         msg: Occopus/Terraform is enabled but matching credential not file found...
@@ -115,6 +124,7 @@
 
     - cloud_cred_path: ./credentials-cloud-api.yml
     - gce_cred_path: ./credentials-gce.json
+    - oci_key_path: ./credentials-oci-key.pem
     - docker_cred_path: ./credentials-docker-registry.yml
     - micado_cred_path: ./credentials-micado.yml
     - micado_version: v0.9.0

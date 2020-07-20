@@ -702,6 +702,10 @@ spec:
         - name: submitter-gce-auth
           mountPath: /var/lib/submitter/gce-auth
 {% endif %}
+{% if oci_key_file.stat.exists %}
+        - name: submitter-oci-auth
+          mountPath: /var/lib/submitter/oci-auth
+{% endif %}
       volumes:
       - name: docker-socket
         hostPath:
@@ -733,6 +737,11 @@ spec:
       - name: submitter-gce-auth
         secret:
           secretName: gce-credentials
+{% endif %}
+{% if oci_key_file.stat.exists %}
+      - name: submitter-oci-auth
+        secret:
+          secretName: oci-key
 {% endif %}
 ---
 ## Service: TOSCA Submitter ##
