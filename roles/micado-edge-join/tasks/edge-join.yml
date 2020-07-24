@@ -25,7 +25,7 @@
     dest: /etc/kubeedge/
     remote_src: yes
     #when: not etc_edge.stat.exists
-  
+
 - name: (KubeEdge) Download and unzip
   unarchive:
     src: https://github.com/kubeedge/kubeedge/releases/download/v{{ packages.kube_edge }}/keadm-v{{ packages.kube_edge }}-linux-amd64.tar.gz
@@ -40,4 +40,5 @@
         --kubeedge-version={{ packages.kube_edge }}
   register: keadm
   async: 60
+  changed_when: false
   #when: not etc_edge.stat.exists
