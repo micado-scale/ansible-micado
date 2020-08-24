@@ -3,10 +3,6 @@
 
 - include: kubernetes-start.yml
 
-- include: load-auth.yml
-  tags:
-  - update-auth
-
 - include: core-config.yml
 
 - include: security-config.yml
@@ -18,6 +14,10 @@
   when: enable_terraform
 
 - include: micado-start.yml
+
+- include: load-auth.yml
+  tags:
+  - update-auth
 
 - include: security-start.yml
 
