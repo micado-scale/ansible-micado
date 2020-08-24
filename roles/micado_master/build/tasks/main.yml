@@ -1,6 +1,7 @@
 ---
 - name: (System) Ensure Google DNS server
   lineinfile:
+    mode: '0777'
     path: /etc/resolv.conf
     line: 'nameserver 8.8.8.8'
 

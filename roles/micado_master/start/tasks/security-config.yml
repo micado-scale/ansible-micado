@@ -9,6 +9,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
+    mode: '0644'
   loop:
     - { src: 'user_data/auth_data_credential_manager.csv.j2', dest: '/var/lib/micado/credman/config/provisioning.csv'}
     - { src: 'user_data/user_data_zorp.env.j2', dest: '/var/lib/micado/zorp/config/user_data_zorp.env'}

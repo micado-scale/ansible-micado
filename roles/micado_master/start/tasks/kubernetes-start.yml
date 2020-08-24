@@ -66,16 +66,19 @@
   file:
     state: directory
     path: /root/.kube
+    mode: '0755'
 
 - name: '(Kubernetes) Copy admin.conf to .kube/'
   copy:
     remote_src: yes
     src: /etc/kubernetes/admin.conf
     dest: /root/.kube/config
+    mode: '0644'
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Add kube/config to ENV'
   lineinfile:
+    mode: '0644'
     path: /etc/environment
     line: 'KUBECONFIG=/root/.kube/config'
 
