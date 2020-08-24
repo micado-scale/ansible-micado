@@ -109,10 +109,10 @@
       - start
 
   roles:
-    - role: build-micado-master
+    - role: micado_master/build
       tags:
       - build
-    - role: start-micado-master
+    - role: micado_master/start
       tags:
       - start
 

@@ -3,6 +3,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
+    mode: '0666'
   loop:
     - { src: 'micado/micado-manifest.yml.j2', dest: '/var/lib/micado/micado-manifest.yml'}
     - { src: 'micado/cadvisor.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/cadvisor.yaml'}

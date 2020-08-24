@@ -5,6 +5,7 @@
 
 - name: '(Kubernetes) Disable swap permanently'
   replace:
+    mode: '0644'
     path: /etc/fstab
     regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
     replace: '#\1\2\3swap\4'

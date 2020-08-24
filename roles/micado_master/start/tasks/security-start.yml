@@ -31,6 +31,7 @@
 
 - name: (MiCADO Security) Put cert into secrets
   lineinfile:
+    mode: '0600'
     path: /etc/ipsec.secrets
     line: ": RSA 'master.key'"
 
