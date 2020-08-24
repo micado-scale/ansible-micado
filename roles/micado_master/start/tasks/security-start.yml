@@ -5,6 +5,7 @@
     name: security-policy-manager
     namespace: micado-system
     wait: yes
+    wait_timeout: 240
     wait_condition:
       reason: MinimumReplicasAvailable
       status: "True"
