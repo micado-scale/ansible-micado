@@ -1,0 +1,64 @@
+---
+- name: '(Kubernetes) Turn off swap'
+  command: swapoff -a
+  changed_when: False
+
+- name: '(Kubernetes) Disable swap permanently'
+  replace:
+    mode: '0644'
+    path: /etc/fstab
+    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+    replace: '#\1\2\3swap\4'
+
+- name: '(Kubernetes) Add APT key'
+  apt_key:
+    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+    state: present
+
+- name: '(Kubernetes) Add APT repository'
+  apt_repository:
+    repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+    state: present
+    filename: 'kubernetes'
+
+- name: '(Kubernetes) Install APT packages'
+  apt:
+    name:
+    - kubelet={{ packages.kubernetes_version }}
+    - kubeadm={{ packages.kubernetes_version }}
+    - kubectl={{ packages.kubernetes_version }}
+    state: present
+    update_cache: yes
+
+- name: '(Kubernetes) prevent package from being upgraded'
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+  - kubelet
+  - kubeadm
+  - kubectl
+
+- name: (Kubernetes) Find config images
+  command: kubeadm config images list
+  register: k8s_config
+  changed_when: False
+
+- name: (Kubernetes) Check for config images locally
+  docker_image_info:
+    name: "{{ k8s_config.stdout_lines }}"
+  register: k8s_images
+
+- name: (Kubernetes) Pull config images
+  command: kubeadm config images pull
+  when: k8s_images.images | length < 7
+
+- name: '(Kubernetes) Copy Kubernetes Dashboard and flannel manifest'
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0644
+  loop:
+  - { src: 'kubernetes/kube-dash.yaml', dest: '/etc/kubernetes/kube-dash.yaml'}
+  - { src: 'kubernetes/kube-flannel.yaml', dest: '/etc/kubernetes/kube-flannel.yaml'}
+  - { src: 'kubernetes/kubelet-config.yaml', dest: '/etc/kubernetes/kubelet-config.yaml'}

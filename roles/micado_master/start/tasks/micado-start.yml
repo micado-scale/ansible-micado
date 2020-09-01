@@ -1,0 +1,36 @@
+---
+- name: (MiCADO Core) Enable packet filtering
+  service:
+    name: iptables
+    state: restarted
+    enabled: yes
+
+- name: (MiCADO Core) Enable IPv6 packet filtering
+  service:
+    name: ip6tables
+    state: restarted
+    enabled: yes
+
+- name: (MiCADO Core) Enable and start MiCADO systemd service
+  service:
+    name: micado
+    state: restarted
+    enabled: yes
+
+- name: (MiCADO Core) Get API endpoint
+  k8s:
+    kind: Service
+    name: toscasubmitter
+    namespace: micado-system
+  register: submitter
+
+- name: (MiCADO Core) Set API environment
+  lineinfile:
+    path: /etc/environment
+    line: "{{ item.line }}"
+    mode: '0644'
+  with_items:
+  - line: >-
+      MICADO_API_ENDPOINT=http://{{ submitter.result.spec.clusterIP
+      }}:{{ submitter.result.spec.ports[0].port }}
+  - { line: "MICADO_API_VERSION=v2.0" }
