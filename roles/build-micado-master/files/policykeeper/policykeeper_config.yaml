@@ -3,7 +3,7 @@ prometheus_config_template: '/config/policykeeper/prometheus_config_template.yam
 prometheus_config_target: '/config/prometheus/prometheus.yml'
 prometheus_rules_directory: '/config/prometheus'
 
-docker_node_unreachable_timeout: 120
+docker_node_unreachable_timeout: 600
 
 k8s_endpoint: 'unix:///var/run/docker.sock'
 

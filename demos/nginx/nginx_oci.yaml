@@ -6,7 +6,7 @@ imports:
 repositories:
   docker_hub: https://hub.docker.com/
 
-description: ADT for NGINX on OpenStack Nova
+description: ADT for NGINX on OCI
 
 topology_template:
   node_templates:
@@ -21,24 +21,21 @@ topology_template:
         - port: 8080
           nodePort: 30012
         - containerPort: 9300
-        
+
     worker-node:
-      type: tosca.nodes.MiCADO.Nova.Compute
+      type: tosca.nodes.MiCADO.OCI.Compute
       properties:
-        image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
-        flavor_name: ADD_YOUR_FLAVOUR_ID_HERE (e.g. 3)
-        project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
-        network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
-        key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
-        security_groups:
-          - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
+        region: <REGION_NAME> (e.g. uk-london-1)
+        availability_domain: <AVAILABILITY_DOMAIN> (e.g. lVvK:UK-LONDON-1-AD-1)
+        compartment_id: <COMPARTMENT_OCID> (e.g ocid1.tenancy.oc1..aaa)
+        shape: <VM_TYPE_NAME> (e.g. VM.Standard.E2.1)
+        source_id: <VM_IMAGE_OCID> (e.g ocid1.image.oc1.uk-london-1.aaa)
+        subnet_id: <SUBNET_OCID> (e.g ocid1.subnet.oc1.uk-london-1.aaa)
+        network_security_group: <NETWORK_SECURITY_GROUP_OCID> (e.g ocid1.networksecuritygroup.oc1.uk-london-1.aaa)
+        ssh-keys: <SSH_KEY_NAME> (e.g. ssh-rsa AAAB3N...)
       interfaces:
-        # TERRAFORM: Change to Terraform and provide network_name in the inputs below
-        Occopus:
+        Terraform:
           create:
-            inputs:
-              #network_name: ADD_YOUR_NETWORK_NAME (e.g. default-net)
-              endpoint: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
       
   outputs:
     ports:

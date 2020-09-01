@@ -6,7 +6,7 @@ imports:
 repositories:
   docker_hub: https://hub.docker.com/
 
-description: ADT for NGINX on GCE
+description: ADT for NGINX on OCI
 
 topology_template:
   node_templates:
@@ -23,14 +23,15 @@ topology_template:
         - containerPort: 9300
 
     worker-node:
-      type: tosca.nodes.MiCADO.GCE.Compute
+      type: tosca.nodes.MiCADO.OCI.Compute
       properties:
-        region: <REGION_NAME> (e.g. us-west1)
-        zone: <ZONE_NAME> (e.g. us-west1-a)
-        project: <PROJECT_NAME> (e.g causal-apple-22)
-        machine_type: <VM_TYPE_NAME> (e.g. n1-standard-2)
-        image: <VM_IMAGE_NAME> (e.g ubuntu-os-cloud/ubuntu-1804-lts)
-        network: <NETWORK_NAME> (e.g default)
+        region: <REGION_NAME> (e.g. uk-london-1)
+        availability_domain: <AVAILABILITY_DOMAIN> (e.g. lVvK:UK-LONDON-1-AD-1)
+        compartment_id: <COMPARTMENT_OCID> (e.g ocid1.tenancy.oc1..aaa)
+        shape: <VM_TYPE_NAME> (e.g. VM.Standard.E2.1)
+        source_id: <VM_IMAGE_OCID> (e.g ocid1.image.oc1.uk-london-1.aaa)
+        subnet_id: <SUBNET_OCID> (e.g ocid1.subnet.oc1.uk-london-1.aaa)
+        network_security_group: <NETWORK_SECURITY_GROUP_OCID> (e.g ocid1.networksecuritygroup.oc1.uk-london-1.aaa)
         ssh-keys: <SSH_KEY_NAME> (e.g. ssh-rsa AAAB3N...)
       interfaces:
         Terraform:

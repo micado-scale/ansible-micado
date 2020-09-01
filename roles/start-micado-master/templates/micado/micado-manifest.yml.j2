@@ -689,18 +689,22 @@ spec:
         - name: kube-binary
           mountPath: /usr/bin/kubectl
         - name: submitter-outputs
-          mountPath: /var/lib/submitter/files/output_configs
+          mountPath: /var/lib/micado/submitter/files/output_configs
         - name: submitter-config
-          mountPath: /var/lib/submitter/system
+          mountPath: /var/lib/micado/submitter/system
         - name: submitter-log
           mountPath: /var/log/submitter
 {% if cloud_cred_file.stat.exists %}
         - name: submitter-auth-data
-          mountPath: /var/lib/submitter/auth
+          mountPath: /var/lib/micado/submitter/auth
 {% endif %}
 {% if gce_cred_file.stat.exists %}
         - name: submitter-gce-auth
-          mountPath: /var/lib/submitter/gce-auth
+          mountPath: /var/lib/micado/submitter/gce-auth
+{% endif %}
+{% if oci_key_file.stat.exists %}
+        - name: submitter-oci-auth
+          mountPath: /var/lib/micado/submitter/oci-auth
 {% endif %}
       volumes:
       - name: docker-socket
@@ -733,6 +737,11 @@ spec:
       - name: submitter-gce-auth
         secret:
           secretName: gce-credentials
+{% endif %}
+{% if oci_key_file.stat.exists %}
+      - name: submitter-oci-auth
+        secret:
+          secretName: oci-key
 {% endif %}
 ---
 ## Service: TOSCA Submitter ##
