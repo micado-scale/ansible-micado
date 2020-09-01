@@ -178,13 +178,13 @@
   hosts: micado-target
 
   roles:
-    - role: micado-edge-start
+    - role: micado_edge_start
       tags:
       - edge
 
   vars:
     - packages:
-        kube_edge: "1.2.1"
+        kube_edge: "1.4.0"
 
 - name: Setup KubeEdge (Edge-core)
   hosts: edgenodes
@@ -219,7 +219,7 @@
       - edge
 
   roles:
-    - role: micado-edge-join
+    - role: micado_edge_join
       tags:
       - edge
 
@@ -228,4 +228,5 @@
         docker_ce: "docker-ce=5:19.03.12~3-0~ubuntu-{{ ansible_distribution_release }}"
         docker_ce_cli: "docker-ce-cli=5:19.03.12~3-0~ubuntu-{{ ansible_distribution_release }}"
         containerd_io: containerd.io=1.2.13-2
-        kube_edge: "1.2.1"
+        kube_edge: "1.4.0"
+

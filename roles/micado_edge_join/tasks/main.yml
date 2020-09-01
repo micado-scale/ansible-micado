@@ -1,0 +1,4 @@
+---
+- include: docker_install.yml
+
+- include: edge_join.yml
