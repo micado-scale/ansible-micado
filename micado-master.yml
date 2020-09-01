@@ -24,7 +24,7 @@
   hosts: micado-target
 
   roles:
-    - role: micado-edge-start
+    - role: micado_edge_start
       tags:
       - edge
 
@@ -43,6 +43,6 @@
     - always
 
   roles:
-    - role: micado-edge-join
+    - role: micado_edge_join
       tags:
       - edge
