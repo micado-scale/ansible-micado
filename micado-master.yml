@@ -164,7 +164,7 @@
         redis: redis:5-alpine
         securitypolicymanager: micado/security-policy-manager:2.1
         terraform: hashicorp/terraform:0.12.21
-        toscasubmitter: micado/toscasubmitter:alpine
+        toscasubmitter: micado/toscasubmitter:edge
         vault: vault:1.0.3
         zorp: micado/zorpgpl:6.0.12
 
@@ -173,3 +173,59 @@
         docker_ce_cli: "docker-ce-cli=5:19.03.12~3-0~ubuntu-{{ ansible_distribution_release }}"
         containerd_io: containerd.io=1.2.13-2
         kubernetes_version: 1.18.5-00
+
+- name: Setup KubeEdge (Cloud-core)
+  hosts: micado-target
+
+  roles:
+    - role: micado-edge-start
+      tags:
+      - edge
+
+  vars:
+    - packages:
+        kube_edge: "1.4.0"
+
+- name: Setup KubeEdge (Edge-core)
+  hosts: edgenodes
+  serial: 1
+  gather_facts: True
+
+  pre_tasks:
+    - name: (System) Turn back gather_fact
+      setup:
+      tags:
+      - edge
+
+    - name: (System) Check system requirements
+      assert:
+        that:
+          "{{ item.that }}"
+        msg: >
+          "{{ item.msg }}"
+      loop:
+        - that: |
+            ansible_os_family == 'Debian' and ansible_distribution_version == '16.04'
+            or ansible_distribution_version == '18.04' or ansible_distribution_version == '20.04'
+          msg: 'The required OS is Ubuntu, supported versions are 16.04, 18.04 or 20.04'
+      tags:
+      - edge
+
+    - name: (System) Waiting for automatic security updates to finish
+      script: pre-task/wait-updates.sh
+      register: outputsh
+      changed_when: not outputsh.stdout
+      tags:
+      - edge
+
+  roles:
+    - role: micado-edge-join
+      tags:
+      - edge
+
+  vars:
+    - packages:
+        docker_ce: "docker-ce=5:19.03.12~3-0~ubuntu-{{ ansible_distribution_release }}"
+        docker_ce_cli: "docker-ce-cli=5:19.03.12~3-0~ubuntu-{{ ansible_distribution_release }}"
+        containerd_io: containerd.io=1.2.13-2
+        kube_edge: "1.4.0"

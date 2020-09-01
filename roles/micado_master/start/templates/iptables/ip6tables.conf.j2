@@ -32,6 +32,9 @@
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 10250 -j ACCEPT
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 10251 -j ACCEPT
 -A FILTERS -m state --state NEW -m tcp -p tcp --dport 10252 -j ACCEPT
+#kubeedge
+-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10000 -j ACCEPT
+-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10002 -j ACCEPT
 #cni
 -A FILTERS -m state --state NEW -i cni0 -j ACCEPT
 -A FILTERS -m state --state NEW -o cni0 -j ACCEPT

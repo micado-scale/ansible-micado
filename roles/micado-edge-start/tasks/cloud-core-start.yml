@@ -1,0 +1,27 @@
+---
+- name: '(KubeEdge) Check if initialised'
+  stat:
+    path: /etc/kubeedge
+  register: etc_edge
+
+- name: (KubeEdge) Download and unzip
+  unarchive:
+    src: https://github.com/kubeedge/kubeedge/releases/download/v{{ packages.kube_edge }}/keadm-v{{ packages.kube_edge }}-linux-amd64.tar.gz
+    dest: /etc/kubernetes
+    remote_src: yes
+  when: not etc_edge.stat.exists
+
+- name: '(KubeEdge) KubeEdge init'
+  command: /etc/kubernetes/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm init
+        --kube-config /root/.kube/config
+        --kubeedge-version={{ packages.kube_edge }}
+        --advertise-address={{ hostvars['micado-target']['ansible_host'] }}
+  register: keadm
+  async: 60
+  when: not etc_edge.stat.exists
+
+- name: '(KubeEdge) KubeEdge token generation'
+  command: /etc/kubernetes/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm gettoken
+        --kube-config /root/.kube/config
+  register: token_kubeedge
+  when: not etc_edge.stat.exists

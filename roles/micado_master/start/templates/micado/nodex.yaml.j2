@@ -25,6 +25,7 @@ spec:
         image: {{docker_images.node_exporter}}
         ports:
         - containerPort: 9100
+          hostPort: 9100
         resources:
           requests:
             cpu: 25m
