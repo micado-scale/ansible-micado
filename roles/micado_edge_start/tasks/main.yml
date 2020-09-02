@@ -1,0 +1,2 @@
+---
+- include: cloud_core_start.yml
