@@ -151,18 +151,18 @@
     - docker_images:
         alertmanager: prom/alertmanager:v0.20.0
         cadvisor: gcr.io/google-containers/cadvisor:v0.34.0
-        credential_manager: micado/credential-manager:alpine
-        crypto_engine: micado/crypto-engine:alpine
+        credential_manager: micado/credential-manager:0.2.0
+        crypto_engine: micado/crypto-engine:1.0
         dashboard: micado/dashboard:0.4.0
         grafana: grafana/grafana:6.6.2
-        iivr: micado/iivr:alpine
+        iivr: micado/iivr:1.0
         node_exporter: prom/node-exporter:v0.18.1
         occopus: micado/occopus:1.7-rc6
         optimizer: micado/optimizer:v0.8.0
-        policykeeper: micado/policykeeper:alpine
+        policykeeper: micado/policykeeper:v0.9.0
         prometheus: prom/prometheus:v2.16.0
         redis: redis:5-alpine
-        securitypolicymanager: micado/security-policy-manager:alpine
+        securitypolicymanager: micado/security-policy-manager:2.1
         terraform: hashicorp/terraform:0.12.21
         toscasubmitter: micado/toscasubmitter:edge
         vault: vault:1.0.3

@@ -16,7 +16,7 @@
     dest: /etc/kubeedge
     mode: '0777'
     remote_src: yes
-    when: not etc_edge.stat.exists
+  when: not etc_edge.stat.exists
 
 - name: '(KubeEdge) KubeEdge join'
   command: /etc/kubeedge/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm join
