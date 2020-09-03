@@ -25,4 +25,4 @@ if [ -z "$SSL_PASS" ]; then
 fi
 
 echo "Deleting app with id \"$APP_ID\" from MiCADO at $MICADO_MASTER..."
-curl --insecure -s -X DELETE -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v2.0/applicaitons/$APP_ID/ | jq
+curl --insecure -s -X DELETE -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v2.0/applications/$APP_ID/ | jq
