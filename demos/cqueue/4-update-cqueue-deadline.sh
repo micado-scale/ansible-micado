@@ -32,5 +32,5 @@ fi
 sed "s/DEADLINE: [0-9]*/DEADLINE: $DL/" cqueue.yaml > cqueue.tmp.yaml
 
 echo "Updating \"$APP_ID\" on MiCADO at $MICADO_MASTER..."
-curl --insecure -s -F file=@"cqueue.tmp.yaml" -X PUT -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/update/$APP_ID | jq
+curl --insecure -s -F adt=@"cqueue.tmp.yaml" -X PUT -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v2.0/applications/$APP_ID/ | jq
 rm cqueue.tmp.yaml
