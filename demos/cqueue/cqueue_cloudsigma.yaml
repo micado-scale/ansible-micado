@@ -158,8 +158,6 @@ topology_template:
                 m_node_count+=1
             else:
               m_node_count = 0
-            print "Number of required nodes:",reqnodes
-            print "Number of requested nodes:",m_node_count
     - scalability:
         type: tosca.policies.Scaling.MiCADO
         targets: [ cqueue-worker ]
@@ -167,12 +165,9 @@ topology_template:
           min_instances: 1
           max_instances: '{{MAXCONTAINERS}}'
           scaling_rule: |
-            print "Length of queue:",ITEMS
             required_count = 0
             if ITEMS>0:
               required_count = ceil(AET/(REMAININGTIME/ITEMS)) if REMAININGTIME>0 else MAXCONTAINERS
               m_container_count = min([required_count, len(m_nodes) * 5])
             else:
               m_container_count = 0
-            print "Number of required containers:",required_count
-            print "Number of requested containers:",m_container_count
