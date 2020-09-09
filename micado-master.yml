@@ -163,7 +163,7 @@
         prometheus: prom/prometheus:v2.20.1
         redis: redis:5-alpine
         securitypolicymanager: micado/security-policy-manager:alpine
-        terraform: hashicorp/terraform:0.13.2
+        terraform: hashicorp/terraform:0.12.29
         toscasubmitter: micado/toscasubmitter:alpine
         vault: vault:1.5.3
         zorp: micado/zorpgpl:6.0.12
