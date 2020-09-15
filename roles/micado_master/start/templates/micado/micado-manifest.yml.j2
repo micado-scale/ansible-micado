@@ -675,10 +675,8 @@ spec:
       - name: toscasubmitter
         image: {{docker_images.toscasubmitter}}
         args:
-        - -h
-        - 0.0.0.0
-        - -p
-        - '5050'
+        - --bind
+        - :5050
         volumeMounts:
         - name: docker-socket
           mountPath: /var/run/docker.sock
