@@ -147,7 +147,7 @@
     ##################################################################################
 
     - intel_cpu: false
-
+    - oci_key: '{{ lookup("file", "{{ oci_key_path }}") }}'
     - docker_images:
         alertmanager: prom/alertmanager:v0.21.0
         cadvisor: gcr.io/google-containers/cadvisor:v0.36.0

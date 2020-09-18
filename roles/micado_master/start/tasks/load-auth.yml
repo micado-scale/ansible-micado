@@ -11,12 +11,6 @@
     name: gce_cred
   when: gce_cred_file.stat.exists
 
-- name: (Ansible) Load the OCI private key from the playbook
-  include_vars:
-    file: "{{ oci_key_path  }}"
-    name: oci_key
-  when: oci_key_file.stat.exists
-
 - name: (Kubernetes) Ensure micado-system namespace exists
   k8s:
     state: present
