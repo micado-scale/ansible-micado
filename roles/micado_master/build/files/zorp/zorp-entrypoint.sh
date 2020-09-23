@@ -6,6 +6,7 @@ PIDFILE_DIR=/var/run/zorp
 TEMPDIR=/var/lib/zorp/tmp
 KEYFILE_NAME=/etc/zorp/ssl.key
 CERTFILE_NAME=/etc/zorp/ssl.pem
+TLS_SAN_CONFIG=/etc/zorp/san.cnf
 
 function create_pidfile_dir {
     mkdir $PIDFILE_DIR
@@ -22,7 +23,8 @@ function create_tempdir {
 if [ ! -f $CERTFILE_NAME ]; then
     if [ "x$TLS_PROVISION_METHOD" == "xself-signed" ]; then
         echo "Generating new x509 keypair"
-        openssl req -new -newkey rsa:4096 -days 3650 -sha256 -nodes -x509 -subj "/CN=${TLS_PROVISION_HOSTNAME}" -keyout $KEYFILE_NAME -out $CERTFILE_NAME
+        #openssl req -new -newkey rsa:4096 -days 3650 -sha256 -nodes -x509 -subj "/CN=${TLS_PROVISION_HOSTNAME}" -keyout $KEYFILE_NAME -out $CERTFILE_NAME
+        openssl req -new -newkey rsa:4096 -days 3650 -sha256 -nodes -x509 -config $TLS_SAN_CONFIG -keyout $KEYFILE_NAME -out $CERTFILE_NAME
         chown zorp.zorp $KEYFILE_NAME
         chown zorp.zorp $CERTFILE_NAME
     fi;
