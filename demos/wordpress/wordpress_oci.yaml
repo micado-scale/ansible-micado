@@ -22,6 +22,8 @@ dsl_definitions:
       insert: true
       cloud_config: |
         runcmd:
+        - iptables -D INPUT -j REJECT --reject-with icmp-host-prohibited
+        - iptables -D FORWARD -j REJECT --reject-with icmp-host-prohibited
         - apt-get install -y nfs-kernel-server nfs-common
 
 topology_template:
