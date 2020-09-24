@@ -29,7 +29,13 @@ topology_template:
         source_id: <VM_IMAGE_OCID> (e.g ocid1.image.oc1.uk-london-1.aaa)
         subnet_id: <SUBNET_OCID> (e.g ocid1.subnet.oc1.uk-london-1.aaa)
         network_security_group: <NETWORK_SECURITY_GROUP_OCID> (e.g ocid1.networksecuritygroup.oc1.uk-london-1.aaa)
-        ssh-keys: <SSH_KEY_NAME> (e.g. ssh-rsa AAAB3N...)
+        ssh_keys: <SSH_KEY_NAME> (e.g. ssh-rsa AAAB3N...)
+        context:
+          insert: true
+          cloud_config: |
+            runcmd:
+            - iptables -D INPUT -j REJECT --reject-with icmp-host-prohibited
+            - iptables -D FORWARD -j REJECT --reject-with icmp-host-prohibited
       interfaces:
         Terraform:
           create:
