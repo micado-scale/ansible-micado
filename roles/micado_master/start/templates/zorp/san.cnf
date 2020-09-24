@@ -13,3 +13,4 @@ subjectAltName = @alt_names
 subjectAltName = @alt_names
 [alt_names]
 IP.1 = {{ hostvars['micado-target']['ansible_host'] }}
+DNS.1 = {{ master_hostname or 'micado-master' }}
