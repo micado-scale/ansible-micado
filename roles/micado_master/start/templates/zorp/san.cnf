@@ -6,7 +6,7 @@ x509_extensions = v3_req
 prompt = no
 [req_distinguished_name]
 organizationName = Self-signed certificate
-commonName = micado-master: Self-signed certificate
+commonName = {{ master_hostname or 'micado-master' }}: Self-signed certificate
 [req_ext]
 subjectAltName = @alt_names
 [v3_req]
