@@ -12,6 +12,16 @@
     tags:
     - always
 
+    - name: Persist some variables
+      set_fact:
+        enable_occopus: "{{ enable_occopus }}"
+        enable_terraform: "{{ enable_terraform }}"
+        disable_worker_updates: "{{ disable_worker_updates }}"
+      tags:
+      - build
+      - start
+      - edge
+
   roles:
     - role: micado_master/build
       tags:

@@ -14,6 +14,7 @@ micado_cred_path: ./credentials-micado.yml
 disable_optimizer: True
 enable_occopus: False
 enable_terraform: True
+multi_cloud: False
 
 # dashboard configuration
 # -------------------------------------------------------
