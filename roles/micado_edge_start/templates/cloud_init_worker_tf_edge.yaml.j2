@@ -111,7 +111,7 @@ runcmd:
   - systemctl enable strongswan
 
   # Connect to cluster
-  - /etc/kubeedge/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm join --cloudcore-ipport={{ hostvars['micado-target']['ansible_host'] }}:10000 --edgenode-name={{ '{{ worker_name }}' }}-$IP --kubeedge-version={{ packages.kube_edge }} --token={{ token_kubeedge.stdout }}
+  - /etc/kubeedge/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm join --cloudcore-ipport={{ hostvars['micado-target']['ansible_host'] }}:10000 --edgenode-name={{ '{{ worker_name }}' }} --kubeedge-version={{ packages.kube_edge }} --token={{ token_kubeedge.stdout }}
 
   # Certificates management
   - curl --connect-timeout 30 --retry 10 -X POST http://10.97.170.199:5003/v1.0/nodecerts > /tmp/tmp_certs
