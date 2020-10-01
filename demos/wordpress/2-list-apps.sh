@@ -20,4 +20,4 @@ if [ -z "$SSL_PASS" ]; then
 fi
 
 echo "Retrieving list of running apps from MiCADO at $MICADO_MASTER..."
-curl --insecure -s -X GET -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/list_app | jq
+curl --insecure -s -X GET -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v2.0/applications/ | jq

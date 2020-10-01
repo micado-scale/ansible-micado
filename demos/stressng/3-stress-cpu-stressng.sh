@@ -34,6 +34,6 @@ cp stressng.yaml stressng.tmp.yaml
 sed "s/'-l', '[0-9]*'/'-l', '$CPU'/" stressng.yaml > stressng.tmp.yaml
 
 echo "Stressing \"$APP_ID\" on MiCADO at $MICADO_MASTER... to a CPU load of $CPU"
-curl --insecure -s -F file=@"stressng.tmp.yaml" -X PUT -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v1.0/app/update/$APP_ID | jq
+curl --insecure -s -F adt=@"stressng.tmp.yaml" -X PUT -u "$SSL_USER":"$SSL_PASS" https://$MICADO_MASTER:$MICADO_PORT/toscasubmitter/v2.0/applications/$APP_ID/ | jq
 
 rm stressng.tmp.yaml

@@ -1,0 +1,18 @@
+---
+- name: '(Ansible) Load the security settings from the playbook'
+  include_vars:
+    file: "{{ micado_cred_path  }}"
+    name: security
+  when: security_cred_file.stat.exists
+
+- name: '(MiCADO Security) Copy config templates'
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  loop:
+    - { src: 'user_data/auth_data_credential_manager.csv.j2', dest: '/var/lib/micado/credman/config/provisioning.csv'}
+    - { src: 'user_data/user_data_zorp.env.j2', dest: '/var/lib/micado/zorp/config/user_data_zorp.env'}
+    - { src: 'zorp/policy.py.j2', dest: '/var/lib/micado/zorp/config/policy.py'}
+    - { src: 'ipsec/ipsec.conf', dest: '/etc/ipsec.conf'}
+    - { src: 'zorp/san.cnf', dest: '/var/lib/micado/zorp/config/san.cnf'}

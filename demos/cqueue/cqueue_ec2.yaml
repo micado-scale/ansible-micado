@@ -1,7 +1,7 @@
-tosca_definitions_version: tosca_simple_yaml_1_0
+tosca_definitions_version: tosca_simple_yaml_1_2
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.9.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/develop/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -15,7 +15,7 @@ dsl_definitions:
     instance_type: ADD_INSTANCE_TYPE_HERE (e.g. t2.small)
     security_group_ids:
       - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
-    key_name: -OPTIONAL- ADD_YOUR_KEY_NAME_HERE (e.g. my_ssh_key)
+    key_name: (OPTIONAL) ADD_YOUR_KEY_NAME_HERE (e.g. my_ssh_key)
 
   endpoint_properties: &endpoint_properties
     endpoint: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com)
@@ -34,8 +34,6 @@ topology_template:
         ports:
         - port: 15672
         - port: 5672
-      requirements:
-      - host: cq-server
 
     rabbitmq-exporter:
       type: tosca.nodes.MiCADO.Container.Application.Docker
@@ -50,12 +48,11 @@ topology_template:
             value: queue
         ports:
         - containerPort: 8090
-      requirements:
-      - host: cq-server
 
     rabbit:
-      type: tosca.nodes.MiCADO.Container.Pod.Kubernetes
+      type: tosca.nodes.MiCADO.Container.Application.Pod
       requirements:
+      - host: cq-server
       - container: rabbitmq
       - container: rabbitmq-exporter
       interfaces:
@@ -160,8 +157,6 @@ topology_template:
                 m_node_count+=1
             else:
               m_node_count = 0
-            print "Number of required nodes:",reqnodes
-            print "Number of requested nodes:",m_node_count
     - scalability:
         type: tosca.policies.Scaling.MiCADO
         targets: [ cqueue-worker ]
@@ -169,12 +164,9 @@ topology_template:
           min_instances: 1
           max_instances: '{{MAXCONTAINERS}}'
           scaling_rule: |
-            print "Length of queue:",ITEMS
             required_count = 0
             if ITEMS>0:
               required_count = ceil(AET/(REMAININGTIME/ITEMS)) if REMAININGTIME>0 else MAXCONTAINERS
               m_container_count = min([required_count, len(m_nodes) * 5])
             else:
               m_container_count = 0
-            print "Number of required containers:",required_count
-            print "Number of requested containers:",m_container_count

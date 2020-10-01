@@ -1,7 +1,7 @@
-tosca_definitions_version: tosca_simple_yaml_1_0
+tosca_definitions_version: tosca_simple_yaml_1_2
 
 imports:
-  - https://raw.githubusercontent.com/micado-scale/tosca/v0.9.0/micado_types.yaml
+  - https://raw.githubusercontent.com/micado-scale/tosca/develop/micado_types.yaml
 
 repositories:
   docker_hub: https://hub.docker.com/
@@ -10,7 +10,7 @@ description: ADT for WordPress on OpenStack Nova
 
 dsl_definitions:
   compute_properties: &compute_properties
-    image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
+    image_id: ADD_YOUR_ID_HERE (e.g. 6bba6dc3-b6d5-4b15-942e-61e0ef2f93cb)
     flavor_name: ADD_YOUR_FLAVOUR_ID_HERE (e.g. 3)
     project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
     network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)

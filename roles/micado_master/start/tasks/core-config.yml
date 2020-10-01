@@ -1,0 +1,14 @@
+---
+- name: '(MiCADO Core) Copy config templates'
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0666'
+  loop:
+    - { src: 'micado/micado-manifest.yml.j2', dest: '/var/lib/micado/micado-manifest.yml'}
+    - { src: 'micado/cadvisor.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/cadvisor.yaml'}
+    - { src: 'micado/nodex.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/nodex.yaml'}
+    - { src: 'toscasubmitter/key_config.yml.j2', dest: '/var/lib/micado/toscasubmitter/system/key_config.yml'}
+    - { src: 'iptables/iptables.conf.j2', dest: '/etc/iptables.conf'}
+    - { src: 'iptables/ip6tables.conf.j2', dest: '/etc/ip6tables.conf'}
+    - { src: 'grafana/data-dashboards-micado.json.j2', dest: '/var/lib/micado/grafana/data/dashboards/micado.json'}
