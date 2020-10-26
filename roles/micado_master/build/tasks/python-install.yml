@@ -10,11 +10,11 @@
   pip:
     name:
     - setuptools<45
-    - pip
-    - docker
-    - kubernetes
-    - openshift
-    - requests
-    - click
-    - terminaltables
+    - pip<21
+    - docker~=4.3.0
+    - kubernetes~=11.0.0
+    - openshift~=0.11.0
+    - requests~=2.22.0
+    - click<8
+    - terminaltables<4
     state: present
