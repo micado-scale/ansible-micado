@@ -33,7 +33,7 @@
       changed_when: not outputsh.stdout
 
   roles:
-    - micado_worker
+    - micado_worker/build
 
   vars:
 
