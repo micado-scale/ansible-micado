@@ -1,5 +1,5 @@
 ---
-- name: 'Docker: Installing dependencies'
+- name: '(Docker) Installing dependencies'
   apt:
     name:
     - apt-transport-https
@@ -8,17 +8,17 @@
     - software-properties-common
     state: present
 
-- name: 'Docker: Adding APT key'
+- name: '(Docker) Adding APT key'
   apt_key:
     url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
     state: present
 
-- name: 'Docker: Adding APT repository'
+- name: '(Docker) Adding APT repository'
   apt_repository:
     repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
     state: present
 
-- name: 'Docker: Installing APT package'
+- name: '(Docker) Installing APT package'
   apt:
     name:
     - "docker-ce={{ docker_version }}~ubuntu-{{ ansible_distribution_release }}"
@@ -27,7 +27,7 @@
     state: present
     update_cache: yes
 
-- name: 'Docker: prevent package from being upgraded'
+- name: '(Docker) prevent package from being upgraded'
   dpkg_selections:
     name: "{{ item }}"
     selection: hold
@@ -36,7 +36,7 @@
     - docker-ce-cli
     - containerd.io
 
-- name: 'Docker: Replace ExecStart for systemd'
+- name: '(Docker) Replace ExecStart for systemd'
   lineinfile:
     mode: '0644'
     dest: /lib/systemd/system/docker.service

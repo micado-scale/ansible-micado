@@ -6,24 +6,31 @@
 ################
 all:
   hosts:
+    # Point to micado-master node below
     master:
-      # Point to micado-master node
       ansible_host: 192.168.1.128
       ansible_connection: ssh
       ansible_user: ubuntu
   
   children:
     workers:
+      # Point to micado-worker nodes below
       hosts:
-        # Point to micado-worker nodes
-        # edge1:
-        #   ansible_host: ip_address_of_edge1
+        # worker-one:
+        #   ansible_host: ip_address_of_worker-one
         #   ansible_connection: ssh
         #   ansible_user: ubuntu
+        #   is_edge: false
         # worker-two:
         #   ansible_host: ip_address_of_worker-two
         #   ansible_connection: ssh
         #   ansible_user: ubuntu
+        #   is_edge: false
+        # edge-one:
+        #   ansible_host: ip_address_of_edge-one
+        #   ansible_connection: ssh
+        #   ansible_user: ubuntu
+        #   is_edge: true
 
   ##################################################################################
   ##### Please do not edit under this line unless you know what you are doing. #####

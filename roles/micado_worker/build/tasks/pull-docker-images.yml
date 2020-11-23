@@ -2,6 +2,7 @@
 - name: Downloading docker images
   docker_image:
       name: "{{ item }}"
+      source: pull
   loop:
     - "{{ cadvisor_image }}"
     - "{{ node_exporter_image }}"

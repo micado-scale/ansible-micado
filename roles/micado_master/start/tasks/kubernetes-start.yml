@@ -102,6 +102,8 @@
   command: kubeadm token create --ttl 0 --print-join-command
   register: join_command
   changed_when: False
+  tags:
+  - join
 
 - name: '(Kubernetes) Get current context namespace'
   command: kubectl config get-contexts --no-headers

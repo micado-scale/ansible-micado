@@ -1,26 +1,26 @@
 ---
-- name: 'K8s: Turn off swap'
+- name: '(Kubernetes) Turn off swap'
   command: swapoff -a
 
-- name: 'K8s: Disable swap permanently'
+- name: '(Kubernetes) Disable swap permanently'
   replace:
     mode: '0644'
     path: /etc/fstab
     regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
     replace: '#\1\2\3swap\4'
 
-- name: 'K8s: Add APT key'
+- name: '(Kubernetes) Add APT key'
   apt_key:
     url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
     state: present
 
-- name: 'K8s: Add APT repository'
+- name: '(Kubernetes) Add APT repository'
   apt_repository:
     repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
     state: present
     filename: 'kubernetes'
 
-- name: 'K8s: Install APT packages'
+- name: '(Kubernetes) Install APT packages'
   apt:
     name:
     - kubelet={{ kubernetes_version }}
@@ -29,7 +29,7 @@
     state: present
     update_cache: yes
 
-- name: 'K8s: prevent package from being upgraded'
+- name: '(Kubernetes) prevent package from being upgraded'
   dpkg_selections:
     name: "{{ item }}"
     selection: hold

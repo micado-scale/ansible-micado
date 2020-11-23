@@ -1,0 +1,175 @@
+---
+- name: Verify hosts
+  hosts: all
+  gather_facts: False
+  pre_tasks:
+  - name: (System) Ensure that Python3 is installed
+    raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
+    register: output
+    changed_when: not output.stdout
+    tags:
+    - build
+    - start
+    - join
+
+  - name: (System) Waiting for automatic security updates to finish
+    script: pre-task/wait-updates.sh
+    register: outputsh
+    changed_when: not outputsh.stdout
+    tags:
+    - build
+    - start
+    - join
+
+- name: Deploy MiCADO Master
+  hosts: master
+  pre_tasks:
+  - name: (System) Check system requirements
+    assert:
+      that:
+        "{{ item.that }}"
+      msg: >
+        "{{ item.msg }}"
+    loop:
+    - that: |
+        ansible_os_family == 'Debian' and ansible_distribution_version == '16.04'
+        or ansible_distribution_version == '18.04' or ansible_distribution_version == '20.04'
+      msg: 'The required OS is Ubuntu, supported versions are 16.04, 18.04 or 20.04'
+    - { that: "ansible_memtotal_mb >= 2950", msg: 'The minimum required memory size is 3 GB' }
+    - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first >= 14000000000",
+        msg: 'The minimum required disk size is 15 GB' }
+    - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_available') | list | first >= 5400000000",
+        msg: 'The minimum required free disk size is 5 GB' }
+    tags:
+    - build
+
+  - name: (Ansible) Checking the existence of cloud credentials file
+    stat: path={{ cloud_cred_path }}
+    delegate_to: localhost
+    register: cloud_cred_file
+    changed_when: False
+    tags:
+    - start
+    - update-auth
+
+  - name: (Ansible) Checking the existence of gce credentials file
+    stat: path={{ gce_cred_path }}
+    delegate_to: localhost
+    register: gce_cred_file
+    changed_when: False
+    tags:
+    - start
+    - update-auth
+
+  - name: (Ansible) Checking the existence of OCI private key file
+    stat: path={{ oci_key_path }}
+    delegate_to: localhost
+    register: oci_key_file
+    changed_when: False
+    tags:
+    - start
+    - update-auth
+
+  - name: (Ansible) Credential check for cloud orchestrators
+    fail:
+      msg: Occopus/Terraform is enabled but matching credential not file found...
+    when: >
+      (enable_occopus and not cloud_cred_file.stat.exists) or
+      (enable_terraform and not cloud_cred_file.stat.exists and not gce_cred_file.stat.exists)
+    tags:
+    - start
+
+  - name: (Ansible) Check for cloud orchestrators
+    pause:
+      prompt: >
+        You are deploying MiCADO without a cloud orchestrator...
+        Press 'Ctrl-C' to abort...
+      seconds: 10
+    when: not enable_occopus and not enable_terraform
+    tags:
+    - start
+
+  - name: (Ansible) Checking the existence of security settings file
+    stat: path={{ micado_cred_path }}
+    delegate_to: localhost
+    register: security_cred_file
+    changed_when: False
+    tags:
+    - start
+
+  - name: "(System) Check the CPU manufacture (Intel)"
+    set_fact:
+      intel_cpu: true
+    when: "ansible_processor | select('match', '.*Intel') | list | length > 0"
+    tags:
+    - build
+    - start
+
+  roles:
+  - role: micado_master/build
+    tags:
+    - build
+  - role: micado_master/start
+    tags:
+    - start
+
+  vars:
+  ######################################################################
+  ##### If you want to change the configuration, please edit here. #####
+  ######################################################################
+  - cloud_cred_path: ./credentials-cloud-api.yml
+  - gce_cred_path: ./credentials-gce.json
+  - oci_key_path: ./credentials-oci-key.pem
+  - docker_cred_path: ./credentials-docker-registry.yml
+  - micado_cred_path: ./credentials-micado.yml
+  - micado_version: v0.9.1
+
+  - disable_optimizer: True
+  - disable_worker_updates: True
+  - grafana_admin_pwd: secret
+  - web_listening_port: 443
+  - web_session_timeout: 600
+
+  - master_hostname: micado-master
+
+  # At least one cloud orchestrator must be enabled
+  - enable_occopus: True
+  - enable_terraform: False
+
+  ##################################################################################
+  ##### Please do not edit under this line unless you know what you are doing. #####
+  ##################################################################################
+
+  - intel_cpu: false
+  - oci_key: '{{ lookup("file", "{{ oci_key_path }}") }}'
+  - docker_images:
+      alertmanager: prom/alertmanager:v0.21.0
+      credential_manager: micado/credential-manager:v0.9.1-slim
+      crypto_engine: micado/crypto-engine:v0.9.1-slim
+      dashboard: micado/dashboard:0.4.0
+      grafana: grafana/grafana:7.1.5
+      iivr: micado/iivr:v0.9.1-slim
+      occopus: micado/occopus:1.7-rc6
+      optimizer: micado/optimizer:v0.9.1
+      policykeeper: micado/policykeeper:v0.9.1-slim
+      prometheus: prom/prometheus:v2.20.1
+      redis: redis:5-alpine
+      securitypolicymanager: micado/security-policy-manager:v0.9.1-slim
+      terraform: hashicorp/terraform:0.12.29
+      toscasubmitter: micado/toscasubmitter:v0.9.1-slim
+      vault: vault:1.5.3
+      zorp: micado/zorpgpl:6.0.12
+
+- name: Setup Workers
+  hosts: workers
+  roles:
+  - role: micado_worker/build
+    tags:
+    - build
+    - join
+
+  - role: micado_worker/join
+    tags:
+    - join
+  vars:
+  - worker_hostname: micado-worker
