@@ -98,7 +98,7 @@ runcmd:
   - apt-get update
 
   # Install Docker
-  - apt-get install -y {{ packages.docker_ce | regex_replace('ubuntu.*$', 'ubuntu')}}-$DISTCODE {{ packages.docker_ce_cli | regex_replace('ubuntu.*$', 'ubuntu')}}-$DISTCODE {{ packages.containerd_io }}
+  - apt-get install -y docker-ce={{ docker_version }}~ubuntu-$DISTCODE docker-ce-cli={{ docker_version }}~ubuntu-$DISTCODE containerd.io={{ containerd_version }}
   - apt-mark hold docker-ce docker-ce-cli containerd.io
   - systemctl enable docker
   - sed -i -e "s/-H fd:\/\//-H fd:\/\/ --exec-opt native.cgroupdriver=systemd --mtu={{ ansible_default_ipv4.mtu }}/g" /lib/systemd/system/docker.service
@@ -107,7 +107,7 @@ runcmd:
 
   # Install K8s
   - swapoff -a
-  - apt-get install -y kubelet={{ packages.kubernetes_version }} kubeadm={{ packages.kubernetes_version }} kubectl={{ packages.kubernetes_version }}
+  - apt-get install -y kubelet={{ kubernetes_version }} kubeadm={{ kubernetes_version }} kubectl={{ kubernetes_version }}
   - apt-mark hold kubelet kubeadm kubectl
 
   # Placeholder for ADT insert

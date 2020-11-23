@@ -1,8 +1,52 @@
 ---
-- name: Deploy MiCADO master
-  hosts: micado-target
+- name: Verify hosts
+  hosts: all
   gather_facts: False
+  pre_tasks:
+    - name: (System) Ensure that Python3 is installed
+      raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
+      register: output
+      changed_when: not output.stdout
+      tags:
+      - build
+      - start
 
+    - name: (Ansible) Gather facts
+      setup:
+      tags:
+      - build
+      - start
+
+    - name: (System) Check system requirements
+      assert:
+        that:
+          "{{ item.that }}"
+        msg: >
+          "{{ item.msg }}"
+      loop:
+        - that: |
+            ansible_os_family == 'Debian' and ansible_distribution_version == '16.04'
+            or ansible_distribution_version == '18.04' or ansible_distribution_version == '20.04'
+          msg: 'The required OS is Ubuntu, supported versions are 16.04, 18.04 or 20.04'
+        - { that: "ansible_memtotal_mb >= 2950", msg: 'The minimum required memory size is 3 GB' }
+        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first >= 14000000000",
+            msg: 'The minimum required disk size is 15 GB' }
+        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_available') | list | first >= 5400000000",
+            msg: 'The minimum required free disk size is 5 GB' }
+      tags:
+      - build
+      - start
+
+    - name: (System) Waiting for automatic security updates to finish
+      script: pre-task/wait-updates.sh
+      register: outputsh
+      changed_when: not outputsh.stdout
+      tags:
+      - build
+      - start
+
+- name: Deploy MiCADO master
+  hosts: master
   pre_tasks:
     - name: (Ansible) Checking the existence of cloud credentials file
       stat: path={{ cloud_cred_path }}
@@ -58,48 +102,6 @@
       tags:
       - start
 
-    - name: (System) Ensure that python3 installed
-      raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
-      register: output
-      changed_when: not output.stdout
-      tags:
-      - build
-      - start
-
-    - name: (System) Turn back gather_fact
-      setup:
-      tags:
-      - build
-      - start
-
-    - name: (System) Check system requirements
-      assert:
-        that:
-          "{{ item.that }}"
-        msg: >
-          "{{ item.msg }}"
-      loop:
-        - that: |
-            ansible_os_family == 'Debian' and ansible_distribution_version == '16.04'
-            or ansible_distribution_version == '18.04' or ansible_distribution_version == '20.04'
-          msg: 'The required OS is Ubuntu, supported versions are 16.04, 18.04 or 20.04'
-        - { that: "ansible_memtotal_mb >= 2950", msg: 'The minimum required memory size is 3 GB' }
-        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first >= 14000000000",
-            msg: 'The minimum required disk size is 15 GB' }
-        - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_available') | list | first >= 5400000000",
-            msg: 'The minimum required free disk size is 5 GB' }
-      tags:
-      - build
-      - start
-
-    - name: (System) Waiting for automatic security updates to finish
-      script: pre-task/wait-updates.sh
-      register: outputsh
-      changed_when: not outputsh.stdout
-      tags:
-      - build
-      - start
-
     - name: "(System) Check the CPU manufacture (Intel)"
       set_fact:
          intel_cpu: true
@@ -150,13 +152,11 @@
     - oci_key: '{{ lookup("file", "{{ oci_key_path }}") }}'
     - docker_images:
         alertmanager: prom/alertmanager:v0.21.0
-        cadvisor: gcr.io/google-containers/cadvisor:v0.36.0
         credential_manager: micado/credential-manager:v0.9.1-slim
         crypto_engine: micado/crypto-engine:v0.9.1-slim
         dashboard: micado/dashboard:0.4.0
         grafana: grafana/grafana:7.1.5
         iivr: micado/iivr:v0.9.1-slim
-        node_exporter: prom/node-exporter:v1.0.1
         occopus: micado/occopus:1.7-rc6
         optimizer: micado/optimizer:v0.9.1
         policykeeper: micado/policykeeper:v0.9.1-slim
@@ -167,9 +167,3 @@
         toscasubmitter: micado/toscasubmitter:v0.9.1-slim
         vault: vault:1.5.3
         zorp: micado/zorpgpl:6.0.12
-
-    - packages:
-        docker_ce: "docker-ce=5:19.03.12~3-0~ubuntu-{{ ansible_distribution_release }}"
-        docker_ce_cli: "docker-ce-cli=5:19.03.12~3-0~ubuntu-{{ ansible_distribution_release }}"
-        containerd_io: containerd.io=1.2.13-2
-        kubernetes_version: 1.19.0-00

@@ -21,9 +21,9 @@
 - name: 'Docker: Installing APT package'
   apt:
     name:
-    - "{{ packages.docker_ce }}"
-    - "{{ packages.docker_ce_cli }}"
-    - "{{ packages.containerd_io }}"
+    - "docker-ce={{ docker_version }}~ubuntu-{{ ansible_distribution_release }}"
+    - "docker-ce-cli={{ docker_version }}~ubuntu-{{ ansible_distribution_release }}"
+    - "containerd.io={{ containerd_version }}"
     state: present
     update_cache: yes
 

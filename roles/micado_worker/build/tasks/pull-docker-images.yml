@@ -3,5 +3,5 @@
   docker_image:
       name: "{{ item }}"
   loop:
-    - "{{ docker_images.cadvisor }}"
-    - "{{ docker_images.node_exporter }}"
+    - "{{ cadvisor_image }}"
+    - "{{ node_exporter_image }}"

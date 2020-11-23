@@ -1,6 +1,6 @@
 ---
 - name: Build MiCADO worker
-  hosts: micado-target
+  hosts: workers
   gather_facts: False
 
   pre_tasks:
@@ -34,19 +34,3 @@
 
   roles:
     - micado_worker/build
-
-  vars:
-
-    ##################################################################################
-    ##### Please do not edit under this line unless you know what you are doing. #####
-    ##################################################################################
-
-    - docker_images:
-        cadvisor: gcr.io/google-containers/cadvisor:v0.34.0
-        node_exporter: prom/node-exporter:v0.18.1
-
-    - packages:
-        docker_ce: "docker-ce=5:19.03.12~3-0~ubuntu-{{ ansible_distribution_release }}"
-        docker_ce_cli: "docker-ce-cli=5:19.03.12~3-0~ubuntu-{{ ansible_distribution_release }}"
-        containerd_io: containerd.io=1.2.13-2
-        kubernetes_version: 1.18.5-00

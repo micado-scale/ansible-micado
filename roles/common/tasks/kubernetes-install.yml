@@ -23,9 +23,9 @@
 - name: 'K8s: Install APT packages'
   apt:
     name:
-    - kubelet={{ packages.kubernetes_version }}
-    - kubeadm={{ packages.kubernetes_version }}
-    - kubectl={{ packages.kubernetes_version }}
+    - kubelet={{ kubernetes_version }}
+    - kubeadm={{ kubernetes_version }}
+    - kubectl={{ kubernetes_version }}
     state: present
     update_cache: yes
 

@@ -6,18 +6,34 @@
 ################
 all:
   hosts:
-    micado-target:
-      # Host info for running micado playbooks
-      #
-      # Usage A: Builds and starts a MiCADO Master node. Use --tags for only one operation 
-      # ansible-playbook -i hosts.yml micado-master.yml [--tags (build | start)]
-      #
-      # Usage B: Builds a MiCADO Worker node for later use
-      # ansible-playbook -i hosts.yml build-micado-worker.yml
-      #
-      ansible_host: localhost
+    master:
+      # Point to micado-master node
+      ansible_host: 192.168.1.128
       ansible_connection: ssh
       ansible_user: ubuntu
-      ansible_become: True
-      ansible_become_method: sudo
-      ansible_python_interpreter: /usr/bin/python3
+  
+  children:
+    workers:
+      hosts:
+        # Point to micado-worker nodes
+        # edge1:
+        #   ansible_host: ip_address_of_edge1
+        #   ansible_connection: ssh
+        #   ansible_user: ubuntu
+        # worker-two:
+        #   ansible_host: ip_address_of_worker-two
+        #   ansible_connection: ssh
+        #   ansible_user: ubuntu
+
+  ##################################################################################
+  ##### Please do not edit under this line unless you know what you are doing. #####
+  ##################################################################################
+  vars:
+    kubernetes_version: 1.19.0-00
+    docker_version: 5:19.03.12~3-0
+    containerd_version: 1.2.13-2
+    cadvisor_image: gcr.io/google-containers/cadvisor:v0.36.0
+    node_exporter_image: prom/node-exporter:v1.0.1
+    ansible_become: True
+    ansible_become_method: sudo
+    ansible_python_interpreter: /usr/bin/python3
