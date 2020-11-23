@@ -7,9 +7,15 @@
 
 - include: python-install.yml
 
-- include: docker-install.yml
+- include_role:
+    name: common
+    tasks_from: docker-install
 
-- include: kubernetes-install.yml
+- include_role:
+    name: common
+    tasks_from: kubernetes-install
+
+- include: kubernetes-prepare.yml
 
 - include: core-install.yml
 

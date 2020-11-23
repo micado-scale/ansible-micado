@@ -5,9 +5,13 @@
     path: /etc/resolv.conf
     line: 'nameserver 8.8.8.8'
 
-- include: docker-install.yml
+- include_role:
+    name: common
+    tasks_from: docker-install
 
-- include: kubernetes-install.yml
+- include_role:
+    name: common
+    tasks_from: kubernetes-install
 
 - include: other-install.yml
 
