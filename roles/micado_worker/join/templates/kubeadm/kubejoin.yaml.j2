@@ -1,0 +1,12 @@
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: JoinConfiguration
+discovery:
+  bootstrapToken:
+    apiServerEndpoint: "{{ hostvars['master']['ansible_host'] }}:6443"
+    token: "{{ join_token }}"
+    caCertHashes:
+    - "{{ join_hash }}"
+nodeRegistration:
+  kubeletExtraArgs:
+    node-labels: "micado.eu/node_type={{ inventory_hostname }}"
+    node-ip: "{{ ansible_host }}"

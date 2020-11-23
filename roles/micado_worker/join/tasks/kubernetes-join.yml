@@ -1,0 +1,40 @@
+---
+- name: '(Kubernetes) Get token from join command'
+  set_fact:
+    join_token: "{{ hostvars['master']['join_command'].stdout | regex_search(regexp, '\\2') | first }}"
+  vars:
+    regexp: '([^\s]+\s+){4}([^\s]+)'
+  changed_when: false
+
+- name: '(Kubernetes) Get hash from join command'
+  set_fact:
+    join_hash: "{{ hostvars['master']['join_command'].stdout | regex_search(regexp, '\\2') | first }}"
+  vars:
+    regexp: '([^\s]+\s+){6}([^\s]+)'
+  changed_when: false
+
+- name: '(Kubernetes) Copy JoinConfiguration'
+  template:
+    src: kubeadm/kubejoin.yaml.j2
+    dest: /etc/kubernetes/kubejoin.yaml
+    mode: '0644'
+
+- name: '(Kubernetes) Join command'
+  command: kubeadm join --config /etc/kubernetes/kubejoin.yaml
+  changed_when: false
+
+- name: '(Kubernetes) Annotate node'
+  delegate_to: master
+  command: |-
+    kubectl annotate node --overwrite {{ inventory_hostname }}
+    flannel.alpha.coreos.com/public-ip-overwrite={{ ansible_host }}
+  when: is_edge is defined and is_edge
+
+- name: '(Docker) Get flannel container'
+  command: docker ps --filter name=kube-flannel_kube-flannel -q
+  register: flannel_container
+  when: is_edge is defined and is_edge
+
+- name: '(Docker) Restart flannel container'
+  command: docker stop {{ flannel_container.stdout }}
+  when: is_edge is defined and is_edge and flannel_container.stdout

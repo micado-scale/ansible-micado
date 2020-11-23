@@ -1,0 +1,10 @@
+---
+- name: '(Netplan) Copy Netplan drop-in'
+  template:
+    src: netplan/60-public-ip.yaml.j2
+    dest: /etc/netplan/60-public-ip.yaml
+    mode: '0644'
+
+- name: '(Netplan) Apply configuration'
+  command: netplan apply
+  changed_when: false

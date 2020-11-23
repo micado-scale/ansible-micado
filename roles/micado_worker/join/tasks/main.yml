@@ -1,0 +1,12 @@
+---
+- include: set-hostname.yml
+
+- include: add-public-ip.yml
+  when: is_edge is defined and is_edge
+
+- name: '(systemd) Collect systemd service facts'
+  service_facts:
+  register: services
+
+- include: kubernetes-join.yml
+  when: ansible_facts.services['kubelet.service']['state'] != "running"

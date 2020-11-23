@@ -1,0 +1,11 @@
+---
+- name: (System) Setting hostname
+  hostname:
+    name: "{{ inventory_hostname }}"
+  register: hostname
+
+- name: (System) Configuring hostfile
+  lineinfile:
+    mode: '0644'
+    path: /etc/hosts
+    line: "127.0.0.1 localhost\t{{ inventory_hostname }}"
