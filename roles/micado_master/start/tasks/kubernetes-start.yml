@@ -87,6 +87,12 @@
     src: /etc/kubernetes/kube-dash.yaml
     apply: yes
 
+- name: '(Kubernetes) Annotate Public IP for Flannel'
+  command: |-
+    kubectl annotate node --overwrite {{ ansible_hostname }}
+    flannel.alpha.coreos.com/public-ip-overwrite={{ ansible_host }}
+  when: ansible_default_ipv4.address != ansible_host
+
 - name: '(Kubernetes) Create Flannel-CNI'
   k8s:
     src: /etc/kubernetes/kube-flannel.yaml
