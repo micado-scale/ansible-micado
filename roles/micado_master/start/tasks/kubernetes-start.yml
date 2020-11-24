@@ -7,28 +7,37 @@
 
 - name: '(Kubernetes) Pre-flight checks'
   command: kubeadm init phase preflight
-        --ignore-preflight-errors=NumCPU
+        --ignore-preflight-errors NumCPU
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Create certificates'
-  command: kubeadm init phase certs all
-        --apiserver-advertise-address={{ ansible_host }}
+  command: |-
+    kubeadm init phase certs all
+    --apiserver-advertise-address
+    {{ ansible_host if advertise_public|default(False)
+    else ansible_default_ipv4.address }}
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Create kubeconfig'
-  command: kubeadm init phase kubeconfig all
-        --apiserver-advertise-address={{ ansible_host }}
+  command: |-
+    kubeadm init phase kubeconfig all
+    --apiserver-advertise-address
+    {{ ansible_host if advertise_public|default(False)
+    else ansible_default_ipv4.address }}
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Start kubelet'
   command: kubeadm init phase kubelet-start
-        --config=/etc/kubernetes/kubelet-config.yaml
+        --config /etc/kubernetes/kubelet-config.yaml
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Create control-plane manifests'
-  command: kubeadm init phase control-plane all
-        --apiserver-advertise-address={{ ansible_host }}
-        --pod-network-cidr=10.244.0.0/16
+  command: |-
+    kubeadm init phase control-plane all
+    --apiserver-advertise-address
+    {{ ansible_host if advertise_public|default(False)
+    else ansible_default_ipv4.address }}
+    --pod-network-cidr 10.244.0.0/16
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Create etcd instance'
@@ -57,9 +66,12 @@
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Install kube-proxy and CoreDNS'
-  command: kubeadm init phase addon all
-        --apiserver-advertise-address={{ ansible_host }}
-        --pod-network-cidr=10.244.0.0/16
+  command: |-
+    kubeadm init phase addon all
+    --apiserver-advertise-address
+    {{ ansible_host if advertise_public|default(False)
+    else ansible_default_ipv4.address }}
+    --pod-network-cidr 10.244.0.0/16
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Create /root/.kube'
@@ -91,7 +103,9 @@
   command: |-
     kubectl annotate node --overwrite {{ ansible_hostname }}
     flannel.alpha.coreos.com/public-ip-overwrite={{ ansible_host }}
-  when: ansible_default_ipv4.address != ansible_host
+  when: |-
+    advertise_public|default(False)
+    and ansible_default_ipv4.address != ansible_host
 
 - name: '(Kubernetes) Create Flannel-CNI'
   k8s:

@@ -2,7 +2,9 @@
 - include: set-hostname.yml
 
 - include: add-public-ip.yml
-  when: is_edge is defined and is_edge
+  when: |-
+    advertise_public|default(False)
+    and ansible_default_ipv4.address != ansible_host
 
 - name: '(systemd) Collect systemd service facts'
   service_facts:

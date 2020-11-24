@@ -11,6 +11,7 @@ all:
       ansible_host: 192.168.1.128
       ansible_connection: ssh
       ansible_user: ubuntu
+      advertise_public: False
   
   children:
     workers:
@@ -20,17 +21,17 @@ all:
         #   ansible_host: ip_address_of_worker-one
         #   ansible_connection: ssh
         #   ansible_user: ubuntu
-        #   is_edge: false
+        #   advertise_public: False
         # worker-two:
         #   ansible_host: ip_address_of_worker-two
         #   ansible_connection: ssh
         #   ansible_user: ubuntu
-        #   is_edge: false
+        #   advertise_public: False
         # edge-one:
         #   ansible_host: ip_address_of_edge-one
         #   ansible_connection: ssh
         #   ansible_user: ubuntu
-        #   is_edge: true
+        #   advertise_public: True
 
   ##################################################################################
   ##### Please do not edit under this line unless you know what you are doing. #####

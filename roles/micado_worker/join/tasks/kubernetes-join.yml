@@ -28,13 +28,15 @@
   command: |-
     kubectl annotate node --overwrite {{ inventory_hostname }}
     flannel.alpha.coreos.com/public-ip-overwrite={{ ansible_host }}
-  when: is_edge is defined and is_edge
+  when: |-
+    advertise_public|default(False)
+    and ansible_default_ipv4.address != ansible_host
 
 - name: '(Docker) Get flannel container'
   command: docker ps --filter name=kube-flannel_kube-flannel -q
   register: flannel_container
-  when: is_edge is defined and is_edge
+  when: advertise_public|default(False)
 
 - name: '(Docker) Restart flannel container'
   command: docker stop {{ flannel_container.stdout }}
-  when: is_edge is defined and is_edge and flannel_container.stdout
+  when: advertise_public|default(False) and flannel_container.stdout
