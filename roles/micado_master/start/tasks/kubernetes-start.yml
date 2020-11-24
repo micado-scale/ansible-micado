@@ -44,6 +44,15 @@
   command: kubeadm init phase etcd local
   when: k8smember.rc == 1
 
+- name: '(Kubernetes) Upload kubeadm config'
+  command: kubeadm init phase upload-config kubeadm
+  when: k8smember.rc == 1
+
+- name: '(Kubernetes) Upload kubelet config'
+  command: kubeadm init phase upload-config kubelet
+        --config /etc/kubernetes/kubelet-config.yaml
+  when: k8smember.rc == 1
+
 - name: '(Kubernetes) Upload control-plane certs'
   command: kubeadm init phase upload-certs --upload-certs
   when: k8smember.rc == 1
@@ -56,13 +65,8 @@
   command: kubeadm init phase bootstrap-token
   when: k8smember.rc == 1
 
-- name: '(Kubernetes) Upload kubeadm config'
-  command: kubeadm init phase upload-config kubeadm
-  when: k8smember.rc == 1
-
-- name: '(Kubernetes) Upload kubelet config'
-  command: kubeadm init phase upload-config kubelet
-        --config=/etc/kubernetes/kubelet-config.yaml
+- name: '(Kubernetes) Finalize Kubelet (auto-cert rotation)'
+  command: kubeadm init phase kubelet-finalize all
   when: k8smember.rc == 1
 
 - name: '(Kubernetes) Install kube-proxy and CoreDNS'
