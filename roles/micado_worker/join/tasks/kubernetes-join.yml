@@ -35,8 +35,13 @@
 - name: '(Docker) Get flannel container'
   command: docker ps --filter name=kube-flannel_kube-flannel -q
   register: flannel_container
-  when: advertise_public|default(False)
+  when: |-
+    advertise_public|default(False)
+    and ansible_default_ipv4.address != ansible_host
 
 - name: '(Docker) Restart flannel container'
   command: docker stop {{ flannel_container.stdout }}
-  when: advertise_public|default(False) and flannel_container.stdout
+  when: |-
+    advertise_public|default(False)
+    and ansible_default_ipv4.address != ansible_host
+    and flannel_container.stdout
