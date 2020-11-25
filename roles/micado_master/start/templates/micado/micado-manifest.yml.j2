@@ -294,6 +294,8 @@ spec:
         tty: true
         command: ["/bin/sh"]
         env:
+        - name: ENV
+          value: "/root/.ashrc"
         - name: TF_INPUT
           value: "false"
         - name: TF_IN_AUTOMATION
