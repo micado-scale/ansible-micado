@@ -14,4 +14,4 @@ export CHECKIN_CLIENT_SECRET="{{ client_secret }}"
 export CHECKIN_REFRESH_TOKEN="{{ refresh_token }}"
 export CHECKIN_AUTH_URL="https://aai.egi.eu/oidc/token"
 
-export OS_TOKEN=$(python3 pyGetScopedToken.py)
+export OS_TOKEN=$(python3 /var/lib/micado/terraform/submitter/pyGetScopedToken.py)
