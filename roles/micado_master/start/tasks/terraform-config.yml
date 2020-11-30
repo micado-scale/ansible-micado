@@ -6,3 +6,5 @@
     mode: '0644'
   loop:
     - { src: 'worker_node/cloud_init_worker_tf.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/cloud_init_worker_tf.yaml'}
+    - { src: 'egi/configure', dest: '/var/lib/micado/toscasubmitter/system/configure'}
+    - { src: 'egi/pyGetScopedToken.py', dest: '/var/lib/micado/toscasubmitter/system/pyGetScopedToken.py'}
