@@ -7,16 +7,25 @@
     - curl
     - software-properties-common
     state: present
+  when: ansible_distribution == "Ubuntu"
 
 - name: '(Docker) Adding APT key'
   apt_key:
     url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
     state: present
+  when: ansible_distribution == "Ubuntu"
 
-- name: '(Docker) Adding APT repository'
+- name: '(Docker) Adding APT repository (x86)'
   apt_repository:
     repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
     state: present
+  when: ansible_distribution == "Ubuntu" and ansible_architecture not in ["aarch64", "arm64"]
+
+- name: '(Docker) Adding APT repository (ARM)'
+  apt_repository:
+    repo: "deb [arch=arm64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+    state: present
+  when: ansible_distribution == "Ubuntu" and ansible_architecture in ["aarch64", "arm64"]
 
 - name: '(Docker) Installing APT package'
   apt:
@@ -26,6 +35,11 @@
     - "containerd.io={{ containerd_version }}"
     state: present
     update_cache: yes
+  when: ansible_distribution == "Ubuntu"
+
+- name: '(Docker) Installing via convenience script (Raspbian)'
+  script: docker/get.sh
+  when: ansible_lsb.id == "Raspbian"
 
 - name: '(Docker) prevent package from being upgraded'
   dpkg_selections:
