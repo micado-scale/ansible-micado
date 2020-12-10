@@ -1,0 +1,92 @@
+tosca_definitions_version: tosca_simple_yaml_1_2
+
+imports:
+  - https://raw.githubusercontent.com/micado-scale/tosca/develop/micado_types.yaml
+
+repositories:
+  docker_hub: https://hub.docker.com/
+
+description: ADT for NGINX on GCE
+
+topology_template:
+  node_templates:
+    nginxapp:
+      type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
+      properties:
+        image: jaydes/nginxapp:1.2
+        resources:
+          requests:
+            cpu: "200m"
+        ports:
+        - port: 8080
+          nodePort: 30012
+        - containerPort: 9300
+
+    worker-node:
+      type: tosca.nodes.MiCADO.EGI.Compute
+      properties:
+        auth_url: <AUTH_URL> (e.g. https://sbgcloud.in2p3.fr:5000/v3)
+        image_id: <IMAGE_ID> (e.g. 0c8fb106-66fc-4261-b359-9bd654bd96ca)
+        flavor_name: <FLAVOR_NAME> (e.g m1.small)
+        network_name: <NETWORK_NAME> (e.g. egi-access-net)
+        security_groups: <SECURITY_GROUPS> (e.g default)
+        ip_pool: <IP_POOL> (e.g ext-net)
+        public_key: <SSH_KEY> (e.g. ssh-rsa AAAB3N...)
+      interfaces:
+        Terraform:
+          create:
+      
+  outputs:
+    ports:
+      value: { get_attribute: [ nginxapp, port ]}
+
+  policies:
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO
+        targets: [ worker-node ]
+        properties:
+          sources:
+            - "nginxapp:9300"
+          constants:
+            MAXNODES: 2
+            MAXCONTAINERS: 8
+            CONTSPERNODE: 4
+            maxRPCth: 4
+            minRPCth: 1
+            minNodeScaleInterval: 90
+            minContScaleInterval: 60
+          queries:
+            REQUESTSPERCONT: 'avg(rate(nginx_connections_accepted[60s]))'
+            TIME: 'time()'
+          min_instances: 1
+          max_instances: '{{MAXNODES}}'
+          scaling_rule: |
+            if m_userdata is None:
+              m_userdata = {'container_count': 1, 'time': TIME }
+            if len(m_nodes)==m_node_count and m_time_since_node_count_changed>minNodeScaleInterval and TIME-m_userdata['time']>minContScaleInterval:
+              if REQUESTSPERCONT>maxRPCth:
+                if m_userdata['container_count']==m_node_count*CONTSPERNODE:
+                  m_node_count+=1
+              elif REQUESTSPERCONT<minRPCth:
+                if m_userdata['container_count']==(m_node_count-1)*CONTSPERNODE:
+                  m_node_count-=1
+
+    - scalability:
+        type: tosca.policies.Scaling.MiCADO
+        targets: [ nginxapp ]
+        properties:
+          min_instances: 1
+          max_instances: '{{MAXCONTAINERS}}'
+          scaling_rule: |
+            if m_userdata is None:
+              m_userdata = {'container_count': 1, 'time': TIME }
+            if len(m_nodes)==m_node_count and TIME-m_userdata['time']>minContScaleInterval:
+              if REQUESTSPERCONT>maxRPCth:
+                if m_container_count<m_node_count*CONTSPERNODE:
+                  m_container_count+=1
+                  m_userdata['container_count'] = m_container_count
+                  m_userdata['time'] = TIME
+              elif REQUESTSPERCONT<minRPCth and m_container_count>1:
+                  m_container_count-=1
+                  m_userdata['container_count'] = m_container_count
+                  m_userdata['time'] = TIME

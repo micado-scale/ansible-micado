@@ -139,8 +139,8 @@
     - worker_hostname: micado-worker
 
     # At least one cloud orchestrator must be enabled
-    - enable_occopus: True
-    - enable_terraform: False
+    - enable_occopus: False
+    - enable_terraform: True
 
     ##################################################################################
     ##### Please do not edit under this line unless you know what you are doing. #####
