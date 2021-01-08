@@ -301,6 +301,10 @@ spec:
         volumeMounts:
         - name: submitter-out
           mountPath: /var/lib/micado/terraform/submitter
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", "apk -U add python3 py-requests py-jwt"]
       volumes:
       - name: submitter-out
         hostPath:
