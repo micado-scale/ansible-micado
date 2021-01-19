@@ -19,7 +19,7 @@ dsl_definitions:
     - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
       ip_v4_conf:
         conf: dhcp
-  
+
   occopus_properties: &occopus_properties
     endpoint: https://zrh.cloudsigma.com/api/2.0
 
@@ -78,7 +78,7 @@ topology_template:
     frontend:
       type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
-        image: sanyi86/cqueue_frontend
+        image: sztakilpds/cqueue_frontend:0.2.6
         env:
           - name: BROKER
             value: amqp://guest:guest@rabbit:5672
@@ -93,7 +93,7 @@ topology_template:
     cqueue-worker:
       type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
-        image: sztakilpds/cqueue_worker
+        image: sztakilpds/cqueue_worker:0.2.6
         env:
           - name: BROKER
             value: amqp://guest:guest@rabbit:5672
@@ -101,13 +101,7 @@ topology_template:
             value: redis://redis:6379
       requirements:
         - host: worker-node
-        - volume: docker-binary-host-vol
         - volume: docker-socket-host-vol
-
-    docker-binary-host-vol:
-      type: tosca.nodes.MiCADO.Container.Volume.HostPath
-      properties:
-        path: /usr/bin/docker
 
     docker-socket-host-vol:
       type: tosca.nodes.MiCADO.Container.Volume.HostPath
