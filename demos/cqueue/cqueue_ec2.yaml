@@ -75,7 +75,7 @@ topology_template:
     frontend:
       type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
-        image: sanyi86/cqueue_frontend
+        image: sztakilpds/cqueue_frontend:0.2.6
         env:
           - name: BROKER
             value: amqp://guest:guest@rabbit:5672
@@ -90,7 +90,7 @@ topology_template:
     cqueue-worker:
       type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:
-        image: sztakilpds/cqueue_worker
+        image: sztakilpds/cqueue_worker:0.2.6
         env:
           - name: BROKER
             value: amqp://guest:guest@rabbit:5672
@@ -98,13 +98,7 @@ topology_template:
             value: redis://redis:6379
       requirements:
         - host: worker-node
-        - volume: docker-binary-host-vol
         - volume: docker-socket-host-vol
-
-    docker-binary-host-vol:
-      type: tosca.nodes.MiCADO.Container.Volume.HostPath
-      properties:
-        path: /usr/bin/docker
 
     docker-socket-host-vol:
       type: tosca.nodes.MiCADO.Container.Volume.HostPath
@@ -119,7 +113,7 @@ topology_template:
         Occopus:
           create:
             inputs: *endpoint_properties
-      
+
     cq-server:
       type: tosca.nodes.MiCADO.EC2.Compute
       properties: *compute_properties
@@ -128,7 +122,7 @@ topology_template:
         Occopus:
           create:
             inputs: *endpoint_properties
-      
+
   policies:
     - scalability:
         type: tosca.policies.Scaling.MiCADO
