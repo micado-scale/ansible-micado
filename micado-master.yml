@@ -164,7 +164,7 @@
         redis: redis:5-alpine
         securitypolicymanager: micado/security-policy-manager:v0.9.1-slim
         terraform: hashicorp/terraform:0.12.29
-        toscasubmitter: micado/toscasubmitter:v0.9.1-slim
+        toscasubmitter: micado/toscasubmitter:alpine
         vault: vault:1.5.3
         zorp: micado/zorpgpl:6.0.12
 
