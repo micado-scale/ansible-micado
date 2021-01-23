@@ -1,6 +1,4 @@
 # OpenStack settings:
-export EGI_SITE={{ egi_site }}
-
 export OS_PROTOCOL="openid"
 export OS_PROJECT_ID="{{ project_id }}"
 export OS_AUTH_URL="https://sbgcloud.in2p3.fr:5000/v3"
