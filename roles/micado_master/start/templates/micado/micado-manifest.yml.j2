@@ -301,6 +301,8 @@ spec:
         volumeMounts:
         - name: submitter-out
           mountPath: /var/lib/micado/terraform/submitter
+        - name: wrapper-file
+          mountPath: /usr/local/bin/
         lifecycle:
           postStart:
             exec:
@@ -309,6 +311,9 @@ spec:
       - name: submitter-out
         hostPath:
           path: /var/lib/micado/toscasubmitter/output
+      - name: wrapper-file
+        hostPath:
+          path: /usr/local/sbin/
 ---
 {% endif %}
 ## Prometheus ##
