@@ -22,10 +22,11 @@ topology_template:
     worker-node:
       type: tosca.nodes.MiCADO.EGI.Compute
       properties:
-        auth_url: <AUTH_URL> (e.g. https://sbgcloud.in2p3.fr:5000/v3)
-        image_id: <IMAGE_ID> (e.g. 0c8fb106-66fc-4261-b359-9bd654bd96ca)
+        auth_url: <AUTH_URL> (e.g. https://cloud-egi.100percentit.com:5000/v3/)
+        project_id: <PROJECT_ID> (3d181dc16e654078a9cbbe1a9df6228f)
+        image_id: <IMAGE_ID> (e.g. 21ec3366-187b-43bb-b222-5ba41f55ffa2)
         flavor_name: <FLAVOR_NAME> (e.g m1.small)
-        network_name: <NETWORK_NAME> (e.g. egi-access-net)
+        network_name: <NETWORK_NAME> (e.g. net1)
         security_groups: <SECURITY_GROUPS> (e.g default)
         ip_pool: <IP_POOL> (e.g ext-net)
         public_key: <SSH_KEY> (e.g. ssh-rsa AAAB3N...)
