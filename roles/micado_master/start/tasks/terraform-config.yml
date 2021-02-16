@@ -15,3 +15,4 @@
   loop:
     - { src: 'egi/configure', dest: '/var/lib/micado/toscasubmitter/system/configure'}
     - { src: 'egi/pyGetScopedToken.py', dest: '/var/lib/micado/toscasubmitter/system/pyGetScopedToken.py'}
+    - { src: 'egi/preprocess.py', dest: '/var/lib/micado/toscasubmitter/system/preprocess.py'}
