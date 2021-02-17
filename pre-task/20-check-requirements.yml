@@ -1,18 +1,4 @@
 ---
-- name: (System) Ensure that python3 installed
-  raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
-  register: output
-  changed_when: not output.stdout
-  tags:
-  - start
-  - build
-
-- name: (System) Turn back gather_fact
-  setup:
-  tags:
-  - start
-  - build
-
 - name: (System) Check system requirements
   assert:
     that:
@@ -29,14 +15,6 @@
         msg: 'The minimum required disk size is 15 GB' }
     - { that: "ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_available') | list | first >= 5400000000",
         msg: 'The minimum required free disk size is 5 GB' }
-  tags:
-  - start
-  - build
-
-- name: (System) Waiting for automatic security updates to finish
-  script: files/wait-updates.sh
-  register: outputsh
-  changed_when: not outputsh.stdout
   tags:
   - start
   - build

@@ -1,0 +1,19 @@
+---
+- name: (Ansible) Credential check for cloud orchestrators
+  fail:
+    msg: Occopus/Terraform is enabled but matching credential not file found...
+  when: >
+    (enable_occopus and not cloud_cred_file.stat.exists) or
+    (enable_terraform and not cloud_cred_file.stat.exists and not gce_cred_file.stat.exists)
+  tags:
+  - start
+
+- name: (Ansible) Check for cloud orchestrators
+  pause:
+    prompt: >
+      You are deploying MiCADO without a cloud orchestrator...
+      Press 'Ctrl-C' to abort...
+    seconds: 5
+  when: not enable_occopus and not enable_terraform
+  tags:
+  - start
