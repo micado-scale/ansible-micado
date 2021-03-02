@@ -42,7 +42,6 @@
   - { src: 'iptables/ip6tables.service', dest: '/etc/systemd/system/ip6tables.service', mode: '0644'}
   - { src: 'micado/micado.service', dest: '/etc/systemd/system/micado.service', mode: '0644'}
   - { src: 'micado/micadoctl', dest: '/usr/local/bin/micadoctl', mode: '0755'}
-  - { src: 'terraform/terraform', dest: '/usr/local/sbin/terraform', mode: '0755'}
   - { src: 'optimizer/optimizer_config.yaml', dest: '/var/lib/micado/optimizer/config/optimizer_config.yaml', mode: '0644'}
   - { src: 'policykeeper/policykeeper_config.yaml', dest: '/var/lib/micado/policykeeper/config/policykeeper_config.yaml', mode: '0644'}
   - { src: 'prometheus/prometheus.yml', dest: '/var/lib/micado/prometheus/config/prometheus.yml', mode: '0644'}

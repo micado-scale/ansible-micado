@@ -9,6 +9,8 @@
   loop:
   - { path: '/var/lib/micado/terraform/config/', owner: 'root', group: 'root' }
   - { path: '/var/lib/micado/terraform/data/', owner: 'root', group: 'root' }
+  - { path: '/var/lib/micado/terraform/wrapper/', owner: 'root', group: 'root' }
+  - { path: '/var/lib/micado/terraform/preprocess/egi/', owner: 'root', group: 'root' }
   # Logs
   - { path: '/var/log/micado/terraform/', owner: 'root', group: 'root' }
 
@@ -17,6 +19,14 @@
     content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep terraform | col1)\n"
     dest: "/var/log/micado/terraform/README"
     mode: 0644
+
+- name: '(Terraform) Copy wrapper script'
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  loop:
+  - { src: 'terraform/terraform', dest: '/var/lib/micado/terraform/wrapper/terraform', mode: '0755'}
 
 - name: '(Terraform) Downloading docker image'
   docker_image:
