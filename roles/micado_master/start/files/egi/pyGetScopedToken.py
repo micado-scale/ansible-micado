@@ -17,7 +17,7 @@ os_auth_url = configure.OS_AUTH_URL
 os_project_id = configure.OS_PROJECT_ID
 
 token_dict = {}
-tf_file = "/var/lib/micado/terraform/submitter/token.txt"
+tf_file = "/var/lib/micado/terraform/preprocess/egi/token.txt"
 
 def dump_json(data, path):
     ''' Dump the dictionary to a json file '''

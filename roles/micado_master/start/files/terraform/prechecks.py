@@ -2,9 +2,9 @@
 
 import json, time, os
 
-tf_file = "/var/lib/micado/terraform/submitter/token.txt"
+tf_file = "/var/lib/micado/terraform/preprocess/egi/token.txt"
 tfvars_file = "/var/lib/micado/terraform/submitter/terraform.tfvars.json"
-cmd = "python3 /var/lib/micado/terraform/submitter/pyGetScopedToken.py"
+cmd_egi = "python3 /var/lib/micado/terraform/preprocess/egi/pyGetScopedToken.py"
 delta = 120
 
 def load_json(path):
@@ -30,7 +30,7 @@ def update_token(token_dict):
     if (now-gen_time) < (3600-delta):
         token_dict["ostoken"] = data["token"]
     else:
-        os.system(cmd)
+        os.system(cmd_egi)
         data = load_json(tf_file)
         token_dict["ostoken"] = data["token"]
 
@@ -40,7 +40,7 @@ def preprocess_egi(token_dict):
     """ Preprocessing for egi """
 
     if not os.path.exists(tf_file):
-        os.system(cmd)
+        os.system(cmd_egi)
         tfvars_dict = update_token(token_dict)
     else:
         tfvars_dict = update_token(token_dict)
