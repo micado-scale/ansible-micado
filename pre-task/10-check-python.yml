@@ -4,11 +4,9 @@
   register: output
   changed_when: not output.stdout
   tags:
-  - start
-  - build
+  - always
 
 - name: (System) Turn back gather_fact
   setup:
   tags:
-  - start
-  - build
+  - always

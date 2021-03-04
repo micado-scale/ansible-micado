@@ -4,5 +4,4 @@
   register: outputsh
   changed_when: not outputsh.stdout
   tags:
-  - start
   - build

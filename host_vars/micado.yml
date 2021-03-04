@@ -31,3 +31,9 @@ master_hostname: micado-master
 # end of user options. do not edit under this line
 # =======================================================
 
+# minimum requirements - MiCADO Master node
+# -------------------------------------------------------
+min_ram: 4950
+min_disk: 14000000000
+min_free: 5000000000
+min_ubuntu: ["18.04", "20.04"]
