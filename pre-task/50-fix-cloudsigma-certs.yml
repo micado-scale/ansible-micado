@@ -1,5 +1,5 @@
 ---
-- name: "(CloudSigma) Remove old SSL cert directory"
+- name: "(System/CloudSigma) Remove old SSL cert directory"
   file:
     path: /usr/local/ssl/certs
     state: absent
@@ -7,7 +7,7 @@
   - never
   - cloudsigma
 
-- name: "(CloudSigma) Link new certs to old directory"
+- name: "(System/CloudSigma) Link new certs to old directory"
   file:
     src: /usr/lib/ssl/certs
     dest: /usr/local/ssl/certs
