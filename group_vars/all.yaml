@@ -1,0 +1,43 @@
+# config file for global MiCADO settings
+# =======================================================
+
+# no options here
+
+# =======================================================
+# end of user options. do not edit under this line
+# =======================================================
+
+# other
+# -------------------------------------------------------
+micado_version: v0.9.1
+intel_cpu: false
+
+# component docker images
+# -------------------------------------------------------
+docker_images:
+  alertmanager: prom/alertmanager:v0.21.0
+  cadvisor: gcr.io/google-containers/cadvisor:v0.36.0
+  credential_manager: micado/credential-manager:v0.9.1-slim
+  crypto_engine: micado/crypto-engine:v0.9.1-slim
+  dashboard: micado/dashboard:0.4.0
+  grafana: grafana/grafana:7.1.5
+  iivr: micado/iivr:v0.9.1-slim
+  node_exporter: prom/node-exporter:v1.0.1
+  occopus: micado/occopus:1.7-rc6
+  optimizer: micado/optimizer:v0.9.1
+  policykeeper: micado/policykeeper:v0.9.1-slim
+  prometheus: prom/prometheus:v2.20.1
+  redis: redis:5-alpine
+  securitypolicymanager: micado/security-policy-manager:v0.9.1-slim
+  terraform: hashicorp/terraform:0.12.29
+  toscasubmitter: micado/toscasubmitter:alpine
+  vault: vault:1.5.3
+  zorp: micado/zorpgpl:6.0.12
+
+# component packages
+# -------------------------------------------------------
+packages:
+  docker_ce: "docker-ce=5:19.03.12~3-0~ubuntu-{{ ansible_distribution_release }}"
+  docker_ce_cli: "docker-ce-cli=5:19.03.12~3-0~ubuntu-{{ ansible_distribution_release }}"
+  containerd_io: containerd.io=1.2.13-2
+  kubernetes_version: 1.19.0-00

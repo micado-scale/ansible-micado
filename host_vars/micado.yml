@@ -1,0 +1,33 @@
+# config file for MiCADO
+# =======================================================
+
+# credential file paths
+# -------------------------------------------------------
+cloud_cred_path: ./credentials-cloud-api.yml
+gce_cred_path: ./credentials-gce.json
+oci_key_path: ./credentials-oci-key.pem
+docker_cred_path: ./credentials-docker-registry.yml
+micado_cred_path: ./credentials-micado.yml
+oci_key: '{{ lookup("file", "{{ oci_key_path }}") }}'
+
+# enable specific components
+# -------------------------------------------------------
+disable_optimizer: True
+enable_occopus: False
+enable_terraform: True
+
+# dashboard configuration
+# -------------------------------------------------------
+web_listening_port: 443
+web_session_timeout: 600
+grafana_admin_pwd: secret
+
+# other
+# -------------------------------------------------------
+disable_worker_updates: True
+master_hostname: micado-master
+
+# =======================================================
+# end of user options. do not edit under this line
+# =======================================================
+
