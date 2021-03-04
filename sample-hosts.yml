@@ -6,7 +6,7 @@
 ################
 all:
   hosts:
-    micado-target:
+    micado:
       # Host info for running micado playbooks
       #
       # Usage A: Builds and starts a MiCADO Master node. Use --tags for only one operation 
