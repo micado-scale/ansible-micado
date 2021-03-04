@@ -8,7 +8,6 @@ gce_cred_path: ./credentials-gce.json
 oci_key_path: ./credentials-oci-key.pem
 docker_cred_path: ./credentials-docker-registry.yml
 micado_cred_path: ./credentials-micado.yml
-oci_key: '{{ lookup("file", "{{ oci_key_path }}") }}'
 
 # enable specific components
 # -------------------------------------------------------
@@ -37,3 +36,7 @@ min_ram: 4950
 min_disk: 14000000000
 min_free: 5000000000
 min_ubuntu: ["18.04", "20.04"]
+
+# lookups
+# -------------------------------------------------------
+oci_key: '{{ lookup("file", "{{ oci_key_path }}") }}'

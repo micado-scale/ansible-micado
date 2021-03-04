@@ -57,5 +57,5 @@
         namespace: micado-system
       type: Opaque
       stringData:
-        oci_api_key.pem: "{{ lookup('file', oci_key_path) }}"
+        oci_api_key.pem: "{{ oci_key }}"
   when: oci_key_file.stat.exists
