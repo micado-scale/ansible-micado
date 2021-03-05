@@ -1,0 +1,23 @@
+---
+- name: (Ansible) Checking the existence of local ansible.cfg
+  stat: path=ansible.cfg
+  delegate_to: localhost
+  register: ansible_cfg_file
+  tags:
+  - always
+
+- name: (Ansible) Discover remote_tmp in ansible.cfg
+  set_fact:
+    ans_remote_tmp: "{{ lookup('ini', 'remote_tmp section=defaults file=ansible.cfg') }}"
+  when: ansible_cfg_file.stat.exists
+  tags:
+  - always
+
+- name: (Ansible) Create remote_tmp on target
+  file:
+    path: ans_remote_tmp
+    state: directory
+    mode: '0777'
+  when: ans_remote_tmp is defined and ans_remote_tmp
+  tags:
+  - always
