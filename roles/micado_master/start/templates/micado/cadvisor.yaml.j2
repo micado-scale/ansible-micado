@@ -30,7 +30,9 @@ spec:
         - --max_housekeeping_interval=15s
         ports:
         - containerPort: 8080
+{% if enable_edge %}          
           hostPort: 8080
+{% endif %}          
         resources:
           requests:
             cpu: 25m

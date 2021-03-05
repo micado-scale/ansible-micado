@@ -25,7 +25,9 @@ spec:
         image: {{docker_images.node_exporter}}
         ports:
         - containerPort: 9100
+{% if enable_edge %}          
           hostPort: 9100
+{% endif %}          
         resources:
           requests:
             cpu: 25m
