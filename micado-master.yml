@@ -35,8 +35,7 @@
 
   roles:
     - role: micado_edge/start
-      tags:
-      - edge
+      when: enable_edge
 
 - name: Setup KubeEdge (Edge-core)
   hosts: edgenodes
@@ -49,10 +48,10 @@
     loop: "{{ query('fileglob', \"pre-task/[0-9][0-9]*.yml\")|sort }}"
     loop_control:
       loop_var: task_item
+    when: enable_edge
     tags:
     - always
 
   roles:
     - role: micado_edge/join
-      tags:
-      - edge
+      when: enable_edge

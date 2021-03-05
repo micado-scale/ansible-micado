@@ -1,7 +1,7 @@
 # config file for global MiCADO settings
 # =======================================================
 
-# no options here
+enable_edge: False
 
 # =======================================================
 # end of user options. do not edit under this line
