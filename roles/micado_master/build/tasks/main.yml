@@ -10,7 +10,7 @@
 - include: security-install.yml
 
 - include: optimizer-install.yml
-  when: not disable_optimizer
+  when: enable_optimizer
 
 - include: occopus-install.yml
   when: enable_occopus

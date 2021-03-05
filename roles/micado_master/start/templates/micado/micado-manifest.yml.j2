@@ -100,7 +100,7 @@ spec:
         - name: MICADO_VERSION
           value: {{ micado_version }}
         - name: DISABLE_OPTIMIZER
-          value: "{{ disable_optimizer }}"
+          value: "{{ not enable_optimizer }}"
 ---
 ## Service: MiCADO Dashboard ##
 apiVersion: v1
@@ -515,7 +515,7 @@ spec:
     name: policykeeper
     tier: scaling
 ---
-{% if not disable_optimizer %}
+{% if enable_optimizer %}
 ## Optimizer ##
 apiVersion: apps/v1
 kind: Deployment

@@ -1,7 +1,11 @@
 # config file for global MiCADO settings
 # =======================================================
 
+# enable MiCADO-Edge features
+# -------------------------------------------------------
+# NOTE that multicloud depends on edge being enabled
 enable_edge: False
+enable_multicloud: False
 
 # =======================================================
 # end of user options. do not edit under this line

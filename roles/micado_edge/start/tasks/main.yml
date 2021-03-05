@@ -2,4 +2,4 @@
 - include: cloud_core_start.yml
 
 - include: multi_cloud_inits.yml
-  when: multi_cloud
+  when: enable_multicloud
