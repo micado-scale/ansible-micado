@@ -31,7 +31,7 @@
       - start
 
 - name: Setup KubeEdge (Cloud-core)
-  hosts: micado-target
+  hosts: micado
 
   roles:
     - role: micado_edge/start

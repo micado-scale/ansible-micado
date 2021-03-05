@@ -6,7 +6,7 @@
 ################
 all:
   hosts:
-    micado-target:
+    micado:
       # Host info for running micado playbooks
       #
       # Usage A: Builds and starts a MiCADO Master node. Use --tags for only one operation 
@@ -18,9 +18,6 @@ all:
       ansible_host: localhost
       ansible_connection: ssh
       ansible_user: ubuntu
-      ansible_become: True
-      ansible_become_method: sudo
-      ansible_python_interpreter: /usr/bin/python3
   children:
     edgenodes:
       # Hosts info of edge nodes
@@ -33,6 +30,3 @@ all:
           ansible_host: ip_address_of_edge1
           ansible_connection: ssh
           ansible_user: ubuntu
-          ansible_become: True
-          ansible_become_method: sudo
-          ansible_python_interpreter: /usr/bin/python3
