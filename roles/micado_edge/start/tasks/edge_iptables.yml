@@ -1,0 +1,32 @@
+---
+- name: '(MiCADO-Edge) Add kubeedge iptables (IPv4) rules'
+  lineinfile:
+    path: /etc/iptables.conf
+    insertbefore: '^#cni'
+    line: "{{ item.line }}"
+  loop:
+    - { line: '#kubeedge' }
+    - { line: '-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10000 -j ACCEPT' }
+    - { line: '-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10002 -j ACCEPT' }
+
+- name: '(MiCADO-Edge) Add kubeedge iptables (IPv6) rules'
+  lineinfile:
+    path: /etc/ip6tables.conf
+    insertbefore: '^#cni'
+    line: "{{ item.line }}"
+  loop:
+    - { line: '#kubeedge' }
+    - { line: '-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10000 -j ACCEPT' }
+    - { line: '-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10002 -j ACCEPT' }
+
+- name: (MiCADO-Edge) Restart iptables (IPv4) service
+  service:
+    name: iptables
+    state: restarted
+    enabled: yes
+
+- name: (MiCADO-Edge) Restart iptables (IPv6) service
+  service:
+    name: ip6tables
+    state: restarted
+    enabled: yes

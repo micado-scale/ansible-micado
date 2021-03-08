@@ -1,5 +1,5 @@
 ---
-- name: '(KubeEdge) Check if initialised'
+- name: '(KubeEdge) Check if downloaded'
   stat:
     path: /etc/kubeedge
   register: etc_edge
@@ -18,6 +18,15 @@
     remote_src: yes
   when: not etc_edge.stat.exists
 
+- name: (KubeEdge) Check edgecore.service is running
+  service_facts:
+
+- name: (KubeEdge) Ensure edgecore.service gets re-created
+  file:
+    path: /etc/systemd/system/edgecore.service
+    state: absent
+  when: "'edgecore.service' in services and services['edgecore.service']['state'] != 'running'"
+
 - name: '(KubeEdge) KubeEdge join'
   command: /etc/kubeedge/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm join
         --cloudcore-ipport={{ hostvars['micado']['ansible_host'] }}:10000
@@ -26,4 +35,4 @@
         --token={{ hostvars['micado']['token_kubeedge']['stdout'] }}
   register: keadm
   async: 60
-  when: not etc_edge.stat.exists
+  when: "'edgecore.service' in services and services['edgecore.service']['state'] != 'running'"

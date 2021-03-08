@@ -16,13 +16,7 @@
   command: /etc/kubernetes/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm init
         --kube-config /root/.kube/config
         --kubeedge-version={{ packages.kube_edge }}
-        --advertise-address={{ hostvars['micado']['ansible_host'] }}
+        --advertise-address={{ 'ansible_host' }}
   register: keadm
   async: 60
-  when: not etc_cloud.stat.exists
-
-- name: '(KubeEdge) KubeEdge token generation'
-  command: /etc/kubernetes/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm gettoken
-        --kube-config /root/.kube/config
-  register: token_kubeedge
   when: not etc_cloud.stat.exists

@@ -1,0 +1,12 @@
+---
+- name: '(Edge Monitoring) Add NodeExporter HostPath'
+  lineinfile:
+    path: /var/lib/micado/toscasubmitter/system/nodex.yaml
+    insertafter: '^        - containerPort: 9100'
+    line: '          hostPort: 9100'
+
+- name: '(Edge Monitoring) Add cAdvisor HostPath'
+  lineinfile:
+    path: /var/lib/micado/toscasubmitter/system/cadvisor.yaml
+    insertafter: '^        - containerPort: 8080'
+    line: '          hostPort: 8080'
