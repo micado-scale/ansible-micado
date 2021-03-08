@@ -35,4 +35,6 @@
         --token={{ hostvars['micado']['token_kubeedge']['stdout'] }}
   register: keadm
   async: 60
-  when: "'edgecore.service' in services and services['edgecore.service']['state'] != 'running'"
+  when:
+    ('edgecore.service' not in services) or
+    ('edgecore.service' in services and services['edgecore.service']['state'] != 'running')
