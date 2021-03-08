@@ -1,9 +1,13 @@
 ---
 - include: python-install.yml
 
-- include: docker-install.yml
+- include: roles/common/tasks/docker-install.yml
 
-- include: kubernetes-install.yml
+- include: roles/common/tasks/docker-configure.yml
+
+- include: roles/common/tasks/kubernetes-install.yml
+
+- include: kubernetes-configure.yml
 
 - include: core-install.yml
 

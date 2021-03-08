@@ -12,6 +12,9 @@
     tags:
     - always
 
+  handlers:
+  - include: roles/common/handlers/main.yml
+
   roles:
   - role: micado_master/build
     tags:
