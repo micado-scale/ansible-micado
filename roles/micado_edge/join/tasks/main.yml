@@ -1,4 +1,4 @@
 ---
-- include: docker_install.yml
+- include: roles/common/tasks/docker-install.yml
 
 - include: edge_join.yml

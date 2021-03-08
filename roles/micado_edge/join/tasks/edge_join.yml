@@ -4,7 +4,7 @@
     path: /etc/kubeedge
   register: etc_edge
 
-- name: Create kubeedge directory if it does not exist
+- name: (KubeEdge) Create kubeedge directory if it does not exist
   file:
     path: /etc/kubeedge
     state: directory

@@ -45,8 +45,7 @@
     loop_control:
       loop_var: task_item
     tags:
-    - join  
-
+    - join
   roles:
   - role: micado_edge/join
     tags:
