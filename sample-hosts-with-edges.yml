@@ -1,38 +1,23 @@
 ################
-##  MiCADO Ansible Deployment
+##  MiCADO hosts connection info
 ##   hosts.yml
 ##
-##  Adjust ansible_host & ansible_user parameters as required
+##  For local installations use `ansible_connection: local`
+##  For SSH, fill fields according to:
+##    ssh <ansible_user>@<ansible_host>
 ################
 all:
   hosts:
     micado:
-      # Host info for running micado playbooks
-      #
-      # Usage A: Builds and starts a MiCADO Master node. Use --tags for only one operation 
-      # ansible-playbook -i hosts.yml micado-master.yml [--tags (build | start)]
-      #
-      # Usage B: Builds a MiCADO Worker node for later use
-      # ansible-playbook -i hosts.yml build-micado-worker.yml
-      #
+      # Connection info for the MiCADO Master node
       ansible_host: localhost
       ansible_connection: ssh
       ansible_user: ubuntu
-      ansible_become: True
-      ansible_become_method: sudo
-      ansible_python_interpreter: /usr/bin/python3
   children:
     edgenodes:
-      # Hosts info of edge nodes
-      #
-      # List all edge nodes under the hosts: in the pattern of given example, i.e.  edge1 
-      # edge1 here represent unique label for the given edge node. Provide unique labels for all edges.
-      #
+      # Connection info for MiCADO Edge node(s)
       hosts:
         edge1:
           ansible_host: ip_address_of_edge1
           ansible_connection: ssh
           ansible_user: ubuntu
-          ansible_become: True
-          ansible_become_method: sudo
-          ansible_python_interpreter: /usr/bin/python3
