@@ -116,7 +116,7 @@ runcmd:
   - systemctl enable strongswan
 
   # Connect to cluster
-  - /etc/kubeedge/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm join --cloudcore-ipport={{ hostvars['micado-target']['ansible_host'] }}:10000 --edgenode-name={{ '{{ worker_name }}' }} --kubeedge-version={{ packages.kube_edge }} --token={{ token_kubeedge.stdout }}
+  - /etc/kubeedge/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm join --cloudcore-ipport={{ hostvars['micado']['ansible_host'] }}:10000 --edgenode-name={{ '{{ worker_name }}' }} --kubeedge-version={{ packages.kube_edge }} --token={{ token_kubeedge.stdout }}
 
   # These removes the temporary scripts, certs
   - /tmp/run_split.sh

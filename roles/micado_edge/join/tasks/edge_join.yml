@@ -20,10 +20,10 @@
 
 - name: '(KubeEdge) KubeEdge join'
   command: /etc/kubeedge/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm join
-        --cloudcore-ipport={{ hostvars['micado-target']['ansible_host'] }}:10000
+        --cloudcore-ipport={{ hostvars['micado']['ansible_host'] }}:10000
         --edgenode-name={{ inventory_hostname }}
         --kubeedge-version={{ packages.kube_edge }}
-        --token={{ hostvars['micado-target']['token_kubeedge']['stdout'] }}
+        --token={{ hostvars['micado']['token_kubeedge']['stdout'] }}
   register: keadm
   async: 60
   when: not etc_edge.stat.exists
