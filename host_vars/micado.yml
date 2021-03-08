@@ -11,10 +11,13 @@ micado_cred_path: ./credentials-micado.yml
 
 # enable specific components
 # -------------------------------------------------------
-disable_optimizer: True
+enable_optimizer: False
 enable_occopus: False
 enable_terraform: True
-multi_cloud: False
+
+# enable multicloud - MiCADO-Edge must be installed
+# -------------------------------------------------------
+enable_multicloud: False
 
 # dashboard configuration
 # -------------------------------------------------------
