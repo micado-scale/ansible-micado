@@ -1,0 +1,14 @@
+# config file for MiCADO-Edge
+# =======================================================
+
+# nothing here yet
+
+# =======================================================
+# end of user options. do not edit under this line
+# =======================================================
+
+# minimum requirements - MiCADO Edge nodes
+# -------------------------------------------------------
+min_ram: 750
+min_disk: 5000000000
+min_free: 2000000000
