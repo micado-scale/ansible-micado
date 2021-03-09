@@ -8,6 +8,7 @@
     - { line: '#kubeedge' }
     - { line: '-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10000 -j ACCEPT' }
     - { line: '-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10002 -j ACCEPT' }
+  notify: (iptables) Restart IPv4 service
 
 - name: '(MiCADO-Edge) Add kubeedge iptables (IPv6) rules'
   lineinfile:
@@ -18,15 +19,7 @@
     - { line: '#kubeedge' }
     - { line: '-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10000 -j ACCEPT' }
     - { line: '-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10002 -j ACCEPT' }
+  notify: (iptables) Restart IPv6 service
 
-- name: (MiCADO-Edge) Restart iptables (IPv4) service
-  service:
-    name: iptables
-    state: restarted
-    enabled: yes
-
-- name: (MiCADO-Edge) Restart iptables (IPv6) service
-  service:
-    name: ip6tables
-    state: restarted
-    enabled: yes
+- name: (iptables) Flush handlers to restart iptables service
+  meta: flush_handlers

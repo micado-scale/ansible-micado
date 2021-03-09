@@ -19,6 +19,9 @@
     - build
     - join
 
+  handlers:
+  - include: roles/common/handlers/main.yml
+
   roles:
   - role: micado_edge/start
     tags:
@@ -35,7 +38,6 @@
 
 - name: Setup KubeEdge (Edge-core)
   hosts: edgenodes
-  serial: 1
   gather_facts: False
 
   pre_tasks:

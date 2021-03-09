@@ -6,3 +6,15 @@
     state: restarted
     enabled: yes
     masked: no
+
+- name: (iptables) Restart IPv4 service
+  service:
+    name: iptables
+    state: restarted
+    enabled: yes
+
+- name: (iptables) Restart IPv6 service
+  service:
+    name: ip6tables
+    state: restarted
+    enabled: yes
