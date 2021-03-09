@@ -1,0 +1,6 @@
+---
+- name: (MiCADO Core) Reload micado.service
+  service:
+    name: micado
+    state: reloaded
+    enabled: yes

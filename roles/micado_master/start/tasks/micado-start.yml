@@ -2,12 +2,6 @@
 - name: (MiCADO Core) Flush handlers to restart services
   meta: flush_handlers
 
-- name: (MiCADO Core) Enable and start MiCADO systemd service
-  service:
-    name: micado
-    state: restarted
-    enabled: yes
-
 - name: (MiCADO Core) Get API endpoint
   k8s:
     kind: Service
