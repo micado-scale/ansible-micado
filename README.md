@@ -7,6 +7,7 @@ MiCADO is an auto-scaling framework for Docker applications. It supports autosca
 The MiCADO manual is hosted at https://micado-scale.readthedocs.io .
 
 Manuals for MiCADO versions are as follows, and there is a very basic quick start guide below:
+ - [MiCADO v0.9.2](https://micado-scale.readthedocs.io/en/0.9.2)
  - [MiCADO v0.9.1-rev1](https://micado-scale.readthedocs.io/en/0.9.1-rev1)
  - [MiCADO v0.9.1](https://micado-scale.readthedocs.io/en/0.9.1)
  - [MiCADO v0.9.0](https://micado-scale.readthedocs.io/en/0.9.0)
@@ -27,7 +28,7 @@ Manuals for MiCADO versions are as follows, and there is a very basic quick star
 ### 1x MiCADO Master
 
 * 2 CPU / 4GB RAM / 20GB DISK
-* Ubuntu 16.04, 18.04 or 20.04
+* Ubuntu 18.04 or 20.04
 * On a supported cloud
   * AWS EC2
   * CloudSigma
@@ -35,10 +36,11 @@ Manuals for MiCADO versions are as follows, and there is a very basic quick star
   * OpenStack
   * Microsoft Azure
   * Google Cloud
+  * Oracle Cloud Infrastructure
 
-### 1x Ansible Remote (or locally on Master)
+### 1x Ansible machine (could be your laptop, or a VM instance)
 
-* Ansible >= v2.8
+* Ansible >= v2.9
 * curl
 * jq (for demos)
 * wrk (for demos)
@@ -47,24 +49,39 @@ Manuals for MiCADO versions are as follows, and there is a very basic quick star
 
 Clone the repository & prepare the credentials:
 
-    git clone https://github.com/micado-scale/ansible-micado micado
-    cd micado
-    git checkout v0.9.0
-    cp sample-hosts.yml hosts.yml
-    cp sample-credentials-cloud-api.yml credentials-cloud-api.yml
-    cp sample-credentials-micado.yml credentials-micado.yml
-    #option to login to private registry# cp sample-credentials-docker-registry.yml credentials-docker-registry.yml
+```bash
+MICADO_PATH=/home/ubuntu/micado
+git clone https://github.com/micado-scale/ansible-micado $MICADO_PATH
 
-Fill the *hosts* file with values for *ansible_host (Master IP)* and *ansible_user (SSH user)* and fill the *credentials-* files with usernames & passwords:
+cd $MICADO_PATH
+git checkout v0.9.2
+cp sample-hosts.yml hosts.yml
 
-    vim hosts.yml
-    vim credentials-cloud-api.yml
-    vim credentials-micado.yml
-    #option to login to private registry# vim credentials-docker-registry.yml
+cd $MICADO_PATH/credentials
+cp sample-credentials-cloud-api.yml credentials-cloud-api.yml
+cp sample-credentials-micado.yml credentials-micado.yml
 
-Run the playbook to completion:
+#optional for private registry login#
+cp sample-credentials-docker-registry.yml credentials-docker-registry.yml
+```
 
-    ansible-playbook -i hosts.yml micado-master.yml
+Fill fields under `micado` key in the *hosts* file with values for *ansible_host (Master IP)* and *ansible_user (SSH user)* and fill the *credentials-* files with usernames & passwords according to your chosen cloud:
+
+```bash
+cd $MICADO_PATH
+edit hosts.yml
+edit credentials/credentials-cloud-api.yml
+edit credentials/credentials-micado.yml
+
+#optional for private registry login#
+edit credentials/credentials-docker-registry.yml
+```
+
+Run the **micado.yml** playbook to completion:
+
+```bash
+ansible-playbook micado.yml
+```
 
 #### Now view the MiCADO Dashboard at https://<MiCADO_Master_IP>
 
@@ -72,17 +89,42 @@ Run the playbook to completion:
 
 Prepare a demo by filling *_settings* with your MiCADO Master IP and user/pass:
 
-    cd demos/stressng
-    vim _settings
+```bash
+cd $MICADO_PATH/demos/stressng
+edit _settings
+```
 
 Fill the required fields (**ADD_YOUR_ID ...**) under the **worker-node** virtual machine with IDs from your cloud service provider, then run the test scripts:
 
-    cp stressng_<yourcloud>.yaml stressng.yaml
-    vim stressng.yaml
-    ./1-submit-tosca-stressng.sh
-    ./2-list-apps.sh
-    ./3-stress-cpu-stressng.sh 85
+```bash
+cp stressng_<yourcloud>.yaml stressng.yaml
+edit stressng.yaml
+./1-submit-tosca-stressng.sh
+./2-list-apps.sh
+./3-stress-cpu-stressng.sh 85
+```
 
 Check out the Dashboard to see the test scale up, and undeploy when done:
 
-    ./4-undeploy-stressng.sh
+```bash
+./4-undeploy-stressng.sh
+```
+
+## Edges
+
+Using the *sample-hosts-with-edges* file as a reference, fill values under the `micado` key as before, pointing at the MiCADO master. Under the `edgenodes` key, add as many **uniquely** named edge devices as desired, specifying their IPs as *ansible_host* and SSH username as *ansible_user*
+
+```bash
+cd $MICADO_PATH
+cp sample-hosts-with-edges.yml hosts.yml
+edit hosts.yml
+```
+
+Run the **edge.yml** playbook to completion:
+
+```bash
+ansible-playbook edge.yml
+```
+
+**When viewing the MiCADO Dashboard, check `Nodes` under**
+**the Kubernetes Dashboard to confirm your Edge device(s) are connected**
