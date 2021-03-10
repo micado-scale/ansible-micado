@@ -1,10 +1,22 @@
 ---
-- include: roles/common/tasks/docker-install.yml
+- name: (Docker) Begin Docker installation
+  include_role:
+    name: common
+    tasks_from: docker-install
 
-- include: roles/common/tasks/docker-configure.yml
+- name: (Docker) Begin Docker configuration
+  include_role:
+    name: common
+    tasks_from: docker-configure
 
-- include: roles/common/tasks/kubernetes-install.yml
+- name: (Kubernetes) Begin Kubernetes installation
+  include_role:
+    name: common
+    tasks_from: kubernetes-install
 
 - include: worker-deps.yml
 
-- include: roles/common/tasks/pull-monitoring.yml
+- name: (MiCADO Monitoring) Prepare Monitoring
+  include_role:
+    name: common
+    tasks_from: pull-monitoring

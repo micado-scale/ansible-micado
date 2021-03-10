@@ -32,6 +32,7 @@
     command: /etc/kubernetes/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm gettoken
           --kube-config /root/.kube/config
     register: token_kubeedge
+    changed_when: False
     tags:
     - build
     - join

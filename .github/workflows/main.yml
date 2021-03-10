@@ -13,5 +13,6 @@ jobs:
       uses: ansible/ansible-lint-action@master
       with:
         targets: |
-          micado-master.yml
-          build-micado-worker.yml
+          micado.yml
+          edge.yml
+          worker.yml
