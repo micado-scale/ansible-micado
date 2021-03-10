@@ -1,0 +1,3 @@
+# ansible-role-join-edge
+
+Run this with _ansible-playbook -i hosts.yml edge.yml --tags join_ to configure any number of edge devices as MiCADO Workers and join them to a prepared MiCADO-Edge ready cluster (this requires *ansible-role-start-edge* to be run first). Make sure all desired edge devices are listed under the *edgenodes* key in the _hosts_ file and that they are populated with the correct *ansible_host* (IP) and *ansible_user* (SSH username).

@@ -1,0 +1,40 @@
+---
+- name: '(KubeEdge) Check if downloaded'
+  stat:
+    path: /etc/kubeedge
+  register: etc_edge
+
+- name: (KubeEdge) Create kubeedge directory if it does not exist
+  file:
+    path: /etc/kubeedge
+    state: directory
+    mode: '0777'
+
+- name: (KubeEdge) Download and unzip
+  unarchive:
+    src: https://github.com/kubeedge/kubeedge/releases/download/v{{ packages.kube_edge }}/keadm-v{{ packages.kube_edge }}-linux-amd64.tar.gz
+    dest: /etc/kubeedge
+    mode: '0777'
+    remote_src: yes
+  when: not etc_edge.stat.exists
+
+- name: (KubeEdge) Check edgecore.service is running
+  service_facts:
+
+- name: (KubeEdge) Ensure edgecore.service gets re-created
+  file:
+    path: /etc/systemd/system/edgecore.service
+    state: absent
+  when: "'edgecore.service' in services and services['edgecore.service']['state'] != 'running'"
+
+- name: '(KubeEdge) KubeEdge join'
+  command: /etc/kubeedge/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm join
+        --cloudcore-ipport={{ hostvars['micado']['ansible_host'] }}:10000
+        --edgenode-name={{ inventory_hostname }}
+        --kubeedge-version={{ packages.kube_edge }}
+        --token={{ hostvars['micado']['token_kubeedge']['stdout'] }}
+  register: keadm
+  async: 60
+  when:
+    ('edgecore.service' not in services) or
+    ('edgecore.service' in services and services['edgecore.service']['state'] != 'running')

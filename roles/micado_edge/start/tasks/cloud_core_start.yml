@@ -1,0 +1,22 @@
+---
+- name: '(KubeEdge) Check if initialised'
+  stat:
+    path: /etc/kubeedge
+  register: etc_cloud
+
+- name: (KubeEdge) Download and unzip
+  unarchive:
+    src: https://github.com/kubeedge/kubeedge/releases/download/v{{ packages.kube_edge }}/keadm-v{{ packages.kube_edge }}-linux-amd64.tar.gz
+    dest: /etc/kubernetes
+    mode: '0777'
+    remote_src: yes
+  when: not etc_cloud.stat.exists
+
+- name: '(KubeEdge) KubeEdge init'
+  command: /etc/kubernetes/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm init
+        --kube-config /root/.kube/config
+        --kubeedge-version={{ packages.kube_edge }}
+        --advertise-address={{ ansible_host }}
+  register: keadm
+  async: 60
+  when: not etc_cloud.stat.exists

@@ -1,0 +1,55 @@
+---
+- name: Setup KubeEdge (Cloud-core)
+  hosts: micado
+  gather_facts: True
+
+  pre_tasks:
+  - name: (MiCADO) Check target is a working Master node
+    k8s:
+      kind: Deployment
+      name: toscasubmitter
+      namespace: micado-system
+      wait: yes
+      wait_timeout: 30
+      wait_condition:
+        reason: MinimumReplicasAvailable
+        status: "True"
+        type: Available
+    tags:
+    - build
+    - join
+
+  handlers:
+  - include: roles/common/handlers/main.yml
+
+  roles:
+  - role: micado_edge/start
+    tags:
+    - build
+
+  post_tasks:
+  - name: '(KubeEdge) KubeEdge token generation'
+    command: /etc/kubernetes/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm gettoken
+          --kube-config /root/.kube/config
+    register: token_kubeedge
+    changed_when: False
+    tags:
+    - build
+    - join
+
+- name: Setup KubeEdge (Edge-core)
+  hosts: edgenodes
+  gather_facts: False
+
+  pre_tasks:
+  - name: (Ansible) Include pre-tasks
+    include_tasks: "{{ task_item }}"
+    loop: "{{ query('fileglob', \"pre-task/[0-9][0-9]*.yml\")|sort }}"
+    loop_control:
+      loop_var: task_item
+    tags:
+    - join
+  roles:
+  - role: micado_edge/join
+    tags:
+    - join

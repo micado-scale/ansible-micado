@@ -1,0 +1,7 @@
+---
+- name: (Docker) Begin Docker installation
+  include_role:
+    name: common
+    tasks_from: docker-install
+
+- include: edge_join.yml

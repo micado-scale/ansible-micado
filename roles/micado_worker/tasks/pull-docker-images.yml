@@ -1,7 +1,0 @@
----
-- name: Downloading docker images
-  docker_image:
-      name: "{{ item }}"
-  loop:
-    - "{{ docker_images.cadvisor }}"
-    - "{{ docker_images.node_exporter }}"

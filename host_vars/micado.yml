@@ -3,17 +3,21 @@
 
 # credential file paths
 # -------------------------------------------------------
-cloud_cred_path: ./credentials-cloud-api.yml
-gce_cred_path: ./credentials-gce.json
-oci_key_path: ./credentials-oci-key.pem
-docker_cred_path: ./credentials-docker-registry.yml
-micado_cred_path: ./credentials-micado.yml
+cloud_cred_path: credentials/credentials-cloud-api.yml
+gce_cred_path: credentials/credentials-gce.json
+oci_key_path: credentials/credentials-oci-key.pem
+docker_cred_path: credentials/credentials-docker-registry.yml
+micado_cred_path: credentials/credentials-micado.yml
 
 # enable specific components
 # -------------------------------------------------------
-disable_optimizer: True
+enable_optimizer: False
 enable_occopus: False
 enable_terraform: True
+
+# enable multicloud - MiCADO-Edge must be installed
+# -------------------------------------------------------
+enable_multicloud: False
 
 # dashboard configuration
 # -------------------------------------------------------

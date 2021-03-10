@@ -38,6 +38,8 @@
 - name: "(System) Check the CPU manufacturer (Intel)"
   set_fact:
     intel_cpu: true
-  when: "ansible_processor | select('match', '.*Intel') | list | length > 0"
+  when:
+    ansible_processor | select('match', '.*Intel') | list | length > 0
+    and 'edgenodes' not in group_names
   tags:
   - always

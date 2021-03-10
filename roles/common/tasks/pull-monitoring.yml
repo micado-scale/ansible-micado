@@ -1,0 +1,8 @@
+---
+- name: '(MiCADO Monitoring) Downloading docker images'
+  docker_image:
+    name: "{{ item }}"
+    source: pull
+  loop:
+  - "{{ docker_images.cadvisor }}"
+  - "{{ docker_images.node_exporter }}"

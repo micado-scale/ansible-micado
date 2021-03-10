@@ -15,7 +15,7 @@
 
 - name: (Ansible) Create remote_tmp on target
   file:
-    path: ans_remote_tmp
+    path: "{{ ans_remote_tmp }}"
     state: directory
     mode: '0777'
   when: ans_remote_tmp is defined and ans_remote_tmp

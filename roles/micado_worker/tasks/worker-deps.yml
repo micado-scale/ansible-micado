@@ -1,0 +1,18 @@
+---
+- name: (Python) Install pip package manager
+  apt:
+    name:
+    - python-setuptools
+    - python3-pip
+    state: present
+
+- name: (Python) Installing packages
+  pip:
+    name:
+    - docker
+    state: present
+
+- name: (Security) Install strongSwan'
+  apt:
+    name: strongswan
+    state: present
