@@ -1,12 +1,17 @@
-name: Ansible Playbook Linting
+name: MiCADO Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+    - develop
 
 jobs:
-  build:
-
+  lint:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Run ansible-lint
@@ -16,3 +21,14 @@ jobs:
           micado.yml
           edge.yml
           worker.yml
+    
+  run:
+    runs-on: ubuntu-20.04
+    needs: lint
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run MiCADO Playbook
+      uses: dawidd6/action-ansible-playbook@v2.2.0
+      with:
+        playbook: micado.yml
+        options: --inventory tests/hosts
