@@ -11,13 +11,6 @@
     name: gce_cred
   when: gce_cred_file.stat.exists
 
-- name: (Kubernetes) Ensure micado-system namespace exists
-  k8s:
-    state: present
-    api_version: v1
-    kind: Namespace
-    name: micado-system
-
 - name: (Kubernetes) Store general cloud credentials in secret
   k8s:
     state: present
