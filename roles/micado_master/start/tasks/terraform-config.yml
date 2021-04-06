@@ -16,3 +16,5 @@
     - { src: 'egi/configure_tf', dest: '/var/lib/micado/toscasubmitter/system/configure_tf'}
     - { src: 'egi/pyGetScopedToken.py', dest: '/var/lib/micado/terraform/preprocess/egi/pyGetScopedToken.py'}
     - { src: 'terraform/prechecks.py', dest: '/var/lib/micado/terraform/preprocess/prechecks.py'}
+    - { src: 'terraform/utils.py', dest: '/var/lib/micado/terraform/preprocess/utils.py'}
+    - { src: 'terraform/egi_preprocess.py', dest: '/var/lib/micado/terraform/preprocess/egi_preprocess.py'}
