@@ -41,9 +41,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Remove existing K8s installations
-      run: sudo apt auto-remove kubectl ansible containernetworking-plugins -y
+      run: sudo -H apt auto-remove kubectl ansible containernetworking-plugins -y
     - name: Install Ansiblev2.9
-      run: sudo apt install python3-setuptools && sudo pip3 install ansible==2.9
+      run: sudo -H apt install python3-setuptools && sudo -H pip3 install ansible==2.9
     - name: Run MiCADO Playbook
       uses: dawidd6/action-ansible-playbook@v2.2.0
       with:
