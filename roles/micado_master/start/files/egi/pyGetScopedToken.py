@@ -4,16 +4,26 @@ import requests
 import jwt
 import json, time, os
 from urllib.parse import urlparse, urlunparse, urljoin
+import configure
 
 # EGI AAI Check-In settings
-client_id = os.getenv('CHECKIN_CLIENT_ID')
-client_secret = os.getenv('CHECKIN_CLIENT_SECRET')
-refresh_token = os.getenv('CHECKIN_REFRESH_TOKEN')
-checkin_auth_url = os.getenv('CHECKIN_AUTH_URL')
+client_id = configure.CHECKIN_CLIENT_ID
+client_secret = configure.CHECKIN_CLIENT_SECRET
+refresh_token = configure.CHECKIN_REFRESH_TOKEN
+checkin_auth_url = configure.CHECKIN_AUTH_URL
 
 # OpenStack settings
-os_auth_url= os.getenv('OS_AUTH_URL')
-os_project_id= os.getenv('OS_PROJECT_ID')
+os_auth_url = configure.OS_AUTH_URL
+os_project_id = configure.OS_PROJECT_ID
+
+token_dict = {}
+tf_file = "/var/lib/micado/terraform/preprocess/egi/token.txt"
+
+def dump_json(data, path):
+    ''' Dump the dictionary to a json file '''
+
+    with open(path, "w") as file:
+        json.dump(data, file, indent=4)
 
 def get_OIDC_Token(checkin_auth_url, client_id, client_secret, refresh_token):
     ''' Get an OIDC token from the EGI AAI Check-In service '''
@@ -82,14 +92,13 @@ def main():
     # Check whether the token is valid
     payload = jwt.decode(token, verify=False)
     now = int(time.time())
+    token_dict["time"] = now
     expires = int(payload['exp'])
     if (expires-now) > 300:
-       # Get the Keystone URL
-       url = get_keystone_url(os_auth_url, "/v3/auth/tokens")
        # Retrieve an OpenStack scoped token 
        scoped_token = get_scoped_Token(os_auth_url, os_project_id, get_unscoped_token(os_auth_url, token))
-
-       print ("%s" %scoped_token)
+       token_dict["token"] = scoped_token
+       dump_json(token_dict,tf_file)
 
 if __name__ == "__main__":
         main()

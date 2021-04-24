@@ -293,6 +293,10 @@ spec:
         volumeMounts:
         - name: submitter-out
           mountPath: /var/lib/micado/terraform/submitter
+        - name: preprocess-files
+          mountPath: /var/lib/micado/terraform/preprocess
+        - name: wrapper-file
+          mountPath: /usr/local/bin/terraform
         lifecycle:
           postStart:
             exec:
@@ -301,6 +305,13 @@ spec:
       - name: submitter-out
         hostPath:
           path: /var/lib/micado/toscasubmitter/output
+      - name: preprocess-files
+        hostPath:
+          path: /var/lib/micado/terraform/preprocess
+      - name: wrapper-file
+        hostPath:
+          path: /var/lib/micado/terraform/wrapper/terraform
+          type: File
 ---
 {% endif %}
 ## Prometheus ##
@@ -686,6 +697,8 @@ spec:
           mountPath: /var/lib/micado/submitter/files/output_configs
         - name: submitter-config
           mountPath: /var/lib/micado/submitter/system
+        - name: submitter-preprocess-egi
+          mountPath: /var/lib/micado/submitter/preprocess/egi
         - name: submitter-log
           mountPath: /var/log/submitter
 {% if cloud_cred_file.stat.exists %}
@@ -719,6 +732,9 @@ spec:
       - name: submitter-config
         hostPath:
           path: /var/lib/micado/toscasubmitter/system
+      - name: submitter-preprocess-egi
+        hostPath:
+          path: /var/lib/micado/terraform/preprocess/egi
       - name: submitter-log
         hostPath:
           path: /var/log/micado/toscasubmitter

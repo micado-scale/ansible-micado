@@ -1,0 +1,7 @@
+OS_PROJECT_ID="{{ project_id }}"
+OS_AUTH_URL="{{ auth_url }}"
+OS_IDENTITY_PROVIDER="{{ identity_provider }}"
+CHECKIN_CLIENT_ID="{{ client_id }}"
+CHECKIN_CLIENT_SECRET="{{ client_secret }}"
+CHECKIN_REFRESH_TOKEN="{{ refresh_token }}"
+CHECKIN_AUTH_URL="{{ oidc_url }}"
