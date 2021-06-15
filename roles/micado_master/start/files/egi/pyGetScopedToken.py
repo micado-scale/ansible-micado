@@ -33,7 +33,7 @@ def get_OIDC_Token(checkin_auth_url, client_id, client_secret, refresh_token):
                'client_secret': client_secret,
                'grant_type': 'refresh_token',
                'refresh_token': refresh_token,
-               'scope': 'openid email profile'}
+               'scope': 'openid email profile eduperson_entitlement'}
 
     curl = requests.post(url=checkin_auth_url, 
            auth=(client_id, client_secret), data=payload)
