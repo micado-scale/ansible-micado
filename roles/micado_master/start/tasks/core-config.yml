@@ -5,13 +5,13 @@
     api_version: v1
     kind: Namespace
     name: micado-system
+  notify: (MiCADO Core) Reload micado.service
 
 - name: '(MiCADO Core) Copy MiCADO Kubernetes manifest'
   template:
     src: micado/micado-manifest.yml.j2
     dest: /var/lib/micado/micado-manifest.yml
     mode: '0666'
-  notify: (MiCADO Core) Reload micado.service
 
 - name: '(MiCADO Core) Copy iptables templates'
   template:
