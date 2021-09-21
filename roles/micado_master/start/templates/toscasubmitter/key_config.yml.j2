@@ -82,6 +82,10 @@ adaptor_config:
       - "tosca.policies.Security.MiCADO.Network.*"
     endoint: "endpoint"
     volume: "./files/output_configs/"
+    unvalidated_kinds:
+      - Certificate
+      - ClusterIssuer
+    k8s_version: "1.21.0"
 
 {% if enable_occopus %}
   OccopusAdaptor:
