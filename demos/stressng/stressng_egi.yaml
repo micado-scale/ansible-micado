@@ -20,15 +20,16 @@ topology_template:
             cpu: "900m"
 
     worker-node:
-      type: tosca.nodes.MiCADO.EGI.Compute
+      type: tosca.nodes.MiCADO.Nova.Compute
       properties:
         auth_url: <AUTH_URL> (e.g. https://cloud-egi.100percentit.com:5000/v3/)
         project_id: <PROJECT_ID> (3d181dc16e654078a9cbbe1a9df6228f)
         image_id: <IMAGE_ID> (e.g. 21ec3366-187b-43bb-b222-5ba41f55ffa2)
         flavor_name: <FLAVOR_NAME> (e.g m1.small)
         network_name: <NETWORK_NAME> (e.g. net1)
-        security_groups: <SECURITY_GROUPS> (e.g default)
-        ip_pool: <IP_POOL> (e.g ext-net)
+        security_groups:
+          - <SECURITY_GROUPS> (e.g. default)
+        floating_ip_pool: <IP_POOL> (e.g public)
         public_key: <SSH_KEY> (e.g. ssh-rsa AAAB3N...)
       interfaces:
         Terraform:
