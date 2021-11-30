@@ -10,7 +10,7 @@ def main():
 
     token_dict = load_json(tfvars_file)
 
-    if token_dict["preprocess"]:
+    if token_dict.get("preprocess", ""):
         cloud = token_dict["preprocess"]
         if cloud == "egi.eu":
             preprocess_egi(token_dict)
