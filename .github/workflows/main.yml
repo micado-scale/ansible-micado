@@ -33,7 +33,7 @@ jobs:
     - name: Run MiCADO Playbook
       uses: dawidd6/action-ansible-playbook@v2.2.0
       with:
-        playbook: micado.yml
+        playbook: getmicado/playbook/project/micado.yml
         options: --inventory tests/hosts
 
   play-ubuntu-18:
@@ -48,5 +48,5 @@ jobs:
     - name: Run MiCADO Playbook
       uses: dawidd6/action-ansible-playbook@v2.2.0
       with:
-        playbook: micado.yml
+        playbook: getmicado/playbook/project/micado.yml
         options: --inventory tests/hosts
