@@ -1,0 +1,32 @@
+---
+- include: python-install.yml
+
+- name: (Docker) Begin Docker installation
+  include_role:
+    name: common
+    tasks_from: docker-install
+
+- name: (Docker) Begin Docker configuration
+  include_role:
+    name: common
+    tasks_from: docker-configure
+
+- name: (Kubernetes) Begin Kubernetes installation
+  include_role:
+    name: common
+    tasks_from: kubernetes-install
+
+- include: kubernetes-configure.yml
+
+- include: core-install.yml
+
+- include: security-install.yml
+
+- include: optimizer-install.yml
+  when: enable_optimizer
+
+- include: occopus-install.yml
+  when: enable_occopus
+
+- include: terraform-install.yml
+  when: enable_terraform

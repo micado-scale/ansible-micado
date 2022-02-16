@@ -1,0 +1,13 @@
+#/bin/bash
+
+cd /var/lib/micado/terraform/preprocess/
+
+FILE=prechecks.py
+if [ -f "$FILE" ]; then
+    python3 prechecks.py
+fi
+
+cd /var/lib/micado/terraform/submitter/
+
+/bin/terraform "$@"
+exit $?

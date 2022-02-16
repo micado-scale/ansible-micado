@@ -1,0 +1,14 @@
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+cgroupDriver: systemd
+evictionHard:
+  imagefs.available: 5%
+  memory.available: 100Mi
+  nodefs.available: 5%
+  nodefs.inodesFree: 5%
