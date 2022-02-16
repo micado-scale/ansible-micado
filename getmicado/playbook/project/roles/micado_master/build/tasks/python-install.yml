@@ -15,7 +15,7 @@
     - setuptools<45
     - pip<21
     - docker~=4.3.0
-    - kubernetes~=11.0.0
+    - kubernetes~=12.0.0
     - openshift~=0.11.0
     - requests~=2.22.0
     - click<8
