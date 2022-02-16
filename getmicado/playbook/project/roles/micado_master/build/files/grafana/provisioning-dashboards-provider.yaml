@@ -1,0 +1,10 @@
+apiVersion: 2
+
+providers:
+- name: 'micado'
+  orgId: 1
+  folder: ''
+  type: file
+  disableDeletion: false
+  options:
+    path: /var/lib/grafana/dashboards

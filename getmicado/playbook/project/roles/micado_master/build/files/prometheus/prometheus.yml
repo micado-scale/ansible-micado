@@ -1,0 +1,47 @@
+rule_files:
+- '*.rules'
+global:
+  scrape_interval: 20s
+scrape_configs:
+- job_name: worker-metrics
+  scrape_interval: 20s
+  kubernetes_sd_configs:
+    - role: pod
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_namespace]
+    action: keep
+    regex: micado-worker
+  - source_labels: [__meta_kubernetes_pod_node_name]
+    target_label: node
+    replacement: $1
+    regex: (.*)-\d{1,3}-\d{1,3}-\d{1,3}-\d{1,3}
+  - source_labels: [__meta_kubernetes_pod_container_name]
+    action: drop
+    regex: zorp-ingress
+  metric_relabel_configs:
+  - source_labels: [container_label_io_kubernetes_pod_namespace]
+    regex: .*-system
+    action: drop
+  - source_labels: [container_label_io_kubernetes_pod_namespace]
+    regex: micado-worker
+    action: drop
+
+- job_name: kube-services
+  scrape_interval: 20s
+  kubernetes_sd_configs:
+    - role: pod
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_pod_container_name, __address__]
+    target_label: endpoint
+    regex: (.*);\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:(\d*)
+    replacement: "${1}:${2}"
+  - source_labels: [endpoint]
+    regex: (a^)
+    action: keep
+
+alerting:
+  alertmanagers:
+  - scheme: http
+    static_configs:
+    - targets:
+      - alertmanager:9093

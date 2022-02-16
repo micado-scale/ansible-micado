@@ -1,0 +1,68 @@
+---
+- name: '(MiCADO Security) Install strongSwan'
+  apt:
+    name: strongswan
+    state: present
+
+- name: '(MiCADO Security) Create directories'
+  file:
+    path: "{{ item.path }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: 0775
+    state: directory
+  loop:
+    - { path: '/var/lib/micado/credman/config/', owner: 'root', group: 'root' }
+    - { path: '/var/lib/micado/crypto_engine/', owner: 'root', group: 'root' }
+    - { path: '/var/lib/micado/vault/config', owner: 'root', group: 'root' }
+    - { path: '/var/lib/micado/vault/storage', owner: 'root', group: 'root' }
+    - { path: '/var/lib/micado/zorp/config/', owner: 'root', group: 'root' }
+    - { path: '/var/lib/micado/zorp/scripts/', owner: 'root', group: 'root' }
+    # Logs
+    - { path: '/var/log/micado/credman/', owner: 'root', group: 'root' }
+    - { path: '/var/log/micado/crypto_engine/', owner: 'root', group: 'root' }
+    - { path: '/var/log/micado/iivr/', owner: 'root', group: 'root' }
+    - { path: '/var/log/micado/zorp/', owner: 'root', group: 'root' }
+    - { path: '/var/log/micado/vault/', owner: 'root', group: 'root' }
+
+- name: '(MiCADO Security) Copy config files'
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { src: 'vault/vault.hcl', dest: '/var/lib/micado/vault/config/vault.hcl', mode: '0644'}
+    - { src: 'zorp/authform.html', dest: '/var/lib/micado/zorp/config/authform.html', mode: '0644'}
+    - { src: 'zorp/zorp-entrypoint.sh', dest: '/var/lib/micado/zorp/scripts/docker-entrypoint.sh', mode: '0755'}
+
+- name: "(MiCADO Security) Copy log README files"
+  copy:
+    content: "{{ item.content }}"
+    dest: "{{ item.dest }}"
+    mode: 0644
+  loop:
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep credman | col1)\n",
+        dest: '/var/log/micado/credman/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep crypto-engine | col1)\n",
+        dest: '/var/log/micado/crypto_engine/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep iivr | col1)\n",
+        dest: '/var/log/micado/iivr/README'}
+    - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep zorp | col1)\n",
+        dest: '/var/log/micado/zorp/README'}
+
+- name: '(MiCADO Security) Downloading docker images'
+  docker_image:
+    name: "{{ item }}"
+    source: pull
+  loop:
+  - "{{ docker_images.credential_manager }}"
+  - "{{ docker_images.vault }}"
+  - "{{ docker_images.securitypolicymanager }}"
+  - "{{ docker_images.crypto_engine }}"
+  - "{{ docker_images.zorp }}"
+
+- name: '(MiCADO Security) Downloading Image Integrity Verifier container'
+  docker_image:
+    name: "{{ docker_images.iivr }}"
+    source: pull
+  when: intel_cpu
