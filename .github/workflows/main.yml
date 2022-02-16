@@ -33,9 +33,10 @@ jobs:
     - name: Remove existing K8s installations
       run: sudo apt auto-remove kubectl containernetworking-plugins -y
     - name: Run MiCADO Playbook
-      uses: dawidd6/action-ansible-playbook@v2.2.0
+      uses: dawidd6/action-ansible-playbook@v2
       with:
-        playbook: getmicado/playbook/project/micado.yml
+        directory: ./getmicado/playbook/
+        playbook: project/micado.yml
         options: --inventory tests/hosts
 
   play-ubuntu-18:
@@ -48,7 +49,8 @@ jobs:
     - name: Install Ansiblev2.9
       run: sudo apt install python3-setuptools && sudo pip3 install ansible==2.9
     - name: Run MiCADO Playbook
-      uses: dawidd6/action-ansible-playbook@v2.2.0
+      uses: dawidd6/action-ansible-playbook@v2
       with:
-        playbook: getmicado/playbook/project/micado.yml
+        directory: ./getmicado/playbook/
+        playbook: project/micado.yml
         options: --inventory tests/hosts
