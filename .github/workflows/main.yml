@@ -37,7 +37,9 @@ jobs:
       with:
         directory: ./getmicado/playbook/
         playbook: project/micado.yml
-        options: --inventory tests/hosts
+        inventory: |
+          [local]
+          micado ansible_connection=local ansible_host=127.0.0.1 ansible_python_interpreter="/usr/bin/python3"
 
   play-ubuntu-18:
     runs-on: ubuntu-18.04
@@ -53,4 +55,6 @@ jobs:
       with:
         directory: ./getmicado/playbook/
         playbook: project/micado.yml
-        options: --inventory tests/hosts
+        inventory: |
+          [local]
+          micado ansible_connection=local ansible_host=127.0.0.1 ansible_python_interpreter="/usr/bin/python3"
