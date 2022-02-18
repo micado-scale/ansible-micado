@@ -41,4 +41,4 @@ packages:
   docker_ce_cli: "docker-ce-cli=5:20.10.8~3-0~ubuntu-{{ ansible_distribution_release }}"
   containerd_io: containerd.io=1.4.4-1
   kubernetes_version: 1.21.3-00
-  kube_edge: "1.4.0"
+  kube_edge: "1.9.1"
