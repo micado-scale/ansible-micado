@@ -9,7 +9,7 @@
 
 # other
 # -------------------------------------------------------
-micado_version: v0.9.1
+micado_version: v0.10.0
 intel_cpu: false
 
 # component docker images
@@ -17,20 +17,20 @@ intel_cpu: false
 docker_images:
   alertmanager: prom/alertmanager:v0.21.0
   cadvisor: gcr.io/google-containers/cadvisor:v0.36.0
-  credential_manager: micado/credential-manager:v0.9.1-slim
-  crypto_engine: micado/crypto-engine:v0.9.1-slim
-  dashboard: micado/dashboard:0.4.0
+  credential_manager: micado/credential-manager:0.10
+  crypto_engine: micado/crypto-engine:0.10
+  dashboard: micado/dashboard:0.10
   grafana: grafana/grafana:7.1.5
-  iivr: micado/iivr:v0.9.1-slim
+  iivr: micado/iivr:0.10
   node_exporter: prom/node-exporter:v1.0.1
   occopus: micado/occopus:1.7-rc6
-  optimizer: micado/optimizer:v0.9.1
-  policykeeper: micado/policykeeper:v0.9.1-slim
+  optimizer: micado/optimizer:0.10
+  policykeeper: micado/policykeeper:0.10
   prometheus: prom/prometheus:v2.20.1
   redis: redis:5-alpine
-  securitypolicymanager: micado/security-policy-manager:v0.9.1-slim
+  securitypolicymanager: micado/security-policy-manager:0.10
   terraform: hashicorp/terraform:0.12.29
-  toscasubmitter: micado/toscasubmitter:alpine
+  toscasubmitter: micado/toscasubmitter:0.10
   vault: vault:1.5.3
   zorp: micado/zorpgpl:6.0.12
 
