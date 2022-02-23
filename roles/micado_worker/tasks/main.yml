@@ -1,14 +1,22 @@
 ---
-- name: Ensure Google DNS server
-  lineinfile:
-    mode: '0777'
-    path: /etc/resolv.conf
-    line: 'nameserver 8.8.8.8'
+- name: (Docker) Begin Docker installation
+  include_role:
+    name: common
+    tasks_from: docker-install
 
-- include: docker-install.yml
+- name: (Docker) Begin Docker configuration
+  include_role:
+    name: common
+    tasks_from: docker-configure
 
-- include: kubernetes-install.yml
+- name: (Kubernetes) Begin Kubernetes installation
+  include_role:
+    name: common
+    tasks_from: kubernetes-install
 
-- include: other-install.yml
+- include: worker-deps.yml
 
-- include: pull-docker-images.yml
+- name: (MiCADO Monitoring) Prepare Monitoring
+  include_role:
+    name: common
+    tasks_from: pull-monitoring

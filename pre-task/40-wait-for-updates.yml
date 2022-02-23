@@ -1,0 +1,8 @@
+---
+- name: (System) Waiting for automatic security updates to finish
+  script: files/wait-updates.sh
+  register: outputsh
+  changed_when: not outputsh.stdout
+  when: ansible_os_family == 'Debian'
+  tags:
+  - build

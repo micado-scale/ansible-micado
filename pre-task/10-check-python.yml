@@ -1,0 +1,12 @@
+---
+- name: (System) Ensure that python3 installed
+  raw: bash -c "test -e /usr/bin/python3" || (apt -qqy update && apt install -qqy python3-minimal)
+  register: output
+  changed_when: not output.stdout
+  tags:
+  - always
+
+- name: (System) Turn back gather_fact
+  setup:
+  tags:
+  - always

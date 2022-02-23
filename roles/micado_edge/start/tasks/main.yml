@@ -1,0 +1,9 @@
+---
+- include: edge_iptables.yml
+
+- include: cloud_core_start.yml
+
+- include: edge_monitoring.yml
+
+- include: multi_cloud_inits.yml
+  when: enable_multicloud

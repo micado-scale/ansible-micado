@@ -1,11 +1,3 @@
-# MiCADO System Namespace ##
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: micado-system
-  labels:
-    name: micado-system
----
 # MiCADO Worker Namespace ##
 kind: Namespace
 apiVersion: v1
@@ -100,7 +92,7 @@ spec:
         - name: MICADO_VERSION
           value: {{ micado_version }}
         - name: DISABLE_OPTIMIZER
-          value: "{{ disable_optimizer }}"
+          value: "{{ not enable_optimizer }}"
 ---
 ## Service: MiCADO Dashboard ##
 apiVersion: v1
@@ -301,10 +293,25 @@ spec:
         volumeMounts:
         - name: submitter-out
           mountPath: /var/lib/micado/terraform/submitter
+        - name: preprocess-files
+          mountPath: /var/lib/micado/terraform/preprocess
+        - name: wrapper-file
+          mountPath: /usr/local/bin/terraform
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", "apk -U add python3 py-requests py-jwt"]
       volumes:
       - name: submitter-out
         hostPath:
           path: /var/lib/micado/toscasubmitter/output
+      - name: preprocess-files
+        hostPath:
+          path: /var/lib/micado/terraform/preprocess
+      - name: wrapper-file
+        hostPath:
+          path: /var/lib/micado/terraform/wrapper/terraform
+          type: File
 ---
 {% endif %}
 ## Prometheus ##
@@ -511,7 +518,7 @@ spec:
     name: policykeeper
     tier: scaling
 ---
-{% if not disable_optimizer %}
+{% if enable_optimizer %}
 ## Optimizer ##
 apiVersion: apps/v1
 kind: Deployment
@@ -690,6 +697,8 @@ spec:
           mountPath: /var/lib/micado/submitter/files/output_configs
         - name: submitter-config
           mountPath: /var/lib/micado/submitter/system
+        - name: submitter-preprocess-egi
+          mountPath: /var/lib/micado/submitter/preprocess/egi
         - name: submitter-log
           mountPath: /var/log/submitter
 {% if cloud_cred_file.stat.exists %}
@@ -723,6 +732,9 @@ spec:
       - name: submitter-config
         hostPath:
           path: /var/lib/micado/toscasubmitter/system
+      - name: submitter-preprocess-egi
+        hostPath:
+          path: /var/lib/micado/terraform/preprocess/egi
       - name: submitter-log
         hostPath:
           path: /var/log/micado/toscasubmitter

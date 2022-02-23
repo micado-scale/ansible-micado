@@ -5,14 +5,17 @@
     - python3-pip
     state: present
     update_cache: yes
+  register: first_apt
+  until: first_apt is not failed
+  retries: 5
 
 - name: '(Python) Installing packages'
   pip:
     name:
     - setuptools<45
     - pip<21
-    - docker~=4.3.0
-    - kubernetes~=11.0.0
+    - docker~=4.4.4
+    - kubernetes~=21.7.0
     - openshift~=0.11.0
     - requests~=2.22.0
     - click<8

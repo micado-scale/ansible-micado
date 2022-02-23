@@ -1,0 +1,45 @@
+---
+- name: (System) Check disk size requirements
+  assert:
+    that:
+      ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_total') | list | first >= {{ min_disk }}
+    msg: >
+      The minimum required disk size is {{ min_disk / 1000000000 }} GB
+  when: min_disk is defined
+  tags:
+  - always
+
+- name: (System) Check free disk requirements
+  assert:
+    that:
+      ansible_mounts | selectattr('mount','equalto', '/') | map(attribute='size_available') | list | first >= {{ min_free }}
+    msg: >
+      The minimum required free disk size is {{ min_free / 1000000000 }} GB
+  when: min_free is defined
+  tags:
+  - build
+
+- name: (System) Check RAM requirements
+  assert:
+    that: "ansible_memtotal_mb >= {{ min_ram }}"
+    msg: "The minimum required memory size is {{ min_ram / 1000}} GB"
+  when: min_ram is defined
+  tags:
+  - always
+
+- name: (System) Check OS requirements
+  assert:
+    that: ansible_os_family == 'Debian' and ansible_distribution_version in {{ min_ubuntu }}
+    msg: The required OS is Ubuntu, the supported versions are {{ min_ubuntu }}
+  when: min_ubuntu is defined
+  tags:
+  - always
+
+- name: "(System) Check the CPU manufacturer (Intel)"
+  set_fact:
+    intel_cpu: true
+  when:
+    ansible_processor | select('match', '.*Intel') | list | length > 0
+    and 'edgenodes' not in group_names
+  tags:
+  - always

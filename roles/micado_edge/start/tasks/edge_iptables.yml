@@ -1,0 +1,25 @@
+---
+- name: '(MiCADO-Edge) Add kubeedge iptables (IPv4) rules'
+  lineinfile:
+    path: /etc/iptables.conf
+    insertbefore: '^#cni'
+    line: "{{ item.line }}"
+  loop:
+    - { line: '#kubeedge' }
+    - { line: '-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10000 -j ACCEPT' }
+    - { line: '-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10002 -j ACCEPT' }
+  notify: (iptables) Restart IPv4 service
+
+- name: '(MiCADO-Edge) Add kubeedge iptables (IPv6) rules'
+  lineinfile:
+    path: /etc/ip6tables.conf
+    insertbefore: '^#cni'
+    line: "{{ item.line }}"
+  loop:
+    - { line: '#kubeedge' }
+    - { line: '-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10000 -j ACCEPT' }
+    - { line: '-A FILTERS -m state --state NEW -m tcp -p tcp --dport 10002 -j ACCEPT' }
+  notify: (iptables) Restart IPv6 service
+
+- name: (iptables) Flush handlers to restart iptables service
+  meta: flush_handlers

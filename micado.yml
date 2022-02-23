@@ -1,0 +1,24 @@
+---
+- name: Deploy MiCADO master
+  hosts: micado
+  gather_facts: False
+
+  pre_tasks:
+  - name: (Ansible) Include pre-tasks
+    include_tasks: "{{ task_item }}"
+    loop: "{{ query('fileglob', \"pre-task/[0-9][0-9]*.yml\")|sort }}"
+    loop_control:
+      loop_var: task_item
+    tags:
+    - always
+
+  handlers:
+  - include: roles/common/handlers/main.yml
+
+  roles:
+  - role: micado_master/build
+    tags:
+    - build
+  - role: micado_master/start
+    tags:
+    - start

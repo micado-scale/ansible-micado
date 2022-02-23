@@ -1,0 +1,23 @@
+---
+- name: (Ansible) Credential check for cloud orchestrators
+  pause:
+    prompt: >
+      Matching cloud credentials file not found...
+      Press 'Ctrl-C' to abort...
+    seconds: 3
+  when: >
+    (enable_occopus is defined and enable_occopus and not cloud_cred_file.stat.exists) or
+    (enable_terraform is defined and enable_terraform and not cloud_cred_file.stat.exists and not gce_cred_file.stat.exists)
+  tags:
+  - start
+
+- name: (Ansible) Check for cloud orchestrators
+  pause:
+    prompt: >
+      You are deploying MiCADO without a cloud orchestrator...
+      Press 'Ctrl-C' to abort...
+    seconds: 3
+  when: (enable_occopus is defined and not enable_occopus) and
+        (enable_terraform is defined and not enable_terraform)
+  tags:
+  - start

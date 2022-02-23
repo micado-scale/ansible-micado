@@ -1,0 +1,46 @@
+# config file for MiCADO
+# =======================================================
+
+# credential file paths
+# -------------------------------------------------------
+cloud_cred_path: credentials/credentials-cloud-api.yml
+gce_cred_path: credentials/credentials-gce.json
+oci_key_path: credentials/credentials-oci-key.pem
+docker_cred_path: credentials/credentials-docker-registry.yml
+micado_cred_path: credentials/credentials-micado.yml
+
+# enable specific components
+# -------------------------------------------------------
+enable_optimizer: False
+enable_occopus: False
+enable_terraform: True
+
+# enable multicloud - MiCADO-Edge must be installed
+# -------------------------------------------------------
+enable_multicloud: False
+
+# dashboard configuration
+# -------------------------------------------------------
+web_listening_port: 443
+web_session_timeout: 600
+grafana_admin_pwd: secret
+
+# other
+# -------------------------------------------------------
+disable_worker_updates: True
+master_hostname: micado-master
+
+# =======================================================
+# end of user options. do not edit under this line
+# =======================================================
+
+# minimum requirements - MiCADO Master node
+# -------------------------------------------------------
+min_ram: 3750
+min_disk: 14000000000
+min_free: 5000000000
+min_ubuntu: ["18.04", "20.04"]
+
+# lookups
+# -------------------------------------------------------
+oci_key: '{{ lookup("file", "{{ oci_key_path }}") }}'

@@ -7,17 +7,25 @@
     - curl
     - software-properties-common
     state: present
+  when: ansible_distribution == "Ubuntu"
 
 - name: '(Docker) Adding APT key'
   apt_key:
     url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
     state: present
+  when: ansible_distribution == "Ubuntu"
 
-- name: '(Docker) Adding APT repository'
+- name: '(Docker) Adding APT repository (x86)'
   apt_repository:
     repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
     state: present
-    mode: '0600'
+  when: ansible_distribution == "Ubuntu" and ansible_architecture not in ["aarch64", "arm64"]
+
+- name: '(Docker) Adding APT repository (ARM)'
+  apt_repository:
+    repo: "deb [arch=arm64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+    state: present
+  when: ansible_distribution == "Ubuntu" and ansible_architecture in ["aarch64", "arm64"]
 
 - name: '(Docker) Installing APT package'
   apt:
@@ -27,6 +35,11 @@
     - "{{ packages.containerd_io }}"
     state: present
     update_cache: yes
+  when: ansible_distribution == "Ubuntu"
+
+- name: '(Docker) Installing via convenience script (Raspbian)'
+  script: docker/get.sh
+  when: ansible_lsb.id == "Raspbian"
 
 - name: '(Docker) prevent package from being upgraded'
   dpkg_selections:
@@ -36,20 +49,3 @@
     - docker-ce
     - docker-ce-cli
     - containerd.io
-
-- name: '(Docker) Replace ExecStart for systemd'
-  lineinfile:
-    mode: '0644'
-    dest: /lib/systemd/system/docker.service
-    regexp: '^ExecStart=/usr/bin/dockerd[.]?'
-    line: "ExecStart=/usr/bin/dockerd -H fd:// --exec-opt native.cgroupdriver=systemd --mtu={{ ansible_default_ipv4.mtu }}"
-  notify: (Docker) Restart service
-
-- name: '(Docker) Copy log options'
-  copy:
-    src: 'docker/daemon.json'
-    dest: '/etc/docker/daemon.json'
-    mode: 0644
-
-- name: (Docker) Flush handlers to restart Docker service
-  meta: flush_handlers

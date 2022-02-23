@@ -1,0 +1,11 @@
+---
+- name: (System) Force Google DNS server
+  blockinfile:
+    mode: '0777'
+    path: /etc/resolv.conf
+    content: |
+      nameserver 8.8.8.8
+      nameserver 8.8.4.4
+  tags:
+  - never
+  - forcedns
