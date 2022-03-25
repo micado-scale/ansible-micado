@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Run ansible-lint
-      uses: ansible/ansible-lint-action@master
+      uses: ansible-community/ansible-lint-action@v6.0.2
       with:
         override-deps: |
           rich>=9.5.1,<11.0.0
