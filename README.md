@@ -47,40 +47,39 @@ Manuals for MiCADO versions are as follows, and there is a very basic quick star
 
 ## Set-up
 
-Clone the repository & prepare the credentials:
+Clone the repository & fill in connection details and credentials. In the *hosts* file,
+complete values for *ansible_host (Master IP)* and *ansible_user (SSH user)*. In the
+*credentials-* files provide usernames & passwords according to cloud, desired MiCADO
+WebUI access and/or private container registry:
 
 ```bash
 MICADO_PATH=/home/ubuntu/micado
 git clone https://github.com/micado-scale/ansible-micado $MICADO_PATH
+PLAYBOOK_PATH=$MICADO_PATH/getmicado/playbook
 
-cd $MICADO_PATH
+cd $PLAYBOOK_PATH
 git checkout v0.9.2
-cp sample-hosts.yml hosts.yml
 
-cd $MICADO_PATH/credentials
+cd $PLAYBOOK_PATH/inventory
+cp sample-hosts.yml hosts.yml
+edit hosts.yml
+
+cd $PLAYBOOK_PATH/project/credentials
 cp sample-credentials-cloud-api.yml credentials-cloud-api.yml
 cp sample-credentials-micado.yml credentials-micado.yml
+edit credentials-cloud-api.yml
+edit credentials-micado.yml
 
 #optional for private registry login#
 cp sample-credentials-docker-registry.yml credentials-docker-registry.yml
-```
-
-Fill fields under `micado` key in the *hosts* file with values for *ansible_host (Master IP)* and *ansible_user (SSH user)* and fill the *credentials-* files with usernames & passwords according to your chosen cloud:
-
-```bash
-cd $MICADO_PATH
-edit hosts.yml
-edit credentials/credentials-cloud-api.yml
-edit credentials/credentials-micado.yml
-
-#optional for private registry login#
-edit credentials/credentials-docker-registry.yml
+edit credentials-docker-registry.yml
 ```
 
 Run the **micado.yml** playbook to completion:
 
 ```bash
-ansible-playbook micado.yml
+cd $PLAYBOOK_PATH
+ansible-playbook project/micado.yml
 ```
 
 #### Now view the MiCADO Dashboard at https://<MiCADO_Master_IP>
@@ -115,7 +114,7 @@ Check out the Dashboard to see the test scale up, and undeploy when done:
 Using the *sample-hosts-with-edges* file as a reference, fill values under the `micado` key as before, pointing at the MiCADO master. Under the `edgenodes` key, add as many **uniquely** named edge devices as desired, specifying their IPs as *ansible_host* and SSH username as *ansible_user*
 
 ```bash
-cd $MICADO_PATH
+cd $PLAYBOOK_PATH/inventory
 cp sample-hosts-with-edges.yml hosts.yml
 edit hosts.yml
 ```
@@ -123,7 +122,8 @@ edit hosts.yml
 Run the **edge.yml** playbook to completion:
 
 ```bash
-ansible-playbook edge.yml
+cd $PLAYBOOK_PATH
+ansible-playbook project/edge.yml
 ```
 
 **When viewing the MiCADO Dashboard, check `Nodes` under**
