@@ -15,30 +15,30 @@ intel_cpu: false
 # component docker images
 # -------------------------------------------------------
 docker_images:
-  alertmanager: prom/alertmanager:v0.21.0
+  alertmanager: prom/alertmanager:v0.23.0
   cadvisor: gcr.io/google-containers/cadvisor:v0.36.0
   credential_manager: micado/credential-manager:0.10
   crypto_engine: micado/crypto-engine:0.10
-  dashboard: micado/dashboard:0.10
-  grafana: grafana/grafana:7.1.5
+  dashboard: micado/dashboard:0.10  
+  grafana: grafana/grafana:8.4.4
   iivr: micado/iivr:0.10
-  node_exporter: prom/node-exporter:v1.0.1
+  node_exporter: prom/node-exporter:v1.3.1
   occopus: micado/occopus:1.7-rc6
   optimizer: micado/optimizer:0.10
   policykeeper: micado/policykeeper:0.10
-  prometheus: prom/prometheus:v2.20.1
-  redis: redis:5-alpine
+  prometheus: prom/prometheus:v2.34.0
+  redis: redis:6-alpine
   securitypolicymanager: micado/security-policy-manager:0.10
-  terraform: hashicorp/terraform:0.12.29
+  terraform: hashicorp/terraform:1.1.7
   toscasubmitter: micado/toscasubmitter:0.10
-  vault: vault:1.5.3
+  vault: vault:1.9.4
   zorp: micado/zorpgpl:6.0.12
 
 # component packages
 # -------------------------------------------------------
 packages:
-  docker_ce: "docker-ce=5:20.10.8~3-0~ubuntu-{{ ansible_distribution_release }}"
-  docker_ce_cli: "docker-ce-cli=5:20.10.8~3-0~ubuntu-{{ ansible_distribution_release }}"
-  containerd_io: containerd.io=1.4.4-1
-  kubernetes_version: 1.21.3-00
+  docker_ce: "docker-ce=5:20.10.13~3-0~ubuntu-{{ ansible_distribution_release }}"
+  docker_ce_cli: "docker-ce-cli=5:20.10.13~3-0~ubuntu-{{ ansible_distribution_release }}"
+  containerd_io: containerd.io=1.5.10-1
+  kubernetes_version: 1.23.4-00
   kube_edge: "1.9.1"
