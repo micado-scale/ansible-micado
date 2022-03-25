@@ -19,7 +19,7 @@ docker_images:
   cadvisor: gcr.io/google-containers/cadvisor:v0.36.0
   credential_manager: micado/credential-manager:0.10
   crypto_engine: micado/crypto-engine:0.10
-  dashboard: micado/dashboard:0.10.0
+  dashboard: micado/dashboard:0.10
   grafana: grafana/grafana:8.4.4
   iivr: micado/iivr:0.10
   node_exporter: prom/node-exporter:v1.3.1
@@ -28,7 +28,7 @@ docker_images:
   policykeeper: micado/policykeeper:0.10
   prometheus: prom/prometheus:v2.34.0
   redis: redis:6-alpine
-  securitypolicymanager: micado/security-policy-manager:0.10.1
+  securitypolicymanager: micado/security-policy-manager:0.10
   terraform: hashicorp/terraform:1.1.7
   toscasubmitter: micado/toscasubmitter:0.10
   vault: vault:1.9.4
