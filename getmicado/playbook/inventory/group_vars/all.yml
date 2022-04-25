@@ -29,7 +29,7 @@ docker_images:
   prometheus: prom/prometheus:v2.34.0
   redis: redis:6-alpine
   securitypolicymanager: micado/security-policy-manager:0.10
-  terraform: hashicorp/terraform:1.1.7
+  terraform: hashicorp/terraform:0.12.29
   toscasubmitter: micado/toscasubmitter:0.10
   vault: vault:1.9.4
   zorp: micado/zorpgpl:6.0.12
