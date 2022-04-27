@@ -1,6 +1,7 @@
 ---
 - name: (Docker login) Checking the existence of Docker credentials
   stat: path={{ docker_cred_path }}
+  become: false
   delegate_to: localhost
   register: f
   changed_when: False
