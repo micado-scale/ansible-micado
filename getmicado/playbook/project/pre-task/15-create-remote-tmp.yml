@@ -1,6 +1,7 @@
 ---
 - name: (Ansible) Checking the existence of local ansible.cfg
   stat: path=ansible.cfg
+  become: false
   delegate_to: localhost
   register: ansible_cfg_file
   tags:
