@@ -7,8 +7,7 @@ from urllib.parse import urlparse, urlunparse, urljoin
 import configure
 
 # EGI AAI Check-In settings
-client_id = configure.CHECKIN_CLIENT_ID
-client_secret = configure.CHECKIN_CLIENT_SECRET
+client_id = "token-portal"
 refresh_token = configure.CHECKIN_REFRESH_TOKEN
 checkin_auth_url = configure.CHECKIN_AUTH_URL
 
@@ -25,18 +24,16 @@ def dump_json(data, path):
     with open(path, "w") as file:
         json.dump(data, file, indent=4)
 
-def get_OIDC_Token(checkin_auth_url, client_id, client_secret, refresh_token):
+def get_OIDC_Token(checkin_auth_url, client_id, refresh_token):
     ''' Get an OIDC token from the EGI AAI Check-In service '''
 
     # Creating the paylod for the request
     payload = {'client_id': client_id, 
-               'client_secret': client_secret,
                'grant_type': 'refresh_token',
                'refresh_token': refresh_token,
-               'scope': 'openid email profile eduperson_entitlement'}
+               'scope': 'openid email profile voperson_id eduperson_entitlement'}
 
-    curl = requests.post(url=checkin_auth_url, 
-           auth=(client_id, client_secret), data=payload)
+    curl = requests.post(url=checkin_auth_url, data=payload)
     data = curl.json()
 
     # Server response
@@ -87,7 +84,7 @@ def get_scoped_Token(os_auth_url, os_project_id, unscoped_token):
 
 def main():
         # Retrive an OIDC token from the EGI AAI Check-In service.
-    token = get_OIDC_Token(checkin_auth_url, client_id, client_secret, refresh_token)
+    token = get_OIDC_Token(checkin_auth_url, client_id, refresh_token)
     
     # Check whether the token is valid
     payload = jwt.decode(token, verify=False)
