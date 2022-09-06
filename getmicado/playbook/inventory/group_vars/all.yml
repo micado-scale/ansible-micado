@@ -9,7 +9,7 @@
 
 # other
 # -------------------------------------------------------
-micado_version: v0.10.0
+micado_version: v0.11.0
 intel_cpu: false
 
 # component docker images
@@ -30,7 +30,7 @@ docker_images:
   redis: redis:6-alpine
   securitypolicymanager: micado/security-policy-manager:0.10
   terraform: hashicorp/terraform:0.12.29
-  toscasubmitter: micado/toscasubmitter:0.10
+  toscasubmitter: micado/toscasubmitter:0.11
   vault: vault:1.9.4
   zorp: micado/zorpgpl:6.0.12
 
