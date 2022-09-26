@@ -93,6 +93,8 @@ spec:
           value: {{ micado_version }}
         - name: DISABLE_OPTIMIZER
           value: "{{ not enable_optimizer }}"
+        - name: ENABLE_OCCOPUS
+          value: "{{ enable_occopus }}"
 ---
 ## Service: MiCADO Dashboard ##
 apiVersion: v1
