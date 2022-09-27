@@ -12,9 +12,17 @@
     name: iptables
     state: restarted
     enabled: yes
+    daemon-reload: yes
+  register: ipv4
+  until: ipv4 is not failed
+  retries: 5
 
 - name: (iptables) Restart IPv6 service
   service:
     name: ip6tables
     state: restarted
     enabled: yes
+    daemon-reload: yes
+  register: ipv6
+  until: ipv6 is not failed
+  retries: 5
