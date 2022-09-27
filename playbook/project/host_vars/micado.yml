@@ -39,7 +39,7 @@ master_hostname: micado-master
 min_ram: 3750
 min_disk: 14000000000
 min_free: 5000000000
-min_ubuntu: ["18.04", "20.04"]
+min_ubuntu: ["18.04", "20.04", "22.04"]
 
 # lookups
 # -------------------------------------------------------

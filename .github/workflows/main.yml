@@ -22,7 +22,24 @@ jobs:
           micado.yml
           edge.yml
           worker.yml
-    
+
+  play-ubuntu-18:
+    runs-on: ubuntu-18.04
+    needs: lint
+    steps:
+    - uses: actions/checkout@v2
+    - name: Remove existing K8s installations
+      run: sudo apt auto-remove kubectl ansible containernetworking-plugins -y
+    - name: Install Ansiblev2.9
+      run: sudo apt install python3-setuptools && sudo pip3 install ansible==2.9
+    - name: Replace hosts file
+      run: sudo cp ./tests/hosts.yml ./playbook/inventory/hosts.yml
+    - name: Run MiCADO Playbook
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        directory: ./playbook/
+        playbook: project/micado.yml
+
   play-ubuntu-20:
     runs-on: ubuntu-20.04
     needs: lint
