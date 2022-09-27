@@ -38,15 +38,13 @@ jobs:
         directory: ./playbook/
         playbook: project/micado.yml
 
-  play-ubuntu-18:
-    runs-on: ubuntu-18.04
+  play-ubuntu-22:
+    runs-on: ubuntu-22.04
     needs: lint
     steps:
     - uses: actions/checkout@v2
     - name: Remove existing K8s installations
       run: sudo apt auto-remove kubectl ansible containernetworking-plugins -y
-    - name: Install Ansiblev2.9
-      run: sudo apt install python3-setuptools && sudo pip3 install ansible==2.9
     - name: Replace hosts file
       run: sudo cp ./tests/hosts.yml ./playbook/inventory/hosts.yml
     - name: Run MiCADO Playbook
