@@ -10,13 +10,32 @@
   include_vars: "{{ docker_cred_path }}"
   when: f.stat.exists
 
-- name: (Docker login) Store Docker Registry Key
-  command: kubectl create secret docker-registry dockerloginkey
-        --docker-server={{ DOCKER_REPO }}
-        --docker-username={{ DOCKER_USER }}
-        --docker-password={{ DOCKER_PASS }}
-  when: f.stat.exists
+- name: (Docker login) Create Docker Registry Secret(s)
+  shell: >-
+    kubectl create secret docker-registry {{ item.REPO_URL.rpartition("//")[-1].partition("/")[0] }}
+    --docker-server={{ item.REPO_URL }}
+    --docker-username={{ item.REPO_USER }}
+    --docker-password={{ item.REPO_PASS }}
+    --dry-run=client -o json | kubectl apply -f -
+  loop: "{{ docker_logins }}"
+  when: docker_logins is defined
 
-- name: (Docker login) Update Service Account with Registry Key
-  command: "kubectl patch serviceaccount default -p '{\"imagePullSecrets\": [{\"name\": \"dockerloginkey\"}]}'"
-  when: f.stat.exists
+- name: (Docker login) Create Docker Registry Secret Name List
+  set_fact:
+    secret_names: >-
+      {
+        "imagePullSecrets": [
+        {% for item in docker_logins %}
+          {"name": "{{ item.REPO_URL.rpartition('//')[-1].partition('/')[0] }}"}
+          {{ ", " if not loop.last else "" }}
+        {% endfor %}
+        ]
+      }
+  no_log: True
+  loop: "{{ docker_logins }}"
+  when: docker_logins is defined
+
+- name: (Docker login) Update Service Account with Registry Key Secret(s)
+  shell: kubectl patch serviceaccount default -p '{{ secret_names | to_json | string }}'
+  when: docker_logins is defined
+
