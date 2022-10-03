@@ -17,6 +17,7 @@
     --docker-username={{ item.REPO_USER }}
     --docker-password={{ item.REPO_PASS }}
     --dry-run=client -o json | kubectl apply -f -
+  no_log: True
   loop: "{{ docker_logins }}"
   when: docker_logins is defined
 
