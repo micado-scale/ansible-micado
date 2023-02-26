@@ -4,3 +4,7 @@
     name: micado
     state: reloaded
     enabled: yes
+  register: micado_running
+  until: micado_running is succeeded
+  retries: 5
+  delay: 10
