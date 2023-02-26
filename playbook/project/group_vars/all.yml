@@ -30,7 +30,7 @@ docker_images:
   redis: library/redis:6-alpine
   securitypolicymanager: micado/security-policy-manager:0.10
   terraform: hashicorp/terraform:0.12.29
-  toscasubmitter: micado/toscasubmitter:0.11
+  toscasubmitter: micado/toscasubmitter:latest
   vault: library/vault:1.9.4
   zorp: micado/zorpgpl:6.0.12
 
