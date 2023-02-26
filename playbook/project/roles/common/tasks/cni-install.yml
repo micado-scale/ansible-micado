@@ -1,0 +1,27 @@
+---
+- name: Download cni
+  ansible.builtin.get_url:
+    url: "{{ packages.cni.url }}"
+    dest: /tmp/cni-plugins-linux-amd64.tgz
+    checksum: "{{ packages.cni.sha256 }}"
+  register: download
+  until: download is succeeded
+  retries: 5
+  delay: 10
+
+- name: Create cni directory
+  ansible.builtin.file:
+    path: /opt/cni/bin
+    state: directory
+    mode: '0755'
+
+- name: Extract cni plugins
+  ansible.builtin.unarchive:
+    remote_src: true
+    src: /tmp/cni-plugins-linux-amd64.tgz
+    dest: /opt/cni/bin
+
+- name: Remove cni plugins tar
+  ansible.builtin.file:
+    path: /tmp/cni-plugins-linux-amd64.tgz
+    state: absent
