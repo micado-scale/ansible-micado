@@ -1,6 +1,6 @@
 ---
 - name: (MiCADO Security) Wait for SPM running state
-  k8s:
+  kubernetes.core.k8s:
     kind: Deployment
     name: security-policy-manager
     namespace: micado-system

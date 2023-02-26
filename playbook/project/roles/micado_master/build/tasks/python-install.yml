@@ -15,7 +15,6 @@
     - setuptools
     - pip
     - kubernetes
-    - openshift
     - requests
     - click
     - terminaltables
