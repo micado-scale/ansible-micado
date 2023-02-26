@@ -1,15 +1,10 @@
 ---
 - include: python-install.yml
 
-- name: (Docker) Begin Docker installation
+- name: (Docker) Begin container runtime setup
   include_role:
     name: common
-    tasks_from: docker-install
-
-- name: (Docker) Begin Docker configuration
-  include_role:
-    name: common
-    tasks_from: docker-configure
+    tasks_from: container-runtime-setup
 
 - name: (Kubernetes) Begin Kubernetes installation
   include_role:
