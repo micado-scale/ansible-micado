@@ -5,12 +5,15 @@
     name: security-policy-manager
     namespace: micado-system
     wait: yes
-    wait_timeout: 240
+    wait_timeout: 90
     wait_condition:
       reason: MinimumReplicasAvailable
       status: "True"
       type: Available
   register: spm_running
+  until: spm_running is succeeded
+  retries: 3
+  delay: 10
 
 - name: (MiCADO Security) Get CA for IPSEC (master) (shell)
   shell: curl http://10.97.170.199:5003/v1.0/nodecerts/ca > /etc/ipsec.d/cacerts/master.pem
