@@ -37,9 +37,6 @@ docker_images:
 # component packages
 # -------------------------------------------------------
 packages:
-  docker_ce: "docker-ce=5:20.10.13~3-0~ubuntu-{{ ansible_distribution_release }}"
-  docker_ce_cli: "docker-ce-cli=5:20.10.13~3-0~ubuntu-{{ ansible_distribution_release }}"
-  containerd_io: containerd.io=1.5.10-1
   containerd:
     url: https://github.com/containerd/containerd/releases/download/v1.6.18/containerd-1.6.18-linux-amd64.tar.gz
     sha256: sha256:c4e516376a2392520a87abea94baf2045cc3a67e9e0c90c75fb6ed038170561e
