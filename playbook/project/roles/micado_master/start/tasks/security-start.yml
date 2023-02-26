@@ -15,13 +15,29 @@
   retries: 3
   delay: 10
 
-- name: (MiCADO Security) Get CA for IPSEC (master) (shell)
-  shell: curl http://10.97.170.199:5003/v1.0/nodecerts/ca > /etc/ipsec.d/cacerts/master.pem
+- name: (MiCADO Security) Get CA for IPSEC (master)
+  get_url:  
+    url: http://10.97.170.199:5003/v1.0/nodecerts/ca
+    dest: /etc/ipsec.d/cacerts/master.pem
   when: spm_running is succeeded
+  register: response
+  until: response.status_code == 200
+  retries: 5
+  delay: 10
 
-- name: (MiCADO Security) Get CRT and KEY for IPSEC (master) (shell)
-  shell: curl http://10.97.170.199:5003/v1.0/nodecerts > /tmp/tmp_certs
+- name: (MiCADO Security) Get CRT and KEY for IPSEC (master)
+  ansible.builtin.uri:
+    url: http://10.97.170.199:5003/v1.0/nodecerts
+    method: POST
+    dest: /tmp/tmp_certs
+    body_format: form-multipart
+    body:
+      cert_common_name: masternode.micado
   when: spm_running is succeeded
+  register: nodecerts
+  until: nodecerts.status == 200
+  retries: 5
+  delay: 10
 
 - name: (MiCADO Security) Split PEM IPSec (key)
   command: /usr/bin/openssl pkey -in /tmp/tmp_certs -out /etc/ipsec.d/private/master.key
