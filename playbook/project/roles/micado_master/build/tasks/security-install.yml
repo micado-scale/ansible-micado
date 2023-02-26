@@ -51,9 +51,7 @@
         dest: '/var/log/micado/zorp/README'}
 
 - name: '(MiCADO Security) Downloading docker images'
-  docker_image:
-    name: "{{ item }}"
-    source: pull
+  ansible.builtin.command: ctr image pull docker.io/{{ item }}
   loop:
   - "{{ docker_images.credential_manager }}"
   - "{{ docker_images.vault }}"
@@ -62,7 +60,5 @@
   - "{{ docker_images.zorp }}"
 
 - name: '(MiCADO Security) Downloading Image Integrity Verifier container'
-  docker_image:
-    name: "{{ docker_images.iivr }}"
-    source: pull
+  ansible.builtin.command: ctr image pull docker.io/{{ docker_images.iivr }}
   when: intel_cpu

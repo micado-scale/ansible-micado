@@ -20,10 +20,8 @@
     dest: "/var/lib/micado/occopus/config/occopus_config.yaml"
     mode: "0775"
 
-- name: '(Occopus) Downloading docker images'
-  docker_image:
-    name: "{{ item }}"
-    source: pull
+- name: '(Occopus) Downloading container images'
+  ansible.builtin.command: ctr image pull docker.io/{{ item }}
   loop:
   - "{{ docker_images.redis }}"
   - "{{ docker_images.occopus }}"

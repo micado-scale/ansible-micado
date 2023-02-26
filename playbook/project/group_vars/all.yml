@@ -27,11 +27,11 @@ docker_images:
   optimizer: micado/optimizer:0.10
   policykeeper: micado/policykeeper:0.10
   prometheus: prom/prometheus:v2.34.0
-  redis: redis:6-alpine
+  redis: library/redis:6-alpine
   securitypolicymanager: micado/security-policy-manager:0.10
   terraform: hashicorp/terraform:0.12.29
   toscasubmitter: micado/toscasubmitter:0.11
-  vault: vault:1.9.4
+  vault: library/vault:1.9.4
   zorp: micado/zorpgpl:6.0.12
 
 # component packages
