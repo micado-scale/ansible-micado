@@ -27,18 +27,25 @@ docker_images:
   optimizer: micado/optimizer:0.10
   policykeeper: micado/policykeeper:0.10
   prometheus: prom/prometheus:v2.34.0
-  redis: redis:6-alpine
+  redis: library/redis:6-alpine
   securitypolicymanager: micado/security-policy-manager:0.10
   terraform: hashicorp/terraform:0.12.29
-  toscasubmitter: micado/toscasubmitter:0.11
-  vault: vault:1.9.4
+  toscasubmitter: micado/toscasubmitter:latest
+  vault: library/vault:1.9.4
   zorp: micado/zorpgpl:6.0.12
 
 # component packages
 # -------------------------------------------------------
 packages:
-  docker_ce: "docker-ce=5:20.10.13~3-0~ubuntu-{{ ansible_distribution_release }}"
-  docker_ce_cli: "docker-ce-cli=5:20.10.13~3-0~ubuntu-{{ ansible_distribution_release }}"
-  containerd_io: containerd.io=1.5.10-1
-  kubernetes_version: 1.23.4-00
+  containerd:
+    url: https://github.com/containerd/containerd/releases/download/v1.6.18/containerd-1.6.18-linux-amd64.tar.gz
+    sha256: sha256:c4e516376a2392520a87abea94baf2045cc3a67e9e0c90c75fb6ed038170561e
+    unit: https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
+  runc:
+    url: https://github.com/opencontainers/runc/releases/download/v1.1.4/runc.amd64
+    sha256: sha256:db772be63147a4e747b4fe286c7c16a2edc4a8458bd3092ea46aaee77750e8ce
+  cni:
+    url: https://github.com/containernetworking/plugins/releases/download/v1.2.0/cni-plugins-linux-amd64-v1.2.0.tgz
+    sha256: sha256:f3a841324845ca6bf0d4091b4fc7f97e18a623172158b72fc3fdcdb9d42d2d37
+  kubernetes_version: 1.26.1-00
   kube_edge: "1.9.1"

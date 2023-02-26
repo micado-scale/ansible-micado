@@ -59,10 +59,8 @@
   - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep prometheus | col1)\n",
       dest: '/var/log/micado/prometheus/README'}
 
-- name: '(MiCADO Core) Downloading docker images'
-  docker_image:
-      name: "{{ item }}"
-      source: pull
+- name: '(MiCADO Core) Downloading container images'
+  ansible.builtin.command: ctr image pull docker.io/{{ item }}
   loop:
   - "{{ docker_images.prometheus }}"
   - "{{ docker_images.alertmanager }}"

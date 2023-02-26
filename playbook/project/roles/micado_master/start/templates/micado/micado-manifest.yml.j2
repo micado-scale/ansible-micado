@@ -79,10 +79,10 @@ spec:
         tier: frontend
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: micado-dashboard
         image: {{docker_images.dashboard}}
@@ -132,10 +132,10 @@ spec:
         tier: cloud-orchestration
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: occopus-redis
         image: {{docker_images.redis}}
@@ -194,10 +194,10 @@ spec:
         tier: cloud-orchestration
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: occopus
         image: {{docker_images.occopus}}
@@ -278,10 +278,10 @@ spec:
         tier: cloud-orchestration
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: terraform
         image: {{docker_images.terraform}}
@@ -336,10 +336,10 @@ spec:
         tier: monitoring
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       serviceAccount: prometheus
       containers:
       - name: prometheus
@@ -400,10 +400,10 @@ spec:
         tier: monitoring
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: alertmanager
         image: {{docker_images.alertmanager}}
@@ -455,10 +455,10 @@ spec:
         tier: scaling
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: policykeeper
         image: {{docker_images.policykeeper}}
@@ -541,10 +541,10 @@ spec:
         tier: optimizing
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: optimizer
         image: {{docker_images.optimizer}}
@@ -604,10 +604,10 @@ spec:
         tier: monitoring
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: grafana
         image: {{docker_images.grafana}}
@@ -676,10 +676,10 @@ spec:
         tier: orchestration
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: toscasubmitter
         image: {{docker_images.toscasubmitter}}
@@ -791,10 +791,10 @@ spec:
         tier: security
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: alertmanager
         image: {{docker_images.credential_manager}}
@@ -847,10 +847,10 @@ spec:
         tier: security
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: iivr
         image: {{docker_images.iivr}}
@@ -898,10 +898,10 @@ spec:
         tier: security
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: crypto-engine
         image: {{docker_images.crypto_engine}}
@@ -948,10 +948,10 @@ spec:
         tier: security
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: vault
         image: {{docker_images.vault}}
@@ -1019,10 +1019,10 @@ spec:
         tier: security
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       initContainers:
       - name: init-wait-vault
         image: busybox:1.30
@@ -1080,10 +1080,10 @@ spec:
         tier: security
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        node-role.kubernetes.io/control-plane: ''
       containers:
       - name: zorp
         image: {{docker_images.zorp}}

@@ -14,6 +14,10 @@
   apt_key:
     url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
     state: present
+  register: add_key
+  until: add_key is succeeded
+  retries: 5
+  delay: 15
 
 - name: '(Kubernetes) Add APT repository'
   apt_repository:

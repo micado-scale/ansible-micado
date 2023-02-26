@@ -1,7 +1,7 @@
 ---
-- name: (Docker) Begin Docker installation
+- name: (Docker) Begin containerd installation
   include_role:
     name: common
-    tasks_from: docker-install
+    tasks_from: container-runtime-setup
 
 - include: edge_join.yml

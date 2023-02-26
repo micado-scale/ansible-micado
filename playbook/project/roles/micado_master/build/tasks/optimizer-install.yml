@@ -20,6 +20,4 @@
   - { src: 'optimizer/optimizer_config.yaml', dest: '/var/lib/micado/optimizer/config/optimizer_config.yaml', mode: '0644'}
 
 - name: '(Optimizer) Downloading container'
-  docker_image:
-    name: "{{ docker_images.optimizer }}"
-    source: pull
+  ansible.builtin.command: ctr image pull docker.io/{{ docker_images.optimizer }}
