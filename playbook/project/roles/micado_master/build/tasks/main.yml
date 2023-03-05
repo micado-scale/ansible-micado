@@ -1,17 +1,22 @@
 ---
-- include: python-install.yml
+- include: python-prep.yml
 
-- name: (Docker) Begin container runtime setup
+- name: Populate service facts
+  service_facts:
+
+- name: (k3s) Init k3s
   include_role:
     name: common
-    tasks_from: container-runtime-setup
+    tasks_from: k3s-init
+  when: '"k3s.service" not in services'
 
-- name: (Kubernetes) Begin Kubernetes installation
-  include_role:
-    name: common
-    tasks_from: kubernetes-install
+- name: Get Service Status
+  ansible.builtin.systemd:
+    name: k3s
+  register: k3s_service
 
-- include: kubernetes-configure.yml
+- include: image-pulls.yml
+  when: k3s_service.status.ActiveState == "active"
 
 - include: core-install.yml
 
@@ -25,3 +30,8 @@
 
 - include: terraform-install.yml
   when: enable_terraform
+
+- name: '(k3s) Stop service'
+  systemd:
+    name: k3s
+    state: stopped

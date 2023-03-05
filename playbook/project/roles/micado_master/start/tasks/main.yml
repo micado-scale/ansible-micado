@@ -1,8 +1,6 @@
 ---
 - include: set-hostname.yml
 
-- include: kubernetes-start.yml
-
 - include: core-config.yml
 
 - include: security-config.yml
@@ -10,8 +8,7 @@
 - include: occopus-config.yml
   when: enable_occopus
 
-- include: terraform-config.yml
-  when: enable_terraform
+- include: k3s-start.yml
 
 - include: micado-start.yml
 
