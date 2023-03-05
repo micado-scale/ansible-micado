@@ -1096,8 +1096,7 @@ spec:
       - name: zorp
         image: {{docker_images.zorp}}
         ports:
-        - hostPort: {{ web_listening_port | default('443') }}
-          containerPort: 443
+        - containerPort: 443
         volumeMounts:
         - name: zorp-config
           mountPath: /etc/zorp
@@ -1126,3 +1125,21 @@ spec:
   selector:
     name: zorp
     tier: security
+---
+## Ingress: Zorp ##
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zorp-ingress
+  namespace: micado-system
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: zorp
+            port:
+              number: 443
