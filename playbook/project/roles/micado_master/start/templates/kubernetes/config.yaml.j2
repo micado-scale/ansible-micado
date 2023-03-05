@@ -1,0 +1,5 @@
+node-name: micado-control-plane
+bind-address: {{ ansible_default_ipv4.address }}
+flannel-backend: wireguard-native
+node-taint:
+  - node-role.kubernetes.io/control-plane=true:NoSchedule
