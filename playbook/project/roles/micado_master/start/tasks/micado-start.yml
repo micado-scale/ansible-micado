@@ -1,13 +1,13 @@
 ---
-- name: (MiCADO Core) Flush handlers to restart services
-  meta: flush_handlers
-
 - name: (MiCADO Core) Get API endpoint
   k8s:
     kind: Service
     name: toscasubmitter
     namespace: micado-system
   register: submitter
+  until: submitter is succeeded
+  retries: 5
+  delay: 10
 
 - name: (MiCADO Core) Set API environment
   lineinfile:
