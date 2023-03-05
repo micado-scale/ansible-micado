@@ -16,7 +16,6 @@
   tags:
   - update-auth
 
-- include: security-start.yml
 
 - include: docker-login.yml
   when: docker_cred_path is defined
