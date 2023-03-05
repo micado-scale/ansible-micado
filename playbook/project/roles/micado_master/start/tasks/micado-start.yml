@@ -1,13 +1,20 @@
 ---
+- name: (MiCADO Core) Wait for components
+  k8s:
+    kind: Deployment
+    name: toscasubmitter
+    namespace: micado-system
+  register: components
+  until: components is succeeded
+  retries: 5
+  delay: 10
+
 - name: (MiCADO Core) Get API endpoint
   k8s:
     kind: Service
     name: toscasubmitter
     namespace: micado-system
   register: submitter
-  until: submitter is succeeded
-  retries: 5
-  delay: 10
 
 - name: (MiCADO Core) Set API environment
   lineinfile:
