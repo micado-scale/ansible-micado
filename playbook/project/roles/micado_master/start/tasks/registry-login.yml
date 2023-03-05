@@ -1,0 +1,12 @@
+---
+- name: (Container registries) Checking the existence of registry credentials
+  stat: path={{ registry_cred_path }}
+  become: false
+  delegate_to: localhost
+  register: f
+
+- name: (Container registries) Copy registries.yaml
+  copy:
+    src: "{{ registry_cred_path }}"
+    dest: /etc/rancher/k3s/registries.yaml
+  when: f.stat.exists

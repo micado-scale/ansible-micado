@@ -5,8 +5,8 @@
 
 - include: security-config.yml
 
-- include: occopus-config.yml
-  when: enable_occopus
+- include: registry-login.yml
+  when: registry_cred_path is defined
 
 - include: k3s-start.yml
 
@@ -15,7 +15,3 @@
 - include: load-auth.yml
   tags:
   - update-auth
-
-
-- include: docker-login.yml
-  when: docker_cred_path is defined
