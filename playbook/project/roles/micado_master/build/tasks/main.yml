@@ -18,17 +18,17 @@
 - include: image-pulls.yml
   when: k3s_service.status.ActiveState == "active"
 
-- include: core-install.yml
+- include: core-prep.yml
 
-- include: security-install.yml
+- include: security-prep.yml
 
-- include: optimizer-install.yml
+- include: optimizer-prep.yml
   when: enable_optimizer
 
-- include: occopus-install.yml
+- include: occopus-prep.yml
   when: enable_occopus
 
-- include: terraform-install.yml
+- include: terraform-prep.yml
   when: enable_terraform
 
 - name: '(k3s) Stop service'

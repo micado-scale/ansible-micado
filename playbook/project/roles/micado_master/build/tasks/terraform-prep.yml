@@ -27,6 +27,3 @@
     mode: "{{ item.mode }}"
   loop:
   - { src: 'terraform/terraform', dest: '/var/lib/micado/terraform/wrapper/terraform', mode: '0755'}
-
-- name: '(Terraform) Downloading container image'
-  ansible.builtin.command: ctr image pull docker.io/{{ docker_images.terraform }}

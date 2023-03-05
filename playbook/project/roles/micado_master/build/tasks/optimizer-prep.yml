@@ -18,6 +18,3 @@
     mode: "{{ item.mode }}"
   loop:
   - { src: 'optimizer/optimizer_config.yaml', dest: '/var/lib/micado/optimizer/config/optimizer_config.yaml', mode: '0644'}
-
-- name: '(Optimizer) Downloading container'
-  ansible.builtin.command: ctr image pull docker.io/{{ docker_images.optimizer }}
