@@ -1,39 +1,16 @@
 ---
-- name: (Kubernetes) Ensure micado-system namespace exists
-  k8s:
-    state: present
-    api_version: v1
-    kind: Namespace
-    name: micado-system
-  notify: (MiCADO Core) Reload micado.service
-
-- name: '(MiCADO Core) Copy MiCADO Kubernetes manifest'
-  template:
-    src: micado/micado-manifest.yml.j2
-    dest: /var/lib/micado/micado-manifest.yml
-    mode: '0666'
-
-- name: '(MiCADO Core) Copy iptables templates'
-  template:
-    src: iptables/iptables.conf.j2
-    dest: /etc/iptables.conf
-    mode: '0666'
-  notify: (iptables) Restart IPv4 service
-
-- name: '(MiCADO Core) Copy ip6tables templates'
-  template:
-    src: iptables/ip6tables.conf.j2
-    dest: /etc/ip6tables.conf
-    mode: '0666'
-  notify: (iptables) Restart IPv6 service
-
-- name: '(MiCADO Core) Copy other config templates'
+- name: 'Copy templates'
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    mode: '0666'
+    mode: 0666
   loop:
-    - { src: 'micado/cadvisor.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/cadvisor.yaml'}
-    - { src: 'micado/nodex.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/nodex.yaml'}
-    - { src: 'toscasubmitter/key_config.yml.j2', dest: '/var/lib/micado/toscasubmitter/system/key_config.yml'}
-    - { src: 'grafana/data-dashboards-micado.json.j2', dest: '/var/lib/micado/grafana/data/dashboards/micado.json'}
+  - { src: 'iptables/iptables.conf.j2', dest: '/etc/iptables.conf'}
+  - { src: 'iptables/ip6tables.conf.j2', dest: '/etc/ip6tables.conf'}
+  - { src: 'micado/cadvisor.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/cadvisor.yaml'}
+  - { src: 'micado/nodex.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/nodex.yaml'}
+  - { src: 'toscasubmitter/key_config.yml.j2', dest: '/var/lib/micado/toscasubmitter/system/key_config.yml'}
+  - { src: 'grafana/data-dashboards-micado.json.j2', dest: '/var/lib/micado/grafana/data/dashboards/micado.json'}
+  notify:
+  - (iptables) Restart IPv4 service
+  - (iptables) Restart IPv6 service
