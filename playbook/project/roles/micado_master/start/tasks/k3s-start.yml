@@ -12,6 +12,7 @@
     mode: 0644
   loop:
   - { src: 'micado/micado-manifest.yml.j2', dest: '/var/lib/rancher/k3s/server/manifests/micado-manifest.yml'}
+  - { src: 'kubernetes/kube-dash.yaml.j2', dest: '/var/lib/rancher/k3s/server/manifests/kube-dash.yaml'}
   - { src: 'kubernetes/traefik-config.yaml.j2', dest: '/var/lib/rancher/k3s/server/manifests/traefik-config.yaml'}
 
 - name: '(k3s) Start service'

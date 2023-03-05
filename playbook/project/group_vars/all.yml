@@ -48,4 +48,5 @@ packages:
     url: https://github.com/containernetworking/plugins/releases/download/v1.2.0/cni-plugins-linux-amd64-v1.2.0.tgz
     sha256: sha256:f3a841324845ca6bf0d4091b4fc7f97e18a623172158b72fc3fdcdb9d42d2d37
   kubernetes_version: 1.26.1-00
+  kubernetes_dashboard: kubernetesui/dashboard:v2.7.0
   kube_edge: "1.9.1"
