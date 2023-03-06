@@ -4,6 +4,12 @@
     kind: Deployment
     name: toscasubmitter
     namespace: micado-system
+    wait: yes
+    wait_timeout: 90
+    wait_condition:
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
   register: components
   until: components is succeeded
   retries: 5
