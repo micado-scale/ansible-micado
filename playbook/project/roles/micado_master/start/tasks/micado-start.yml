@@ -1,4 +1,25 @@
 ---
+- name: (MiCADO Core) Get API endpoint
+  k8s:
+    kind: Service
+    name: toscasubmitter
+    namespace: micado-system
+  register: submitter
+  until: submitter is succeeded
+  retries: 
+  delay: 10
+
+- name: (MiCADO Core) Set API environment
+  lineinfile:
+    path: /etc/environment
+    line: "{{ item.line }}"
+    mode: '0644'
+  with_items:
+  - line: >-
+      MICADO_API_ENDPOINT=http://{{ submitter.result.spec.clusterIP
+      }}:{{ submitter.result.spec.ports[0].port }}
+  - { line: "MICADO_API_VERSION=v2.0" }
+
 - name: (MiCADO Core) Wait for components
   k8s:
     kind: Deployment
@@ -12,23 +33,5 @@
       type: Available
   register: components
   until: components is succeeded
-  retries: 5
-  delay: 10
-
-- name: (MiCADO Core) Get API endpoint
-  k8s:
-    kind: Service
-    name: toscasubmitter
-    namespace: micado-system
-  register: submitter
-
-- name: (MiCADO Core) Set API environment
-  lineinfile:
-    path: /etc/environment
-    line: "{{ item.line }}"
-    mode: '0644'
-  with_items:
-  - line: >-
-      MICADO_API_ENDPOINT=http://{{ submitter.result.spec.clusterIP
-      }}:{{ submitter.result.spec.ports[0].port }}
-  - { line: "MICADO_API_VERSION=v2.0" }
+  retries: 3
+  delay: 5
