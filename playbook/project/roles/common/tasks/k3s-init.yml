@@ -1,6 +1,6 @@
 ---
 - name: '(k3s) Create cluster'
-  shell: curl -sfL https://get.k3s.io | sh -s - --node-name micado-control-plane
+  shell: curl -sfL https://get.k3s.io | sh -s - --node-name micado-control-plane --node-taint node-role.kubernetes.io/control-plane=true:NoSchedule
 
 - name: (k3s) Create kubeconfig directory
   ansible.builtin.file:
