@@ -13,9 +13,9 @@
 - include: cloud-config.yml
   when: enable_terraform or enable_occopus
 
-- include: micado-start.yml
-
 - include: load-auth.yml
   when: enable_terraform or enable_occopus
   tags:
   - update-auth
+
+- include: micado-start.yml
