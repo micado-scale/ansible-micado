@@ -21,6 +21,13 @@ write_files:
     - micado.eu/node_type={{ '{{ worker_name }}' }}
     token: {{ join_token.content | b64decode | trim }}
 
+{% if reg_creds.stat.exists %}
+- path: /etc/rancher/k3s/registries.yaml
+  permissons: '644'
+  content: |
+{{ registries['content'] | b64decode | indent(4, true) }}
+{% endif %}
+
 packages:
 - apt-transport-https
 - ca-certificates
