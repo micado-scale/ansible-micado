@@ -253,7 +253,8 @@ spec:
           emptyDir: {}
       serviceAccountName: kubernetes-dashboard
       nodeSelector:
-        "kubernetes.io/os": linux
+        node-role.kubernetes.io/control-plane: 'true'
       tolerations:
         - key: node-role.kubernetes.io/control-plane
+          operator: Exists
           effect: NoSchedule
