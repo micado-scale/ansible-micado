@@ -8,7 +8,7 @@
 
 # other
 # -------------------------------------------------------
-micado_version: v0.12.0-alpha
+micado_version: v0.12.0-beta
 intel_cpu: false
 
 # component docker images

@@ -39,3 +39,10 @@
     src: /etc/rancher/k3s/k3s.yaml
     dest: /root/.kube/config
     remote_src: true
+
+- name: '(micado) wait for namespace'
+  command: kubectl get ns micado-system
+  register: micado_namespace
+  until: micado_namespace is succeeded
+  retries: 5
+  delay: 5
