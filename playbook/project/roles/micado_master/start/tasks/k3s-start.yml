@@ -31,8 +31,9 @@
     state: directory
     mode: '0644'
 
-- name: '(k3s) Set default namespace'
+- name: '(k3s) Try to set default namespace'
   command: kubectl config set-context --current --namespace=default
+  ignore_errors: true
 
 - name: '(k3s) Copy kubeconfig'
   ansible.builtin.copy:
