@@ -1,0 +1,4 @@
+node-name: micado-control-plane
+disable: traefik
+bind-address: {{ ansible_default_ipv4.address }}
+flannel-backend: wireguard-native

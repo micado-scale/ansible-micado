@@ -1,9 +1,4 @@
 ---
-- name: '(MiCADO Security) Install strongSwan'
-  apt:
-    name: strongswan
-    state: present
-
 - name: '(MiCADO Security) Create directories'
   file:
     path: "{{ item.path }}"
@@ -49,16 +44,3 @@
         dest: '/var/log/micado/iivr/README'}
     - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep zorp | col1)\n",
         dest: '/var/log/micado/zorp/README'}
-
-- name: '(MiCADO Security) Downloading docker images'
-  ansible.builtin.command: ctr image pull docker.io/{{ item }}
-  loop:
-  - "{{ docker_images.credential_manager }}"
-  - "{{ docker_images.vault }}"
-  - "{{ docker_images.securitypolicymanager }}"
-  - "{{ docker_images.crypto_engine }}"
-  - "{{ docker_images.zorp }}"
-
-- name: '(MiCADO Security) Downloading Image Integrity Verifier container'
-  ansible.builtin.command: ctr image pull docker.io/{{ docker_images.iivr }}
-  when: intel_cpu

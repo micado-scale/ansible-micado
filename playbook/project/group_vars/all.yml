@@ -1,7 +1,6 @@
 # config file for global MiCADO settings
 # =======================================================
 
-# no options here
 
 # =======================================================
 # end of user options. do not edit under this line
@@ -9,14 +8,13 @@
 
 # other
 # -------------------------------------------------------
-micado_version: v0.11.0
+micado_version: v0.12.0-beta
 intel_cpu: false
 
 # component docker images
 # -------------------------------------------------------
 docker_images:
   alertmanager: prom/alertmanager:v0.23.0
-  cadvisor: gcr.io/google-containers/cadvisor:v0.36.0
   credential_manager: micado/credential-manager:0.10
   crypto_engine: micado/crypto-engine:0.10
   dashboard: micado/dashboard:0.11
@@ -37,15 +35,6 @@ docker_images:
 # component packages
 # -------------------------------------------------------
 packages:
-  containerd:
-    url: https://github.com/containerd/containerd/releases/download/v1.6.18/containerd-1.6.18-linux-amd64.tar.gz
-    sha256: sha256:c4e516376a2392520a87abea94baf2045cc3a67e9e0c90c75fb6ed038170561e
-    unit: https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
-  runc:
-    url: https://github.com/opencontainers/runc/releases/download/v1.1.4/runc.amd64
-    sha256: sha256:db772be63147a4e747b4fe286c7c16a2edc4a8458bd3092ea46aaee77750e8ce
-  cni:
-    url: https://github.com/containernetworking/plugins/releases/download/v1.2.0/cni-plugins-linux-amd64-v1.2.0.tgz
-    sha256: sha256:f3a841324845ca6bf0d4091b4fc7f97e18a623172158b72fc3fdcdb9d42d2d37
   kubernetes_version: 1.26.1-00
+  kubernetes_dashboard: kubernetesui/dashboard:v2.7.0
   kube_edge: "1.9.1"

@@ -225,7 +225,7 @@ spec:
     spec:
       containers:
         - name: kubernetes-dashboard
-          image: kubernetesui/dashboard:v2.7.0
+          image: {{packages.kubernetes_dashboard}}
           ports:
             - containerPort: 9090
               protocol: TCP
@@ -253,7 +253,8 @@ spec:
           emptyDir: {}
       serviceAccountName: kubernetes-dashboard
       nodeSelector:
-        "kubernetes.io/os": linux
+        node-role.kubernetes.io/control-plane: 'true'
       tolerations:
         - key: node-role.kubernetes.io/control-plane
+          operator: Exists
           effect: NoSchedule

@@ -1,0 +1,49 @@
+---
+- name: '(k3s) Copy config'
+  template:
+    src: kubernetes/config.yaml.j2
+    dest: /etc/rancher/k3s/config.yaml
+    mode: 0644
+
+- name: 'Copy auto-deploy manifests'
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0644
+  loop:
+  - { src: 'micado/micado-manifest.yml.j2', dest: '/var/lib/rancher/k3s/server/manifests/micado-manifest.yml'}
+  - { src: 'kubernetes/kube-dash.yaml.j2', dest: '/var/lib/rancher/k3s/server/manifests/kube-dash.yaml'}
+  - { src: 'kubernetes/traefik-config.yaml.j2', dest: '/var/lib/rancher/k3s/server/manifests/traefik-config.yaml'}
+
+- name: '(k3s) Start service'
+  systemd:
+    name: k3s
+    state: started
+
+- name: '(k3s) Get cluster join command'
+  ansible.builtin.slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  register: join_token
+
+- name: (k3s) Create kubeconfig directory
+  ansible.builtin.file:
+    path: /root/.kube/
+    state: directory
+    mode: '0644'
+
+- name: '(k3s) Try to set default namespace'
+  command: kubectl config set-context --current --namespace=default
+  ignore_errors: true
+
+- name: '(k3s) Copy kubeconfig'
+  ansible.builtin.copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: /root/.kube/config
+    remote_src: true
+
+- name: '(micado) wait for namespace'
+  command: kubectl get ns micado-system
+  register: micado_namespace
+  until: micado_namespace is succeeded
+  retries: 5
+  delay: 5

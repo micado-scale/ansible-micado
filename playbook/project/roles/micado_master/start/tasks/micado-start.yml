@@ -1,13 +1,13 @@
 ---
-- name: (MiCADO Core) Flush handlers to restart services
-  meta: flush_handlers
-
 - name: (MiCADO Core) Get API endpoint
   k8s:
     kind: Service
     name: toscasubmitter
     namespace: micado-system
   register: submitter
+  until: submitter is succeeded
+  retries: 
+  delay: 10
 
 - name: (MiCADO Core) Set API environment
   lineinfile:
@@ -19,3 +19,19 @@
       MICADO_API_ENDPOINT=http://{{ submitter.result.spec.clusterIP
       }}:{{ submitter.result.spec.ports[0].port }}
   - { line: "MICADO_API_VERSION=v2.0" }
+
+- name: (MiCADO Core) Wait for components
+  k8s:
+    kind: Deployment
+    name: toscasubmitter
+    namespace: micado-system
+    wait: yes
+    wait_timeout: 90
+    wait_condition:
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+  register: components
+  until: components is succeeded
+  retries: 3
+  delay: 5

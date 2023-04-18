@@ -1,0 +1,15 @@
+---
+- name: '(k3s) Create cluster'
+  shell: curl -sfL https://get.k3s.io | sh -s - --node-name micado-control-plane --node-taint node-role.kubernetes.io/control-plane=true:NoSchedule --disable traefik
+
+- name: (k3s) Create kubeconfig directory
+  ansible.builtin.file:
+    path: /root/.kube/
+    state: directory
+    mode: '0644'
+
+- name: (k3s) Create manifests directory
+  ansible.builtin.file:
+    path: /var/lib/rancher/k3s/server/manifests/
+    state: directory
+    mode: '0755'

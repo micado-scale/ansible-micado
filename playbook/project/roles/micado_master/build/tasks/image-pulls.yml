@@ -1,0 +1,38 @@
+---
+- name: '(MiCADO Core) Downloading container images'
+  ansible.builtin.command: "k3s crictl pull docker.io/{{ item }}"
+  loop:
+  - "{{ docker_images.prometheus }}"
+  - "{{ docker_images.alertmanager }}"
+  - "{{ docker_images.grafana }}"
+  - "{{ docker_images.policykeeper }}"
+  - "{{ docker_images.dashboard }}"
+  - "{{ docker_images.toscasubmitter }}"
+
+- name: '(MiCADO Security) Downloading docker images'
+  ansible.builtin.command: "k3s crictl pull docker.io/{{ item }}"
+  loop:
+  - "{{ docker_images.credential_manager }}"
+  - "{{ docker_images.vault }}"
+  - "{{ docker_images.securitypolicymanager }}"
+  - "{{ docker_images.crypto_engine }}"
+  - "{{ docker_images.zorp }}"
+
+- name: '(MiCADO Security) Downloading Image Integrity Verifier container'
+  ansible.builtin.command: "k3s crictl pull docker.io/{{ docker_images.iivr }}"
+  when: intel_cpu
+
+- name: '(Occopus) Downloading container images'
+  ansible.builtin.command: "k3s crictl pull docker.io/{{ item }}"
+  loop:
+  - "{{ docker_images.redis }}"
+  - "{{ docker_images.occopus }}"
+  when: enable_occopus
+
+- name: '(Terraform) Downloading container image'
+  ansible.builtin.command: "k3s crictl pull docker.io/{{ docker_images.terraform }}"
+  when: enable_terraform
+
+- name: '(Optimizer) Downloading container'
+  ansible.builtin.command: "k3s crictl pull docker.io/{{ docker_images.optimizer }}"
+  when: enable_optimizer

@@ -1,3 +1,11 @@
+# MiCADO System Namespace ##
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: micado-system
+  labels:
+    name: micado-system
+---
 # MiCADO Worker Namespace ##
 kind: Namespace
 apiVersion: v1
@@ -80,9 +88,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: micado-dashboard
         image: {{docker_images.dashboard}}
@@ -133,9 +142,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: occopus-redis
         image: {{docker_images.redis}}
@@ -195,9 +205,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: occopus
         image: {{docker_images.occopus}}
@@ -279,9 +290,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: terraform
         image: {{docker_images.terraform}}
@@ -337,9 +349,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       serviceAccount: prometheus
       containers:
       - name: prometheus
@@ -401,9 +414,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: alertmanager
         image: {{docker_images.alertmanager}}
@@ -456,9 +470,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: policykeeper
         image: {{docker_images.policykeeper}}
@@ -542,9 +557,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: optimizer
         image: {{docker_images.optimizer}}
@@ -605,9 +621,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: grafana
         image: {{docker_images.grafana}}
@@ -677,9 +694,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: toscasubmitter
         image: {{docker_images.toscasubmitter}}
@@ -727,7 +745,7 @@ spec:
           path: /root/.kube
       - name: kube-binary
         hostPath:
-          path: /usr/bin/kubectl
+          path: /usr/local/bin/kubectl
       - name: submitter-outputs
         hostPath:
           path: /var/lib/micado/toscasubmitter/output
@@ -792,9 +810,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: alertmanager
         image: {{docker_images.credential_manager}}
@@ -848,9 +867,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: iivr
         image: {{docker_images.iivr}}
@@ -899,9 +919,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: crypto-engine
         image: {{docker_images.crypto_engine}}
@@ -949,9 +970,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: vault
         image: {{docker_images.vault}}
@@ -1020,9 +1042,10 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       initContainers:
       - name: init-wait-vault
         image: busybox:1.30
@@ -1053,7 +1076,6 @@ metadata:
   labels:
     tier: security
 spec:
-  clusterIP: 10.97.170.199
   ports:
   - port: 5003
   selector:
@@ -1081,15 +1103,16 @@ spec:
     spec:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
+        operator: Exists
         effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ''
+        node-role.kubernetes.io/control-plane: 'true'
       containers:
       - name: zorp
         image: {{docker_images.zorp}}
         ports:
-        - hostPort: {{ web_listening_port | default('443') }}
-          containerPort: 443
+        - containerPort: 443
+          hostPort: 443
         volumeMounts:
         - name: zorp-config
           mountPath: /etc/zorp

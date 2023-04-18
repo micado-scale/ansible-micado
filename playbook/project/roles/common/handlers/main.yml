@@ -1,12 +1,4 @@
 ---
-- name: (Docker) Restart service
-  systemd:
-    daemon_reload: yes
-    name: docker
-    state: restarted
-    enabled: yes
-    masked: no
-
 - name: (iptables) Restart IPv4 service
   service:
     name: iptables

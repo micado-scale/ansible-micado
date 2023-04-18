@@ -1,0 +1,18 @@
+---
+- name: (Container registries) Checking the existence of registry credentials
+  stat: path={{ registry_cred_path }}
+  become: false
+  delegate_to: localhost
+  register: reg_creds
+
+- name: (Container registries) Copy registries.yaml
+  copy:
+    src: "{{ registry_cred_path }}"
+    dest: /etc/rancher/k3s/registries.yaml
+  when: reg_creds.stat.exists
+
+- name: (Container registries) Slurp registries.yaml
+  ansible.builtin.slurp:
+    src: /etc/rancher/k3s/registries.yaml
+  register: registries
+  when: reg_creds.stat.exists

@@ -1,6 +1,0 @@
----
-- name: '(MiCADO Monitoring) Downloading container images'
-  ansible.builtin.command: ctr image pull docker.io/{{ item }}
-  loop:
-  - "{{ docker_images.cadvisor }}"
-  - "{{ docker_images.node_exporter }}"

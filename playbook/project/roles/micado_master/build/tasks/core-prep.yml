@@ -40,7 +40,6 @@
   - { src: 'grafana/provisioning-datasources-prometheus.yaml', dest: '/var/lib/micado/grafana/provisioning/datasources/prometheus.yaml', mode: '0644'}
   - { src: 'iptables/iptables.service', dest: '/etc/systemd/system/iptables.service', mode: '0644'}
   - { src: 'iptables/ip6tables.service', dest: '/etc/systemd/system/ip6tables.service', mode: '0644'}
-  - { src: 'micado/micado.service', dest: '/etc/systemd/system/micado.service', mode: '0644'}
   - { src: 'micado/micadoctl', dest: '/usr/local/bin/micadoctl', mode: '0755'}
   - { src: 'optimizer/optimizer_config.yaml', dest: '/var/lib/micado/optimizer/config/optimizer_config.yaml', mode: '0644'}
   - { src: 'policykeeper/policykeeper_config.yaml', dest: '/var/lib/micado/policykeeper/config/policykeeper_config.yaml', mode: '0644'}
@@ -58,13 +57,3 @@
       dest: '/var/log/micado/dashboard/README'}
   - { content: "Check the logs by the following command:\nkubectl -n micado-system logs $(kubectl -n micado-system get pod | grep prometheus | col1)\n",
       dest: '/var/log/micado/prometheus/README'}
-
-- name: '(MiCADO Core) Downloading container images'
-  ansible.builtin.command: ctr image pull docker.io/{{ item }}
-  loop:
-  - "{{ docker_images.prometheus }}"
-  - "{{ docker_images.alertmanager }}"
-  - "{{ docker_images.grafana }}"
-  - "{{ docker_images.policykeeper }}"
-  - "{{ docker_images.dashboard }}"
-  - "{{ docker_images.toscasubmitter }}"

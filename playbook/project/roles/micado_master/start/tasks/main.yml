@@ -1,25 +1,21 @@
 ---
 - include: set-hostname.yml
 
-- include: kubernetes-start.yml
-
 - include: core-config.yml
 
 - include: security-config.yml
 
-- include: occopus-config.yml
-  when: enable_occopus
+- include: registry-login.yml
+  when: registry_cred_path is defined
 
-- include: terraform-config.yml
-  when: enable_terraform
+- include: k3s-start.yml
 
-- include: micado-start.yml
+- include: cloud-config.yml
+  when: enable_terraform or enable_occopus
 
 - include: load-auth.yml
+  when: enable_terraform or enable_occopus
   tags:
   - update-auth
 
-- include: security-start.yml
-
-- include: docker-login.yml
-  when: docker_cred_path is defined
+- include: micado-start.yml
