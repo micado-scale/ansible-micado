@@ -23,7 +23,7 @@
 - name: (MiCADO Core) Wait for components
   k8s:
     kind: Deployment
-    name: toscasubmitter
+    name: zorp
     namespace: micado-system
     wait: yes
     wait_timeout: 90
