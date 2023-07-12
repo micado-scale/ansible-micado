@@ -1049,7 +1049,7 @@ spec:
       initContainers:
       - name: init-wait-vault
         image: busybox:1.30
-        command: ['sh', '-c', 'until nslookup vault; do echo waiting for vault; sleep 2; done;']
+        command: ['sh', '-c', 'until wget --spider vault:8200/v1/sys/health?uninitcode=200; do echo waiting for vault; sleep 2; done;']
       containers:
       - name: security-policy-manager
         image: {{docker_images.securitypolicymanager}}
@@ -1107,6 +1107,10 @@ spec:
         effect: NoSchedule
       nodeSelector:
         node-role.kubernetes.io/control-plane: 'true'
+      initContainers:
+      - name: init-wait-vault
+        image: busybox:1.30
+        command: ['sh', '-c', 'until wget --spider vault:8200/v1/sys/health; do echo waiting for vault; sleep 2; done;']
       containers:
       - name: zorp
         image: {{docker_images.zorp}}
