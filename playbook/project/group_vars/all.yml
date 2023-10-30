@@ -37,4 +37,4 @@ docker_images:
 packages:
   kubernetes_version: 1.26.1-00
   kubernetes_dashboard: kubernetesui/dashboard:v2.7.0
-  kube_edge: "1.9.1"
+  kube_edge: "1.15.0"
