@@ -22,6 +22,7 @@
 
 - name: Add the new public key to authorized_keys
   authorized_key:
+    user: "{{ ansible_user }}"
     state: present
     key: "from=\"{{ ansible_host }}\" {{ public_key_content['content'] | b64decode }}"
 
