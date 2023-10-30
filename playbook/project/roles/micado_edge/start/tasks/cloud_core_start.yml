@@ -4,6 +4,12 @@
     path: /etc/kubeedge
   register: etc_cloud
 
+- name: Ensure /etc/kubernetes directory exists
+  file:
+    path: /etc/kubernetes
+    state: directory
+    mode: '0777'
+
 - name: (KubeEdge) Download and unzip
   unarchive:
     src: https://github.com/kubeedge/kubeedge/releases/download/v{{ packages.kube_edge }}/keadm-v{{ packages.kube_edge }}-linux-amd64.tar.gz
