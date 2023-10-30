@@ -21,12 +21,12 @@ install_micado_edge() {
     fi
 
     containerd_version="1.7.8"
-    runc_version="1.1.4"
+    runc_version="1.1.9"
     cni_plugins_version="1.3.0"
     kubeedge_version="1.15.0"
     token={{ hostvars['micado']['token_kubeedge']['stdout'] }}
     server={{ hostvars['micado']['ansible_host'] }}
-    nodename={{ inventory_hostname }}
+    nodename={{ inventory_hostname|lower }}
     keversion={{ packages.kube_edge }}
 
     # Determine architecture
@@ -59,58 +59,43 @@ install_micado_edge() {
     fi
 
     if [ "$containerd_not_running" -eq 1 ]; then
-      echo "apt/yum installing required packages (curl, gnupg2)..."
+      echo "apt/yum/dnf installing required packages (curl, gnupg2, ca-certificates)..."
       $sh_c 'if command -v apt-get >/dev/null 2>&1; then
           # Debian and Ubuntu
           export DEBIAN_FRONTEND=noninteractive
           apt-get -qq update
-          apt-get -qq install -y curl gnupg2
+          apt-get -qq install -y curl gnupg2 ca-certificates
+          
+          # Add Docker official GPG key
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+          chmod a+r /etc/apt/keyrings/docker.gpg
+          
+          # Add Docker repository to Apt sources
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" > /etc/apt/sources.list.d/docker.list
+          
+          apt-get -qq update
+          apt-get -qq install -y containerd.io
+          
       elif command -v yum >/dev/null 2>&1; then
-          # CentOS, RHEL, and Amazon Linux
+          # CentOS, RHEL
           yum makecache fast
-          yum install -y -q curl gnupg2
+          yum install -y -q curl gnupg2 yum-utils
+          yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+          yum install -y -q containerd.io
+          
+      elif command -v dnf >/dev/null 2>&1; then
+          # Fedora
+          dnf -y install dnf-plugins-core curl gnupg2
+          dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+          dnf -y install containerd.io
+
       else
           echo "Error: unsupported package manager" >&2
           exit 1
       fi'
 
-      echo "loading kernel modules (overlay, br_netfilter)..."
-      # Load kernel modules
-      $sh_c 'echo "overlay" > /etc/modules-load.d/k8s.conf'
-      $sh_c 'echo "br_netfilter" >> /etc/modules-load.d/k8s.conf'
-      $sh_c 'modprobe overlay'
-      $sh_c 'modprobe br_netfilter'
 
-      echo "sysctl setting kernel params (bridge-iptables, ip_forward)..."
-      $sh_c 'echo "net.bridge.bridge-nf-call-iptables = 1" > /etc/sysctl.d/k8s.conf'
-      $sh_c 'echo "net.bridge.bridge-nf-call-ip6tables = 1" >> /etc/sysctl.d/k8s.conf'
-      $sh_c 'echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.d/k8s.conf'
-      $sh_c 'sysctl --quiet --system'
-
-      echo "downloading container runtime components (containerd, runc, cni-plugins)..."
-      $sh_c "curl -fsSL -o containerd-$containerd_version-linux-$package_arch.tar.gz https://github.com/containerd/containerd/releases/download/v$containerd_version/containerd-$containerd_version-linux-$package_arch.tar.gz"
-      $sh_c "curl -fsSL -o containerd.sha256sum https://github.com/containerd/containerd/releases/download/v$containerd_version/containerd-$containerd_version-linux-$package_arch.tar.gz.sha256sum"
-      $sh_c "curl -fsSL -o /usr/lib/systemd/system/containerd.service https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
-      echo "$(cat containerd.sha256sum)" | sha256sum --check --status || (echo "Error: checksum verification failed for containerd" >&2; exit 1)
-      $sh_c "mkdir -p /usr/local && tar Cxzf /usr/local containerd-$containerd_version-linux-$package_arch.tar.gz"
-
-      # Download and verify runc
-      $sh_c "curl -fsSL -o runc.$package_arch https://github.com/opencontainers/runc/releases/download/v$runc_version/runc.$package_arch"
-      #echo "$(cat runc.sha256) runc.tar.gz" | sha256sum --check --status || (echo "Error: checksum verification failed for runc" >&2; exit 1)
-      $sh_c "install -m 755 runc.$package_arch /usr/local/sbin/runc"
-
-      # Download and verify CNI plugins
-      $sh_c "curl -fsSL -o cni-plugins-linux-$package_arch-v$cni_plugins_version.tgz https://github.com/containernetworking/plugins/releases/download/v$cni_plugins_version/cni-plugins-linux-$package_arch-v$cni_plugins_version.tgz"
-      $sh_c "curl -fsSL -o cni-plugins.sha256 https://github.com/containernetworking/plugins/releases/download/v$cni_plugins_version/cni-plugins-linux-$package_arch-v$cni_plugins_version.tgz.sha256"
-      echo "$(cat cni-plugins.sha256)" | sha256sum --check --status || (echo "Error: checksum verification failed for CNI plugins" >&2; exit 1)
-      $sh_c "mkdir -p /opt/cni/bin && tar Cxzf /opt/cni/bin cni-plugins-linux-$package_arch-v$cni_plugins_version.tgz"
-
-      echo "cleaning up..."
-      rm -f containerd-$containerd_version-linux-$package_arch.tar.gz containerd.sha256sum
-      rm -f runc.$package_arch
-      rm -f cni-plugins-linux-$package_arch-v$cni_plugins_version.tgz cni-plugins.sha256
-
-      echo "configuring containerd and cni plugin..."
+      echo "configuring containerd"
       $sh_c 'mkdir -p /etc/containerd && containerd config default > /etc/containerd/config.toml'
 
       if command -v systemctl >/dev/null 2>&1; then
@@ -127,9 +112,10 @@ install_micado_edge() {
   $sh_c "tar Cxzf /tmp keadm.tar.gz"
   $sh_c "cp /tmp/keadm-v$kubeedge_version-linux-$package_arch/keadm/keadm /usr/local/bin/keadm"
   $sh_c "rm -f keadm.tar.gz keadm.sha512"
+  $sh_c "rm -rf /etc/kubeedge"
 
   echo "join cluster"
-  $sh_c "keadm join --cloudcore-ipport=$server:10000 --edgenode-name=$nodename --kubeedge-version=$keversion --token=$token"
+  $sh_c "keadm join --cloudcore-ipport=$server:10000 --edgenode-name=$nodename --kubeedge-version=$kubeedge_version --token=$token"
 
   echo "configuring kubeedge..."
   #$sh_c 'mkdir -p /etc/kubeedge/config && edgecore --defaultconfig > /etc/kubeedge/config/edgecore.yaml'
