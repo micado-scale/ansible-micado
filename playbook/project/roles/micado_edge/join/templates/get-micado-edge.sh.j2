@@ -94,9 +94,48 @@ install_micado_edge() {
           exit 1
       fi'
 
-
-      echo "configuring containerd"
+      echo "Installing cni plugins..."
+      $sh_c "curl -fsSL -o cni-plugins-linux-$package_arch-v$cni_plugins_version.tgz https://github.com/containernetworking/plugins/releases/download/v$cni_plugins_version/cni-plugins-linux-$package_arch-v$cni_plugins_version.tgz"
+      $sh_c "curl -fsSL -o cni-plugins.sha256 https://github.com/containernetworking/plugins/releases/download/v$cni_plugins_version/cni-plugins-linux-$package_arch-v$cni_plugins_version.tgz.sha256"
+      echo "$(cat cni-plugins.sha256)" | sha256sum --check --status || (echo "Error: checksum verification failed for CNI plugins" >&2; exit 1)
+      $sh_c "mkdir -p /opt/cni/bin && tar Cxzf /opt/cni/bin cni-plugins-linux-$package_arch-v$cni_plugins_version.tgz"
       $sh_c 'mkdir -p /etc/containerd && containerd config default > /etc/containerd/config.toml'
+      $sh_c "mkdir -p /etc/cni/net.d"
+      $sh_c 'cat << EOF > /etc/cni/net.d/10-containerd-net.conflist
+{
+  "cniVersion": "1.0.0",
+  "name": "containerd-net",
+  "plugins": [
+    {
+      "type": "bridge",
+      "bridge": "cni0",
+      "isGateway": true,
+      "ipMasq": true,
+      "promiscMode": true,
+      "ipam": {
+        "type": "host-local",
+        "ranges": [
+          [{
+            "subnet": "10.88.0.0/16"
+          }],
+          [{
+            "subnet": "2001:db8:4860::/64"
+          }]
+        ],
+        "routes": [
+          { "dst": "0.0.0.0/0" },
+          { "dst": "::/0" }
+        ]
+      }
+    },
+    {
+      "type": "portmap",
+      "capabilities": {"portMappings": true},
+      "externalSetMarkChain": "KUBE-MARK-MASQ"
+    }
+  ]
+}
+EOF'
 
       if command -v systemctl >/dev/null 2>&1; then
           $sh_c 'systemctl daemon-reload && systemctl restart containerd'
@@ -118,12 +157,6 @@ install_micado_edge() {
   $sh_c "keadm join --cloudcore-ipport=$server:10000 --edgenode-name=$nodename --kubeedge-version=$kubeedge_version --token=$token"
 
   echo "configuring kubeedge..."
-  #$sh_c 'mkdir -p /etc/kubeedge/config && edgecore --defaultconfig > /etc/kubeedge/config/edgecore.yaml'
-  #$sh_c "sed -i -e 's|token: .*|token: $token|g' /etc/kubeedge/config/edgecore.yaml"
-  #$sh_c "sed -i -e 's|server: .*:10000|server: $server:10000|g' /etc/kubeedge/config/edgecore.yaml"
-  #$sh_c "sed -i -e 's|server: .*:10002|server: $server:10002|g' /etc/kubeedge/config/edgecore.yaml"
-  #$sh_c "sed -i -e 's|server: .*:10004|server: $server:10004|g' /etc/kubeedge/config/edgecore.yaml"
-
   $sh_c "sed -i 's/            SystemdCgroup = false/            SystemdCgroup = true/' /etc/containerd/config.toml"
   $sh_c "sed -i -e 's|cgroupDriver: .*|cgroupDriver: systemd|g' /etc/kubeedge/config/edgecore.yaml"
   $sh_c "sed -i -e '/edgeStream:/,/^ *[^ ]/ {s/\(enable: \)false/\1true/;}' /etc/kubeedge/config/edgecore.yaml" 
