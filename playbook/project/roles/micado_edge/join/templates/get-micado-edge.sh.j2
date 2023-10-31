@@ -99,7 +99,7 @@ install_micado_edge() {
       $sh_c "curl -fsSL -o cni-plugins.sha256 https://github.com/containernetworking/plugins/releases/download/v$cni_plugins_version/cni-plugins-linux-$package_arch-v$cni_plugins_version.tgz.sha256"
       echo "$(cat cni-plugins.sha256)" | sha256sum --check --status || (echo "Error: checksum verification failed for CNI plugins" >&2; exit 1)
       $sh_c "mkdir -p /opt/cni/bin && tar Cxzf /opt/cni/bin cni-plugins-linux-$package_arch-v$cni_plugins_version.tgz"
-      $sh_c 'mkdir -p /etc/containerd && containerd config default > /etc/containerd/config.toml'
+      $sh_c "rm -f cni-plugins-linux-$package_arch-v$cni_plugins_version.tgz cni-plugins.sha256"
       $sh_c "mkdir -p /etc/cni/net.d"
       $sh_c 'cat << EOF > /etc/cni/net.d/10-containerd-net.conflist
 {
@@ -137,13 +137,14 @@ install_micado_edge() {
 }
 EOF'
 
-      if command -v systemctl >/dev/null 2>&1; then
-          $sh_c 'systemctl daemon-reload && systemctl restart containerd'
-      elif command -v service >/dev/null 2>&1; then
-          $sh_c 'service containerd restart'
-      fi
-    fi
+  fi
 
+  $sh_c 'mkdir -p /etc/containerd && containerd config default > /etc/containerd/config.toml'
+  if command -v systemctl >/dev/null 2>&1; then
+      $sh_c 'systemctl daemon-reload && systemctl restart containerd'
+  elif command -v service >/dev/null 2>&1; then
+      $sh_c 'service containerd restart'
+  fi
   echo "downloading edge connector (kubeedge)..."
   $sh_c "curl -fsSL -o keadm.tar.gz https://github.com/kubeedge/kubeedge/releases/download/v$kubeedge_version/keadm-v$kubeedge_version-linux-$package_arch.tar.gz"
   $sh_c "curl -fsSL -o keadm.sha512 https://github.com/kubeedge/kubeedge/releases/download/v$kubeedge_version/checksum_keadm-v$kubeedge_version-linux-$package_arch.tar.gz.txt"
@@ -154,6 +155,12 @@ EOF'
   $sh_c "rm -rf /etc/kubeedge"
 
   echo "join cluster"
+  $sh_c "keadm reset --force || echo 'Attempted Reset'"
+  if command -v systemctl >/dev/null 2>&1; then
+      $sh_c 'systemctl stop edgecore || echo "Edgecore not running"'
+  elif command -v service >/dev/null 2>&1; then
+      $sh_c 'service edgecore stop || echo "Edgecore not running"'
+  fi
   $sh_c "keadm join --cloudcore-ipport=$server:10000 --edgenode-name=$nodename --kubeedge-version=$kubeedge_version --token=$token"
 
   echo "configuring kubeedge..."

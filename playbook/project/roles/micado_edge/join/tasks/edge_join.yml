@@ -7,10 +7,6 @@
     src: get-micado-edge.sh.j2
     dest: /tmp/get-micado-edge.sh
     mode: '0777'
-  when: 
-    - '"edgecore.service" not in services or services["edgecore.service"].state != "running"'
 
 - name: (edge) Install MiCADO Edge
   command: /tmp/get-micado-edge.sh
-  when: 
-    - '"edgecore.service" not in services or services["edgecore.service"].state != "running"'
