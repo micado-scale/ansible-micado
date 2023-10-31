@@ -39,6 +39,7 @@ step:
     - OccopusAdaptor
 {% endif %}
     - PkAdaptor
+    - AnsibleAdaptor
   execute:
     - SecurityPolicyManagerAdaptor
 {% if enable_terraform %}
@@ -49,6 +50,7 @@ step:
 {% endif %}
     - KubernetesAdaptor
     - PkAdaptor
+    - AnsibleAdaptor
   update:
     - SecurityPolicyManagerAdaptor
 {% if enable_terraform %}
@@ -59,6 +61,7 @@ step:
 {% endif %}
     - KubernetesAdaptor
     - PkAdaptor
+    - AnsibleAdaptor
   undeploy:
     - PkAdaptor
     - KubernetesAdaptor
@@ -78,6 +81,7 @@ step:
     - OccopusAdaptor
 {% endif %}
     - PkAdaptor
+    - AnsibleAdaptor
     - SecurityPolicyManagerAdaptor
 
 adaptor_config:
@@ -91,6 +95,13 @@ adaptor_config:
       - Certificate
       - ClusterIssuer
     k8s_version: "1.21.0"
+
+  AnsibleAdaptor:
+    types:
+      - "tosca.nodes.MiCADO.Edge"
+    endoint: "endpoint"
+    volume: "./files/output_configs/"
+    micado_host: "{{ ansible_host }}"
 
 {% if enable_occopus %}
   OccopusAdaptor:
@@ -119,4 +130,3 @@ adaptor_config:
       - "tosca.policies.Security.MiCADO.Secret.KubernetesSecretDistribution"
     endoint: "endpoint"
     volume: "./files/output_configs/"
-
