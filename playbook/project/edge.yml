@@ -32,6 +32,8 @@
     command: /etc/kubernetes/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm gettoken
           --kube-config /root/.kube/config
     register: token_kubeedge
+    until: token_kubeedge is not failed
+    retries: 5
     changed_when: False
     tags:
     - build
