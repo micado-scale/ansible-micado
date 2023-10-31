@@ -1,14 +1,15 @@
 ---
-- name: '(KubeEdge) Check if initialised'
-  stat:
-    path: /etc/kubeedge
-  register: etc_cloud
+- name: Check if cloudcore deployment exists
+  command: kubectl get deployment cloudcore -n kubeedge
+  register: cloudcore
+  failed_when: false
 
 - name: Ensure /etc/kubernetes directory exists
   file:
     path: /etc/kubernetes
     state: directory
     mode: '0777'
+  when: cloudcore.rc != 0
 
 - name: (KubeEdge) Download and unzip
   unarchive:
@@ -16,13 +17,16 @@
     dest: /etc/kubernetes
     mode: '0777'
     remote_src: yes
-  when: not etc_cloud.stat.exists
+  when: cloudcore.rc != 0
 
 - name: '(KubeEdge) KubeEdge init'
   command: /etc/kubernetes/keadm-v{{ packages.kube_edge }}-linux-amd64/keadm/keadm init
         --kube-config /root/.kube/config
         --kubeedge-version={{ packages.kube_edge }}
         --advertise-address={{ ansible_host }}
+        --set cloudCore.tolerations[0].key="node-role.kubernetes.io/control-plane"
+        --set cloudCore.tolerations[0].operator="Exists"
+        --set cloudCore.tolerations[0].effect="NoSchedule"
   register: keadm
   async: 60
-  when: not etc_cloud.stat.exists
+  when: cloudcore.rc != 0
