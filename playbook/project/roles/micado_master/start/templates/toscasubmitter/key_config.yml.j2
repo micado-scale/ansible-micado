@@ -102,6 +102,7 @@ adaptor_config:
     endoint: "endpoint"
     volume: "./files/output_configs/"
     micado_host: "{{ ansible_host }}"
+    micado_user: "{{ ansible_user }}"
 
 {% if enable_occopus %}
   OccopusAdaptor:
