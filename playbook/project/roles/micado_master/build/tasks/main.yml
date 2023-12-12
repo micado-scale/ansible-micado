@@ -1,5 +1,5 @@
 ---
-- include: python-prep.yml
+- include_tasks: python-prep.yml
 
 - name: Populate service facts
   service_facts:
@@ -15,20 +15,20 @@
     name: k3s
   register: k3s_service
 
-- include: image-pulls.yml
+- include_tasks: image-pulls.yml
   when: k3s_service.status.ActiveState == "active"
 
-- include: core-prep.yml
+- include_tasks: core-prep.yml
 
-- include: security-prep.yml
+- include_tasks: security-prep.yml
 
-- include: optimizer-prep.yml
+- include_tasks: optimizer-prep.yml
   when: enable_optimizer
 
-- include: occopus-prep.yml
+- include_tasks: occopus-prep.yml
   when: enable_occopus
 
-- include: terraform-prep.yml
+- include_tasks: terraform-prep.yml
   when: enable_terraform
 
 - name: '(k3s) Stop service'

@@ -1,21 +1,21 @@
 ---
-- include: set-hostname.yml
+- include_tasks: set-hostname.yml
 
-- include: core-config.yml
+- include_tasks: core-config.yml
 
-- include: security-config.yml
+- include_tasks: security-config.yml
 
-- include: registry-login.yml
+- include_tasks: registry-login.yml
   when: registry_cred_path is defined
 
-- include: k3s-start.yml
+- include_tasks: k3s-start.yml
 
-- include: cloud-config.yml
+- include_tasks: cloud-config.yml
   when: enable_terraform or enable_occopus
 
-- include: load-auth.yml
+- include_tasks: load-auth.yml
   when: enable_terraform or enable_occopus
   tags:
   - update-auth
 
-- include: micado-start.yml
+- include_tasks: micado-start.yml

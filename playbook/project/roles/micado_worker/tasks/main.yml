@@ -1,2 +1,2 @@
 ---
-- include: worker-deps.yml
+- include_tasks: worker-deps.yml

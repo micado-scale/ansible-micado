@@ -20,7 +20,7 @@
     - join
 
   handlers:
-  - include: roles/common/handlers/main.yml
+  - include_tasks: roles/common/handlers/main.yml
 
   roles:
   - role: micado_edge/start
