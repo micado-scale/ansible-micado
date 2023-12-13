@@ -1,0 +1,38 @@
+---
+- name: Gather server info
+  hosts: micado
+  gather_facts: True
+
+  pre_tasks:
+  - name: (MiCADO) Check target is a micado-control plane
+    k8s:
+      kind: Deployment
+      name: toscasubmitter
+      namespace: micado-system
+      wait: yes
+      wait_timeout: 30
+      wait_condition:
+        reason: MinimumReplicasAvailable
+        status: "True"
+        type: Available
+
+  post_tasks:
+  - name: '(k3s) k3s token retrieval'
+    ansible.builtin.slurp:
+      src: /var/lib/rancher/k3s/server/node-token
+    register: k3s_token
+
+- name: Join agents
+  hosts: agents
+  gather_facts: False
+
+  pre_tasks:
+  - name: (Ansible) Include worker pre-tasks
+    include_tasks: "{{ item }}"
+    loop:
+    - "pre-task/10-check-python.yml"
+    - "pre-task/15-create-remote-tmp.yml"
+    - "pre-task/40-wait-for-updates.yml"
+
+  roles:
+    - micado_agent

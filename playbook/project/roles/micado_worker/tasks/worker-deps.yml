@@ -1,7 +1,0 @@
----
-- name: (Python) Install pip package manager
-  apt:
-    name:
-    - python-setuptools
-    - python3-pip
-    state: present
