@@ -1,6 +1,6 @@
 ---
 - name: Join k3s cluster
-  shell: curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{ packages.k3s_version }} INSTALL_K3S_EXEC="agent" sh -s - 
+  shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="agent" sh -s - 
     --server "https://{{ hostvars['micado']['ansible_host'] }}:6443"
     --node-label "micado.eu/node_type={{ inventory_hostname }}"
     --token "{{ hostvars['micado']['k3s_token']['content'] | b64decode | trim }}"
