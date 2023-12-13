@@ -1,0 +1,2 @@
+Add Kubernetes manifests (.yaml | .yml) to this directory and
+objects will be automatically created at cluster start time.

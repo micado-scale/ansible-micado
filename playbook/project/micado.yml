@@ -22,3 +22,15 @@
   - role: micado_master/start
     tags:
     - start
+
+  post_tasks:
+  - name: 'Copy user defined manifests'
+    copy:
+      src: "{{ task_item }}"
+      dest: "/var/lib/rancher/k3s/server/{{ task_item | basename }}"
+      mode: 0644
+    loop: "{{ query('fileglob', \"manifests/*\") }}"
+    loop_control:
+      loop_var: task_item
+    tags:
+    - start
