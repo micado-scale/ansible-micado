@@ -4,6 +4,3 @@
 - include_tasks: cloud_core_start.yml
 
 - include_tasks: edge_monitoring.yml
-
-- include_tasks: multi_cloud_inits.yml
-  when: enable_multicloud
