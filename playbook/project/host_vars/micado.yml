@@ -15,9 +15,10 @@ enable_optimizer: False
 enable_occopus: False
 enable_terraform: True
 
-# enable multicloud - MiCADO-Edge must be installed
+# For nodes outside of the control-plane private subnet
+# e.g edge and multicloud
 # -------------------------------------------------------
-enable_multicloud: False
+advertise-public-ip: False
 
 # dashboard configuration
 # -------------------------------------------------------
