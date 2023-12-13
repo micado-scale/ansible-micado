@@ -18,7 +18,7 @@ enable_terraform: True
 # For nodes outside of the control-plane private subnet
 # e.g edge and multicloud
 # -------------------------------------------------------
-advertise-public-ip: False
+advertise_public_ip: False
 
 # dashboard configuration
 # -------------------------------------------------------

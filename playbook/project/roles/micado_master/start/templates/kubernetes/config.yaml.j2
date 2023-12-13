@@ -2,7 +2,7 @@ node-name: micado-control-plane
 disable: traefik
 bind-address: {{ ansible_default_ipv4.address }}
 flannel-backend: wireguard-native
-{% if advertise-public-ip %}
+{% if advertise_public_ip %}
 node-external-ip: {{ ansible_host }}
 flannel-external-ip: true
 {% endif %}
