@@ -22,6 +22,17 @@
       src: /var/lib/rancher/k3s/server/node-token
     register: k3s_token
 
+  - name: (registries) Check for registries.yaml
+    ansible.builtin.stat:
+      path: /etc/rancher/k3s/registries.yaml
+    register: registries_file
+
+  - name: (registries) Slurp registries.yaml
+    ansible.builtin.slurp:
+      src: /etc/rancher/k3s/registries.yaml
+    register: registries_content
+    when: registries_file.stat.exists
+
 - name: Join agents
   hosts: agents
   gather_facts: False

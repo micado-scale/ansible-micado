@@ -1,7 +1,24 @@
 ---
+- name: Run k3s agent uninstall script
+  command: k3s-agent-uninstall.sh
+  ignore_errors: yes
+
+- name: (registries) Ensure /etc/rancher/k3s directory
+  file:
+    path: /etc/rancher/k3s
+    state: directory
+    mode: '0755'
+  when: hostvars['micado']['registries_file'].stat.exists
+
+- name: (registries) Copy registries.yaml
+  copy:
+    content: "{{ hostvars['micado']['registries_content']['content'] | b64decode }}"
+    dest: /etc/rancher/k3s/registries.yaml
+  when: hostvars['micado']['registries_file'].stat.exists
+
 - name: Join k3s cluster
   shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="agent" sh -s - 
     --server "https://{{ hostvars['micado']['ansible_host'] }}:6443"
-    --node-label "micado.eu/node_type={{ inventory_hostname }}"
+    --node-name "{{ inventory_hostname | lower }}"
     --token "{{ hostvars['micado']['k3s_token']['content'] | b64decode | trim }}"
     --node-external-ip "{{ ansible_host }}"
