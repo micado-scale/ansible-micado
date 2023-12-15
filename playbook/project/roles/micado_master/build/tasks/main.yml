@@ -5,7 +5,7 @@
   service_facts:
 
 - name: (k3s) Init k3s
-  include_tasks: k3s-init
+  include_tasks: k3s-init.yml
   when: '"k3s.service" not in services'
 
 - name: Get Service Status
