@@ -15,10 +15,10 @@ enable_optimizer: False
 enable_occopus: False
 enable_terraform: True
 
-# For nodes outside of the control-plane private subnet
-# e.g edge and multicloud
+# edge and multicloud settings
 # -------------------------------------------------------
-advertise_public_ip: False
+advertise_public_ip: False # when nodes may be out-of-subnet
+enable_wireguard: True # wireguard may not be available on all kernels
 
 # dashboard configuration
 # -------------------------------------------------------
