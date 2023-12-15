@@ -53,7 +53,7 @@ runcmd:
   - resolvconf -u
   
   # Connect to cluster
-  - curl --retry 6 -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{ k3s_version }} INSTALL_K3S_EXEC="agent" sh -s -
+  - curl --retry 6 -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{ packages.k3s_version }} INSTALL_K3S_EXEC="agent" sh -s -
 
   # Placeholder for ADT insert
   - echo micado runcmd placeholder
