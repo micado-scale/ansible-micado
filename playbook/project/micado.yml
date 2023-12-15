@@ -27,7 +27,7 @@
   - name: 'Copy user defined manifests'
     copy:
       src: "{{ task_item }}"
-      dest: "/var/lib/rancher/k3s/server/{{ task_item | basename }}"
+      dest: "/var/lib/rancher/k3s/server/manifests/{{ task_item | basename }}"
       mode: 0644
     loop: "{{ query('fileglob', \"manifests/*\") }}"
     loop_control:
