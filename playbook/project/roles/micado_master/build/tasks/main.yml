@@ -5,9 +5,7 @@
   service_facts:
 
 - name: (k3s) Init k3s
-  include_role:
-    name: common
-    tasks_from: k3s-init
+  include_tasks: k3s-init
   when: '"k3s.service" not in services'
 
 - name: Get Service Status
