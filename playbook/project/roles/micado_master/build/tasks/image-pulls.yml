@@ -1,8 +1,11 @@
 ---
-- name: '(MiCADO Core) Wait for crictl directory'
-  ansible.builtin.wait_for:
-    path: "/var/lib/rancher/k3s/data/"
-    state: present
+- name: '(MiCADO Core) Wait for crictl'
+  command: crictl
+  register: crictl
+  until: crictl is succeeded
+  retries: 5
+  delay: 5
+
 
 - name: '(MiCADO Core) Downloading container images'
   ansible.builtin.command: "k3s crictl pull docker.io/{{ item }}"
