@@ -15,6 +15,7 @@ intel_cpu: false
 # -------------------------------------------------------
 docker_images:
   alertmanager: prom/alertmanager:v0.23.0
+  cadvisor: gcr.io/cadvisor/cadvisor:v0.50.0
   credential_manager: micado/credential-manager:0.10
   crypto_engine: micado/crypto-engine:0.10
   dashboard: micado/dashboard:0.11

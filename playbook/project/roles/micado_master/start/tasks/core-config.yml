@@ -8,6 +8,7 @@
   - { src: 'iptables/iptables.conf.j2', dest: '/etc/iptables.conf'}
   - { src: 'iptables/ip6tables.conf.j2', dest: '/etc/ip6tables.conf'}
   - { src: 'micado/nodex.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/nodex.yaml'}
+  - { src: 'micado/cadvisor.yaml.j2', dest: '/var/lib/micado/toscasubmitter/system/cadvisor.yaml'}
   - { src: 'toscasubmitter/key_config.yml.j2', dest: '/var/lib/micado/toscasubmitter/system/key_config.yml'}
   - { src: 'grafana/data-dashboards-micado.json.j2', dest: '/var/lib/micado/grafana/data/dashboards/micado.json'}
   notify:
