@@ -153,10 +153,10 @@ policy_types:
         description: pre-define alerts for container Net
         default:
         - alert: service_overloaded
-          expr: 'avg(rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[60s]))/1000 > {{SERVICE_TH_MAX}}'
+          expr: 'avg(rate(container_network_receive_bytes_total{pod=~"{{SERVICE_FULL_NAME}}.*"}[60s]))/1000 > {{SERVICE_TH_MAX}}'
           for: 30s
         - alert: service_underloaded
-          expr: 'avg(rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[60s]))/1000 < {{SERVICE_TH_MIN}}'
+          expr: 'avg(rate(container_network_receive_bytes_total{pod=~"{{SERVICE_FULL_NAME}}.*"}[60s]))/1000 < {{SERVICE_TH_MIN}}'
           for: 30s
         required: true
       scaling_rule:
@@ -181,10 +181,10 @@ policy_types:
         description: pre-define alerts for node Net
         default:
         - alert: node_overloaded
-          expr: 'avg(rate(container_network_receive_bytes_total{node="{{ NODE_NAME }}", container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[60s]))/1000 > {{SERVICE_TH_MAX}}'
+          expr: 'avg(rate(container_network_receive_bytes_total{instance="{{ NODE_NAME }}"}[60s]))/1000 > {{SERVICE_TH_MAX}}'
           for: 1m
         - alert: node_underloaded
-          expr: 'avg(rate(container_network_receive_bytes_total{node="{{ NODE_NAME }}", container_label_io_kubernetes_pod_name=~"{{SERVICE_FULL_NAME}}-[^-]*-[^-]*"}[60s]))/1000 < {{SERVICE_TH_MIN}}'
+          expr: 'avg(rate(container_network_receive_bytes_total{instance="{{ NODE_NAME }}"}[60s]))/1000 < {{SERVICE_TH_MIN}}'
           for: 1m
         required: true
       scaling_rule:

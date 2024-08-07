@@ -78,10 +78,10 @@ policy_types:
         description: pre-define alerts for container CPU
         default:
         - alert: service_overloaded
-          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[60s]))*100 > {{SERVICE_TH_MAX}}'
+          expr: 'avg(rate(container_cpu_usage_seconds_total{image!~"docker.io/rancher.*", pod=~"{{SERVICE_FULL_NAME}}.*"}[60s]))*100 > {{SERVICE_TH_MAX}}'
           for: 30s
         - alert: service_underloaded
-          expr: 'avg(rate(container_cpu_usage_seconds_total{container_label_io_kubernetes_container_name="{{SERVICE_FULL_NAME}}"}[60s]))*100 < {{SERVICE_TH_MIN}}'
+          expr: 'avg(rate(container_cpu_usage_seconds_total{image!~"docker.io/rancher.*", pod=~"{{SERVICE_FULL_NAME}}.*"}[60s]))*100 < {{SERVICE_TH_MIN}}'
           for: 30s
         required: true
       scaling_rule:
@@ -106,10 +106,10 @@ policy_types:
         description: pre-define alerts for VM CPU
         default:
         - alert: node_overloaded
-          expr: '(100-(avg(rate(node_cpu_seconds_total{node="{{ NODE_NAME }}", mode="idle"}[60s]))*100)) > {{NODE_TH_MAX}}'
+          expr: 'avg(rate(container_cpu_usage_seconds_total{instance=~"{{ NODE_NAME }}.*", id="/"}[60s]))*100 > {{NODE_TH_MAX}}'
           for: 1m
         - alert: node_underloaded
-          expr: '(100-(avg(rate(node_cpu_seconds_total{node="{{ NODE_NAME }}", mode="idle"}[60s]))*100)) < {{NODE_TH_MIN}}'
+          expr: 'avg(rate(container_cpu_usage_seconds_total{instance=~"{{ NODE_NAME }}.*", id="/"}[60s]))*100 < {{NODE_TH_MIN}}'
           for: 1m
         required: true
       scaling_rule:
