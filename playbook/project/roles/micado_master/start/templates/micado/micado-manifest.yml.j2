@@ -40,16 +40,15 @@ metadata:
 rules:
 - apiGroups: [""]
   resources:
-  - nodes
-  - services
-  - endpoints
-  - pods
+    - nodes
+    - nodes/metrics
+    - nodes/proxy
   verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources:
-  - configmaps
-  verbs: ["get"]
-- nonResourceURLs: ["/metrics"]
+- nonResourceURLs:
+    - "/metrics"
+    - "/metrics/cadvisor"
+    - "/metrics/probes"
+    - "/metrics/resource"
   verbs: ["get"]
 ---
 # Prometheus Cluster Role Binding ##
