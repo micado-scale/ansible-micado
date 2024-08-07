@@ -2,7 +2,8 @@
 - name: Gather server info
   hosts: micado
   gather_facts: True
-
+  tags:
+  - always
   pre_tasks:
   - name: (MiCADO) Check target is a micado-control plane
     k8s:
@@ -32,6 +33,32 @@
       src: /etc/rancher/k3s/registries.yaml
     register: registries_content
     when: registries_file.stat.exists
+
+- name: Write edge registry and script to localhost
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  tags:
+  - never
+  - edge-files
+  tasks:
+  - name: Write registries.yaml to localhost
+    ansible.builtin.copy:
+      content: "{{ hostvars['micado']['registries_content']['content'] | b64decode }}"
+      dest: "../../../registries.yaml"
+    when: hostvars['micado']['registries_file'].stat.exists
+
+  - name: Write k3s agent install script
+    ansible.builtin.copy:
+      content: |
+        #!/bin/bash
+        curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{ packages.k3s_version }} INSTALL_K3S_EXEC="agent" sh -s - \
+            --server "https://{{ hostvars['micado']['ansible_host'] }}:6443" \
+            --node-name YOUR_UNIQUE_EDGE_HOSTNAME \
+            --token "{{ hostvars['micado']['k3s_token']['content'] | b64decode | trim }}" \
+            --node-external-ip YOUR_EDGE_PUBLIC_IP
+      dest: "../../../connect_edge.sh"
+      mode: '0755'
 
 - name: Join agents
   hosts: agents
