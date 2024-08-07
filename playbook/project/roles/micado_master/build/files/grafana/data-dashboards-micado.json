@@ -102,7 +102,7 @@
       "tableColumn": "Value",
       "targets": [
         {
-          "expr": "count(node_load1)",
+          "expr": "count(node_cpu_usage_seconds_total)",
           "format": "table",
           "hide": false,
           "instant": false,
@@ -110,20 +110,12 @@
           "legendFormat": "",
           "refId": "A",
           "step": 1800
-        },
-        {
-          "expr": "count(node_memory_Inactive)",
-          "format": "table",
-          "hide": true,
-          "intervalFactor": 2,
-          "legendFormat": "",
-          "refId": "B"
         }
       ],
       "thresholds": "",
       "timeFrom": "30s",
       "timeShift": null,
-      "title": "",
+      "title": "Total Nodes",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -205,7 +197,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "count(rate(container_last_seen{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name-.*\"}[$interval]))",
+          "expr": "count(rate(container_last_seen{pod=~\"$service_name-.*\", namespace=~\"default\", image!~\"docker.io/rancher/mirrored-pause.*\", image!=\"\"}[$interval]))",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 2,
@@ -217,7 +209,7 @@
       "thresholds": "",
       "timeFrom": "30s",
       "timeShift": null,
-      "title": "",
+      "title": "Total Containers",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -297,7 +289,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "time() - min(node_boot_time_seconds{instance=~\"$worker:.*\"})",
+          "expr": "time() - min(container_start_time_seconds{namespace=~\"default\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -453,13 +445,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "100 - (avg(irate(node_cpu_seconds_total{mode=\"idle\",node=~\"$node\"}[$interval])) * 100)",
+          "expr": "(sum(irate(container_cpu_usage_seconds_total{id=\"/\", instance=~\"$instance\"}[$interval])) / scalar(sum(machine_cpu_cores{instance=~\"$instance\"}))) * 100",
           "format": "time_series",
           "hide": false,
           "instant": false,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{% raw %}{{host}}{% endraw %}",
+          "legendFormat": "{{host}}",
           "metric": "",
           "refId": "C",
           "step": 600
@@ -469,7 +461,7 @@
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{% raw %}{{host}}{% endraw %}",
+          "legendFormat": "{{host}}",
           "refId": "A"
         }
       ],
@@ -570,7 +562,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(irate(container_cpu_usage_seconds_total{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name-.*\"}[$interval]) * 100)",
+          "expr": "avg(irate(container_cpu_usage_seconds_total{pod=~\"$service_name-.*\", namespace=~\"$namespace\" , image!~\"docker.io/rancher/mirrored-pause.*\", image!=\"\"}[$interval]) * 100)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -672,10 +664,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",node=~\"$node\"}[$interval])) * 100)",
+          "expr": "sum by (instance) (rate(container_cpu_usage_seconds_total{id=\"/\", instance=~\"$instance\"}[$interval]) / on(instance) group_left() machine_cpu_cores{instance=~\"$instance\"}) * 100",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{% raw %}{{instance}}{% endraw %}",
+          "legendFormat": "{{instance}}",
           "refId": "A",
           "step": 240
         }
@@ -767,12 +759,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": " label_replace(topk($topk, sum without (cpu) (irate(container_cpu_usage_seconds_total{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name-.*\"}[1m])) * 100), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
+          "expr": " label_replace(topk($topk, sum without (cpu) (irate(container_cpu_usage_seconds_total{pod=~\"$service_name-.*\", namespace=~\"$namespace\", image!~\"docker.io/rancher/mirrored-pause.*\", image!=\"\"}[1m])) * 100), \"task_name\", \"$1\", \"pod\", \"(.*)\")",
           "format": "time_series",
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{% raw %}{{task_name}}{% endraw %}",
+          "legendFormat": "{{task_name}}",
           "metric": "",
           "refId": "A",
           "step": 240
@@ -858,10 +850,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "node_memory_MemTotal_bytes{node=~\"$node\"} - node_memory_MemAvailable_bytes{node=~\"$node\"}",
+          "expr": "container_memory_usage_bytes{id=\"/kubepods.slice\", instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{% raw %}{{instance}}{% endraw %}",
+          "legendFormat": "{{instance}}",
           "refId": "A",
           "step": 240
         }
@@ -951,11 +943,11 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(topk($topk, sum(container_memory_usage_bytes{container_label_io_kubernetes_docker_type!=\"podsandbox\", container_label_io_kubernetes_pod_name=~\"$service_name-.*\"}) by (name, container_label_io_kubernetes_pod_name)), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
+          "expr": "label_replace(topk($topk, sum(container_memory_usage_bytes{pod=~\"$service_name-.*\", namespace=~\"$namespace\", image!~\"docker.io/rancher/mirrored-pause.*\", image!=\"\"}) by (name, pod)), \"task_name\", \"$1\", \"pod\", \"(.*)\")",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{% raw %}{{task_name}}{% endraw %}",
+          "legendFormat": "{{task_name}}",
           "refId": "A",
           "step": 240
         }
@@ -1165,10 +1157,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(topk($topk, rate(container_network_receive_bytes_total{container_label_io_kubernetes_pod_name=~\"$service_name-.*\"}[2m])*100), \"task_name\", \"$1\", \"container_label_io_kubernetes_pod_name\", \"(.*)\")",
+          "expr": "label_replace(topk($topk, rate(container_network_receive_bytes_total{pod=~\"$service_name-.*\", namespace=~\"$namespace\"}[2m])*100), \"task_name\", \"$1\", \"pod\", \"(.*)\")",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{% raw %}{{task_name}}{% endraw %}",
+          "legendFormat": "{{task_name}}",
           "refId": "A",
           "step": 240
         }
@@ -1276,7 +1268,7 @@
               "expr": "cadvisor_version_info",
               "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{% raw %}{{instance}} cAdvisor Version: {{cadvisorVersion}}{% endraw %}",
+              "legendFormat": "{{instance}} cAdvisor Version: {{cadvisorVersion}}",
               "refId": "A",
               "step": 240
             },
@@ -1284,7 +1276,7 @@
               "expr": "prometheus_build_info",
               "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{% raw %}{{instance}} Prometheus Version: {{version}}{% endraw %}",
+              "legendFormat": "{{instance}} Prometheus Version: {{version}}",
               "refId": "B",
               "step": 240
             },
@@ -1292,7 +1284,7 @@
               "expr": "node_exporter_build_info",
               "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{% raw %}{{instance}} Node-Exporter Version: {{version}}{% endraw %}",
+              "legendFormat": "{{instance}} Node-Exporter Version: {{version}}",
               "refId": "C",
               "step": 240
             },
@@ -1300,7 +1292,7 @@
               "expr": "cadvisor_version_info",
               "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{% raw %}{{instance}} Docker Version: {{dockerVersion}}{% endraw %}",
+              "legendFormat": "{{instance}} Docker Version: {{dockerVersion}}",
               "refId": "D",
               "step": 240
             },
@@ -1308,7 +1300,7 @@
               "expr": "cadvisor_version_info",
               "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{% raw %}{{instance}} Host OS Version: {{osVersion}}{% endraw %}",
+              "legendFormat": "{{instance}} Host OS Version: {{osVersion}}",
               "refId": "E",
               "step": 240
             },
@@ -1316,7 +1308,7 @@
               "expr": "cadvisor_version_info",
               "format": "table",
               "intervalFactor": 2,
-              "legendFormat": "{% raw %}{{instance}} Host Kernel Version: {{kernelVersion}}{% endraw %}",
+              "legendFormat": "{{instance}} Host Kernel Version: {{kernelVersion}}",
               "refId": "F",
               "step": 240
             }
@@ -1338,29 +1330,29 @@
   "style": "dark",
   "tags": [
     "micado",
-    "{{ micado_version }}"
+    "v0.12"
   ],
   "templating": {
     "list": [
       {
         "allValue": null,
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": "default",
+          "value": "default"
         },
         "datasource": "Prometheus",
         "definition": "",
         "hide": 0,
         "includeAll": true,
-        "label": "Node ID",
+        "label": "Namespace",
         "multi": true,
-        "name": "node",
+        "name": "namespace",
         "options": [],
-        "query": "label_values(node)",
+        "query": "query_result(count(container_last_seen{namespace=~\".+\"}) by (namespace))",
         "refresh": 2,
-        "regex": "",
+        "regex": "/namespace=\"([^\"]+)\"/",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 1,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -1408,9 +1400,9 @@
         "multi": true,
         "name": "service_name",
         "options": [],
-        "query": "query_result(count(container_last_seen{container_label_io_kubernetes_container_name=~\".+\"}) by (container_label_io_kubernetes_container_name))",
+        "query": "query_result(count(container_last_seen{pod=~\".+\"}) by (pod))",
         "refresh": 2,
-        "regex": "/container_label_io_kubernetes_container_name=\"(?!POD)(.*)\"/",
+        "regex": "/pod=\"([^-]+(?:-[^-]+)*?)(?:-[0-9a-f]+)?(?:-[a-z0-9]+)?\"/",
         "skipUrlSync": false,
         "sort": 1,
         "tagValuesQuery": "",
