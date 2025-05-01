@@ -997,7 +997,8 @@ spec:
         hostPath:
           path: /var/lib/micado/vault/config
       - name: vault-storage
-        emptyDir: {}
+        hostPath:
+          path: /var/lib/micado/vault/data
       - name: vault-log
         hostPath:
           path: /var/log/micado/vault
@@ -1048,7 +1049,7 @@ spec:
       initContainers:
       - name: init-wait-vault
         image: busybox:1.30
-        command: ['sh', '-c', 'until wget --spider vault:8200/v1/sys/health?uninitcode=200; do echo waiting for vault; sleep 2; done;']
+        command: ['sh', '-c', 'until wget --spider -q vault:8200/v1/sys/health?sealedcode=200&standbycode=200&uninitcode=200; do echo waiting for vault; sleep 2; done;']
       containers:
       - name: security-policy-manager
         image: {{docker_images.securitypolicymanager}}
@@ -1109,7 +1110,7 @@ spec:
       initContainers:
       - name: init-wait-vault
         image: busybox:1.30
-        command: ['sh', '-c', 'until wget --spider vault:8200/v1/sys/health; do echo waiting for vault; sleep 2; done;']
+        command: ['sh', '-c', 'until wget --spider -q vault:8200/v1/sys/health?sealedcode=200&standbycode=200&uninitcode=200; do echo waiting for vault; sleep 2; done;']
       containers:
       - name: zorp
         image: {{docker_images.zorp}}
