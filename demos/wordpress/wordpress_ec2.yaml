@@ -103,19 +103,23 @@ topology_template:
       type: tosca.nodes.MiCADO.EC2.Compute
       properties: *compute_properties
       interfaces:
-        # TERRAFORM: Change key to Terraform
-        Occopus:
+        Terraform:
           create:
-            inputs: *endpoint_properties
+        # Occopus:
+        #   create:
+        #     inputs: *endpoint_properties
+        #       endpoint: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com )
       
     static-worker:
       type: tosca.nodes.MiCADO.EC2.Compute
       properties: *compute_properties
       interfaces:
-        # TERRAFORM: Change key to Terraform
-        Occopus:
+        Terraform:
           create:
-            inputs: *endpoint_properties
+        # Occopus:
+        #   create:
+        #     inputs: *endpoint_properties
+        #       endpoint: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com )
       
   outputs:
     ports:

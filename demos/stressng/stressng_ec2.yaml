@@ -29,11 +29,12 @@ topology_template:
         security_group_ids:
           - ADD_YOUR_SECURITY_GROUP_ID_HERE (e.g. sg-93d46bf7)
       interfaces:
-        # TERRAFORM: Change key to Terraform
-        Occopus:
+        Terraform:
           create:
-            inputs:
-              endpoint: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com )
+        # Occopus:
+        #   create:
+        #     inputs:
+        #       endpoint: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com )
       
   policies:
     - monitoring:
