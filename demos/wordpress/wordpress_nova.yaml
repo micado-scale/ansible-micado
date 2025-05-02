@@ -108,19 +108,19 @@ topology_template:
       type: tosca.nodes.MiCADO.Nova.Compute
       properties: *compute_properties
       interfaces:
-        # TERRAFORM: Change to Terraform / *terraform_properties
-        Occopus:
+        # Occopus: Change to Occopus / *occopus_properties
+        Terraform:
           create:
-            inputs: *occopus_properties
+            inputs: *terraform_properties
       
     static-worker:
       type: tosca.nodes.MiCADO.Nova.Compute
       properties: *compute_properties
       interfaces:
-        # TERRAFORM: Change to Terraform / *terraform_properties
-        Occopus:
+        # Occopus: Change to Occopus / *occopus_properties
+        Terraform:
           create:
-            inputs: *occopus_properties
+            inputs: *terraform_properties
       
   outputs:
     ports:

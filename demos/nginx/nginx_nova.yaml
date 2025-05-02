@@ -33,11 +33,11 @@ topology_template:
         security_groups:
           - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
       interfaces:
-        # TERRAFORM: Change to Terraform and provide network_name in the inputs below
-        Occopus:
+        # Occopus: Change to Occopus and remove network_name from the inputs below
+        Terraform:
           create:
             inputs:
-              #network_name: ADD_YOUR_NETWORK_NAME (e.g. default-net)
+              network_name: ADD_YOUR_NETWORK_NAME (e.g. default-net)
               endpoint: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
       
   outputs:
