@@ -14,7 +14,7 @@ write_files:
     done
 
 - path: /etc/rancher/k3s/config.yaml
-  permissons: '644'
+  permissions: '644'
   content: |
     server: https://{{ ansible_default_ipv4.address }}:6443
     node-label:
@@ -23,7 +23,7 @@ write_files:
 
 {% if reg_creds.stat.exists %}
 - path: /etc/rancher/k3s/registries.yaml
-  permissons: '644'
+  permissions: '644'
   content: |
 {{ registries['content'] | b64decode | indent(4, true) }}
 {% endif %}
