@@ -13,28 +13,27 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Run ansible-lint
-      uses: ansible-community/ansible-lint-action@v6.0.2
+      uses: ansible/ansible-lint@main
       with:
-        override-deps: |
-          rich>=9.5.1,<11.0.0
-        targets: |
+        args: |
+          -p
           micado.yml
           edge.yml
           worker.yml
 
-  play-ubuntu-20:
-    runs-on: ubuntu-20.04
+  play-ubuntu-24:
+    runs-on: ubuntu-24.04
     needs: lint
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Remove existing K8s installations
       run: sudo apt auto-remove kubectl containernetworking-plugins -y
     - name: Replace hosts file
       run: sudo cp ./tests/hosts.yml ./playbook/inventory/hosts.yml
     - name: Run MiCADO Playbook
-      uses: dawidd6/action-ansible-playbook@v2
+      uses: dawidd6/action-ansible-playbook@v3
       with:
         directory: ./playbook/
         playbook: project/micado.yml
@@ -43,13 +42,13 @@ jobs:
     runs-on: ubuntu-22.04
     needs: lint
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Remove existing K8s installations
       run: sudo apt auto-remove kubectl ansible containernetworking-plugins -y
     - name: Replace hosts file
       run: sudo cp ./tests/hosts.yml ./playbook/inventory/hosts.yml
     - name: Run MiCADO Playbook
-      uses: dawidd6/action-ansible-playbook@v2
+      uses: dawidd6/action-ansible-playbook@v3
       with:
         directory: ./playbook/
         playbook: project/micado.yml
